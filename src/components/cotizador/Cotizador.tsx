@@ -1,11 +1,19 @@
-import type { PrecioRow } from "@/types/sheets";
+import type { CotizacionPreciosConfig } from "@/types/sheets";
+import {
+  CARGO_BOMBEO_VOL_MENOR_15_M3,
+  RESISTENCIAS_KG,
+  cargoBombeoAplicable,
+  labelResistenciaKg,
+  precioM3ParaResistencia,
+  type ResistenciaKg,
+} from "@/lib/cotizacion";
 
 export interface CotizadorProps {
-  precios: PrecioRow[];
+  cotizacion: CotizacionPreciosConfig | null;
+  resistenciaKg: ResistenciaKg;
+  setResistenciaKg: (v: ResistenciaKg) => void;
   loading: boolean;
   error: string | null;
-  resistencia: string;
-  setResistencia: (v: string) => void;
   tipoVaciado: "tiro_directo" | "bombeo";
   setTipoVaciado: (v: "tiro_directo" | "bombeo") => void;
   volumen: string;
@@ -18,18 +26,21 @@ function labelTipoSheet(t: "tiro_directo" | "bombeo") {
 }
 
 export function Cotizador({
-  precios,
+  cotizacion,
+  resistenciaKg,
+  setResistenciaKg,
   loading,
   error,
-  resistencia,
-  setResistencia,
   tipoVaciado,
   setTipoVaciado,
   volumen,
   setVolumen,
   totalEstimado,
 }: CotizadorProps) {
-  const resistencias = [...new Set(precios.map((p) => p.Resistencia).filter(Boolean))];
+  const vol = parseFloat(volumen.replace(",", ".")) || 0;
+  const precioM3 = precioM3ParaResistencia(cotizacion, resistenciaKg);
+  const bombeoExtra = cargoBombeoAplicable(vol, tipoVaciado);
+  const subtotalVol = vol > 0 && precioM3 > 0 ? vol * precioM3 : 0;
 
   return (
     <div className="space-y-5">
@@ -40,23 +51,23 @@ export function Cotizador({
       )}
 
       <div>
-        <label className="block text-sm font-medium text-[#cbd5e1] mb-2">Resistencia</label>
+        <label htmlFor="cotiz-resistencia" className="block text-sm font-medium text-[#cbd5e1] mb-2">
+          Resistencia (kg/cm²)
+        </label>
         <select
-          value={resistencia}
-          onChange={(e) => setResistencia(e.target.value)}
-          disabled={!precios.length}
+          id="cotiz-resistencia"
+          value={resistenciaKg}
+          onChange={(e) => setResistenciaKg(Number(e.target.value) as ResistenciaKg)}
+          disabled={!cotizacion}
           className="w-full py-3 px-4 bg-[#0c0f14] border border-[#94a3b8]/25 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#c62828]/60"
         >
-          {resistencias.length === 0 ? (
-            <option value="">—</option>
-          ) : (
-            resistencias.map((r) => (
-              <option key={r} value={r}>
-                {r}
-              </option>
-            ))
-          )}
+          {RESISTENCIAS_KG.map((kg) => (
+            <option key={kg} value={kg}>
+              {labelResistenciaKg(kg)}
+            </option>
+          ))}
         </select>
+        <p className="text-xs text-[#64748b] mt-1">Precio por m³ según la columna B de la hoja Precios (fila de cada resistencia).</p>
       </div>
 
       <div>
@@ -85,6 +96,9 @@ export function Cotizador({
             {labelTipoSheet("bombeo")}
           </button>
         </div>
+        <p className="text-xs text-[#64748b] mt-2">
+          Bombeo con volumen menor a 15 m³: se cobra $15,000 MXN.
+        </p>
       </div>
 
       <div>
@@ -98,14 +112,30 @@ export function Cotizador({
         />
       </div>
 
-      <div className="rounded-xl border border-[#78716c]/40 bg-[#0c0f14]/80 px-4 py-3">
-        <p className="text-xs uppercase tracking-wide text-[#94a3b8] mb-1">Total estimado</p>
-        <p className="font-display text-2xl font-bold text-[#ffcdd2]">
-          {Number.isFinite(totalEstimado)
-            ? `$${totalEstimado.toLocaleString("es-MX", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
-            : "—"}
-        </p>
-        <p className="text-xs text-[#64748b] mt-1">Revisa y ajusta antes de continuar.</p>
+      <div className="rounded-xl border border-[#78716c]/40 bg-[#0c0f14]/80 px-4 py-3 space-y-2">
+        <p className="text-xs uppercase tracking-wide text-[#94a3b8] mb-1">Desglose</p>
+        {cotizacion && precioM3 > 0 && vol > 0 && (
+          <p className="text-sm text-[#cbd5e1]">
+            {vol.toLocaleString("es-MX", { maximumFractionDigits: 2 })} m³ ×{" "}
+            {precioM3.toLocaleString("es-MX", { minimumFractionDigits: 2 })} ={" "}
+            <span className="text-white">${subtotalVol.toLocaleString("es-MX", { minimumFractionDigits: 2 })}</span>
+          </p>
+        )}
+        {bombeoExtra > 0 && (
+          <p className="text-sm text-[#86efac]">
+            Cargo bombeo (vol. menor a 15 m³): +$
+            {CARGO_BOMBEO_VOL_MENOR_15_M3.toLocaleString("es-MX", { minimumFractionDigits: 2 })} MXN
+          </p>
+        )}
+        <div className="border-t border-[#78716c]/30 pt-2 mt-2">
+          <p className="text-xs uppercase tracking-wide text-[#94a3b8] mb-1">Total estimado</p>
+          <p className="font-display text-2xl font-bold text-[#ffcdd2]">
+            {Number.isFinite(totalEstimado) && totalEstimado > 0
+              ? `$${totalEstimado.toLocaleString("es-MX", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+              : "—"}
+          </p>
+        </div>
+        <p className="text-xs text-[#64748b]">Revisa y ajusta antes de continuar.</p>
       </div>
     </div>
   );

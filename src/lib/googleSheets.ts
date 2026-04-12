@@ -2,7 +2,13 @@
  * Solo para entorno servidor (Route Handlers). No importar desde componentes cliente.
  */
 import { JWT } from "google-auth-library";
+import type { GoogleSpreadsheetRow, GoogleSpreadsheetWorksheet } from "google-spreadsheet";
 import { GoogleSpreadsheet } from "google-spreadsheet";
+import {
+  buildCotizacionConfigFromRows,
+  cotizacionTieneAlgunPrecio,
+  parseResistenciaKg,
+} from "@/lib/cotizacion";
 
 const SCOPES = ["https://www.googleapis.com/auth/spreadsheets"];
 
@@ -42,17 +48,104 @@ export interface PrecioRow {
   Tipo_Vaciado: string;
 }
 
+function normHeader(k: string): string {
+  return k
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/\u0300/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+/** google-spreadsheet exige encabezados idénticos a row.get("Resistencia"); esto admite variantes. */
+function extractResistenciaFlexible(row: GoogleSpreadsheetRow): string {
+  const obj = row.toObject() as Record<string, unknown>;
+  for (const [k, v] of Object.entries(obj)) {
+    const kn = normHeader(k);
+    if (kn.includes("resistencia")) {
+      const s = String(v ?? "").trim();
+      if (s !== "") return s;
+    }
+  }
+  for (const v of Object.values(obj)) {
+    const s = String(v ?? "").trim();
+    if (parseResistenciaKg(s)) return s;
+  }
+  return String(row.get("Resistencia" as never) ?? "").trim();
+}
+
+function extractPrecioM3Flexible(row: GoogleSpreadsheetRow): number {
+  const obj = row.toObject() as Record<string, unknown>;
+  let best = 0;
+  for (const [k, v] of Object.entries(obj)) {
+    const kn = normHeader(k);
+    if (
+      /\bprecio\b/.test(kn) &&
+      (kn.includes("m3") || kn.includes("m³") || /m[_\s]?3/.test(kn) || kn.includes("m 3"))
+    ) {
+      const p = parseFloat(String(v ?? "").replace(",", ".")) || 0;
+      if (p > best) best = p;
+    }
+  }
+  if (best > 0) return best;
+  for (const [k, v] of Object.entries(obj)) {
+    const kn = normHeader(k);
+    if (
+      kn === "precio" ||
+      (kn.startsWith("precio") && !kn.includes("distancia") && !kn.includes("cargo") && !kn.includes("extra"))
+    ) {
+      const p = parseFloat(String(v ?? "").replace(",", ".")) || 0;
+      if (p > 0) return p;
+    }
+  }
+  return parseFloat(String(row.get("Precio_m3" as never) ?? "0").replace(",", ".")) || 0;
+}
+
+async function fetchPreciosDesdeColumnasAB(sheet: GoogleSpreadsheetWorksheet): Promise<PrecioRow[]> {
+  const maxR = Math.min(sheet.rowCount || 60, 200);
+  if (maxR < 2) return [];
+  await sheet.loadCells(`A2:B${maxR}`);
+  const out: PrecioRow[] = [];
+  for (let r = 2; r <= maxR; r++) {
+    const a = sheet.getCellByA1(`A${r}`);
+    const b = sheet.getCellByA1(`B${r}`);
+    const resistenciaStr = String(a?.value ?? "").trim();
+    const precio = parseFloat(String(b?.value ?? "").replace(",", ".")) || 0;
+    if (precio <= 0) continue;
+    if (parseResistenciaKg(resistenciaStr) == null) continue;
+    out.push({
+      Resistencia: resistenciaStr,
+      Precio_m3: precio,
+      Cargo_distancia: 0,
+      Tipo_Vaciado: "",
+    });
+  }
+  return out;
+}
+
 export async function fetchPreciosRows(): Promise<PrecioRow[]> {
   const doc = await getSpreadsheetDoc();
   const sheet = doc.sheetsByTitle["Precios"];
   if (!sheet) throw new Error('No existe la hoja "Precios"');
   const rows = await sheet.getRows();
-  return rows.map((row) => ({
-    Resistencia: String(row.get("Resistencia") ?? "").trim(),
-    Precio_m3: parseFloat(String(row.get("Precio_m3") ?? "0")) || 0,
-    Cargo_distancia: parseFloat(String(row.get("Cargo_distancia") ?? "0")) || 0,
-    Tipo_Vaciado: String(row.get("Tipo_Vaciado") ?? "").trim(),
-  }));
+  const mapped: PrecioRow[] = rows.map((row) => {
+    const rFlex = extractResistenciaFlexible(row);
+    const pFlex = extractPrecioM3Flexible(row);
+    const rStrict = String(row.get("Resistencia" as never) ?? "").trim();
+    const pStrict = parseFloat(String(row.get("Precio_m3" as never) ?? "0").replace(",", ".")) || 0;
+    return {
+      Resistencia: rFlex || rStrict,
+      Precio_m3: pFlex > 0 ? pFlex : pStrict,
+      Cargo_distancia: parseFloat(String(row.get("Cargo_distancia" as never) ?? "0").replace(",", ".")) || 0,
+      Tipo_Vaciado: String(row.get("Tipo_Vaciado" as never) ?? "").trim(),
+    };
+  });
+
+  if (!cotizacionTieneAlgunPrecio(buildCotizacionConfigFromRows(mapped))) {
+    const desdeAb = await fetchPreciosDesdeColumnasAB(sheet);
+    if (desdeAb.length > 0) return desdeAb;
+  }
+  return mapped;
 }
 
 /** Lee capacidad m³/hora: celda B1 (A1 = Capacidad_Maxima_Hora, B1 = 30). */

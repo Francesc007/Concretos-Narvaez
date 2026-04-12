@@ -5,7 +5,14 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X, ChevronLeft, ChevronRight } from "lucide-react";
 import { CONFIG } from "@/config";
 import { apiUrl, fetchApiJson } from "@/lib/api";
-import type { PrecioRow } from "@/types/sheets";
+import {
+  calcularTotalCotizacion,
+  cotizacionTieneAlgunPrecio,
+  labelResistenciaKg,
+  precioM3ParaResistencia,
+  type ResistenciaKg,
+} from "@/lib/cotizacion";
+import type { CotizacionPreciosConfig, PrecioRow } from "@/types/sheets";
 import { Cotizador } from "./Cotizador";
 import { AgendaSelector } from "./AgendaSelector";
 
@@ -15,19 +22,6 @@ const OBRA_LABELS: Record<string, string> = {
   infraestructura: "Infraestructura / civil",
 };
 
-function matchPrecioRow(
-  precios: PrecioRow[],
-  resistencia: string,
-  tipo: "tiro_directo" | "bombeo",
-): PrecioRow | undefined {
-  const tipoSheet = tipo === "bombeo" ? "Bombeo" : "Tiro Directo";
-  return precios.find(
-    (p) =>
-      p.Resistencia.trim().toLowerCase() === resistencia.trim().toLowerCase() &&
-      p.Tipo_Vaciado.trim().toLowerCase() === tipoSheet.toLowerCase(),
-  );
-}
-
 interface Props {
   isOpen: boolean;
   onClose: () => void;
@@ -35,12 +29,12 @@ interface Props {
 
 export function CotizadorReservaModal({ isOpen, onClose }: Props) {
   const [step, setStep] = useState<1 | 2>(1);
-  const [precios, setPrecios] = useState<PrecioRow[]>([]);
+  const [cotizacion, setCotizacion] = useState<CotizacionPreciosConfig | null>(null);
   const [capacidadMaximaHora, setCapacidadMaximaHora] = useState(30);
   const [loadErr, setLoadErr] = useState<string | null>(null);
   const [loadingSheet, setLoadingSheet] = useState(false);
 
-  const [resistencia, setResistencia] = useState("");
+  const [resistenciaKg, setResistenciaKg] = useState<ResistenciaKg>(250);
   const [tipoVaciado, setTipoVaciado] = useState<"tiro_directo" | "bombeo">("tiro_directo");
   const [volumen, setVolumen] = useState("");
 
@@ -62,14 +56,16 @@ export function CotizadorReservaModal({ isOpen, onClose }: Props) {
     (async () => {
       try {
         const [j1, j2] = await Promise.all([
-          fetchApiJson<{ prices: PrecioRow[] }>(apiUrl("/api/prices")),
+          fetchApiJson<{ prices: PrecioRow[]; cotizacion: CotizacionPreciosConfig }>(
+            apiUrl("/api/prices"),
+          ),
           fetchApiJson<{ capacidadMaximaHora: number }>(apiUrl("/api/sheet-config")),
         ]);
-        const list = j1.prices;
-        setPrecios(list);
-        const uniq = [...new Set(list.map((p) => p.Resistencia).filter(Boolean))];
-        if (uniq.length) {
-          setResistencia((prev) => (prev && uniq.includes(prev) ? prev : uniq[0]));
+        setCotizacion(j1.cotizacion);
+        if (!cotizacionTieneAlgunPrecio(j1.cotizacion)) {
+          setLoadErr(
+            'No se pudo leer precio para 150, 250, 350 o 500 kg/cm². En la hoja "Precios", coloca en la columna A la resistencia y en la B el precio por m³ (o usa encabezados que incluyan "Resistencia" y "Precio" / precio por m³).',
+          );
         }
         setCapacidadMaximaHora(Number(j2.capacidadMaximaHora) || 30);
       } catch (e) {
@@ -78,24 +74,26 @@ export function CotizadorReservaModal({ isOpen, onClose }: Props) {
             ? e.message
             : "API no disponible. Revisa `.env.local` (GOOGLE_*) y los logs del servidor Next.js.",
         );
-        setPrecios([]);
+        setCotizacion(null);
       } finally {
         setLoadingSheet(false);
       }
     })();
   }, [isOpen]);
 
+  const precioM3Actual = useMemo(
+    () => precioM3ParaResistencia(cotizacion, resistenciaKg),
+    [cotizacion, resistenciaKg],
+  );
+
   const totalEstimado = useMemo(() => {
     const vol = parseFloat(volumen.replace(",", ".")) || 0;
-    const row = matchPrecioRow(precios, resistencia, tipoVaciado);
-    if (!row || vol <= 0) return 0;
-    return vol * row.Precio_m3 + row.Cargo_distancia;
-  }, [precios, resistencia, tipoVaciado, volumen]);
+    if (!cotizacion) return 0;
+    return calcularTotalCotizacion(vol, tipoVaciado, precioM3ParaResistencia(cotizacion, resistenciaKg));
+  }, [cotizacion, tipoVaciado, volumen, resistenciaKg]);
 
   const puedeAvanzar =
-    parseFloat(volumen.replace(",", ".")) > 0 &&
-    !!matchPrecioRow(precios, resistencia, tipoVaciado) &&
-    !loadErr;
+    parseFloat(volumen.replace(",", ".")) > 0 && !!cotizacion && precioM3Actual > 0 && !loadErr;
 
   const abrirWhatsAppReserva = (extra: { total: number; resistencia: string; vaciado: string; vol: number }) => {
     const lineas = [
@@ -122,10 +120,18 @@ export function CotizadorReservaModal({ isOpen, onClose }: Props) {
       setErrorReserva("Completa nombre y volumen válido.");
       return;
     }
+    if (!cotizacion) {
+      setErrorReserva("No hay datos de cotización.");
+      return;
+    }
+    const p = precioM3ParaResistencia(cotizacion, resistenciaKg);
+    if (p <= 0) {
+      setErrorReserva("Selecciona una resistencia con precio válido.");
+      return;
+    }
     setReservando(true);
     try {
-      const row = matchPrecioRow(precios, resistencia, tipoVaciado);
-      const total = row ? vol * row.Precio_m3 + row.Cargo_distancia : totalEstimado;
+      const total = calcularTotalCotizacion(vol, tipoVaciado, p);
       const comentarioFinal =
         (comentarios.trim() ? `${comentarios.trim()}\n` : "") + `Total ref. cotización: $${total.toFixed(2)} MXN`;
 
@@ -145,7 +151,7 @@ export function CotizadorReservaModal({ isOpen, onClose }: Props) {
 
       abrirWhatsAppReserva({
         total,
-        resistencia,
+        resistencia: labelResistenciaKg(resistenciaKg),
         vaciado: tipoVaciado === "bombeo" ? "Bombeo" : "Tiro directo",
         vol,
       });
@@ -201,11 +207,11 @@ export function CotizadorReservaModal({ isOpen, onClose }: Props) {
             {step === 1 && (
               <>
                 <Cotizador
-                  precios={precios}
+                  cotizacion={cotizacion}
+                  resistenciaKg={resistenciaKg}
+                  setResistenciaKg={setResistenciaKg}
                   loading={loadingSheet}
                   error={loadErr}
-                  resistencia={resistencia}
-                  setResistencia={setResistencia}
                   tipoVaciado={tipoVaciado}
                   setTipoVaciado={setTipoVaciado}
                   volumen={volumen}

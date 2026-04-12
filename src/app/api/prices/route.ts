@@ -1,5 +1,6 @@
+import { buildCotizacionConfigFromRows } from "@/lib/cotizacion";
 import { fetchPreciosRows } from "@/lib/googleSheets";
-import { corsHeaders, emptyWithCors, jsonWithCors } from "@/lib/api-cors";
+import { emptyWithCors, jsonWithCors } from "@/lib/api-cors";
 
 const METHODS = "GET, OPTIONS";
 
@@ -10,7 +11,8 @@ export async function OPTIONS() {
 export async function GET() {
   try {
     const prices = await fetchPreciosRows();
-    return jsonWithCors({ prices }, 200, METHODS);
+    const cotizacion = buildCotizacionConfigFromRows(prices);
+    return jsonWithCors({ prices, cotizacion }, 200, METHODS);
   } catch (e) {
     console.error(e);
     return jsonWithCors(
