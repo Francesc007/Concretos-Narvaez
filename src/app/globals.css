@@ -1,26 +1,73 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #0c0f14;
+  --foreground: #e7e5e4;
+  --tepexi-bg: #0c0f14;
+  --tepexi-surface: #141922;
+  --tepexi-elevated: #1c2433;
+  --tepexi-accent: #c62828;
+  --tepexi-accent-hover: #e53935;
+  --tepexi-steel: #94a3b8;
+  --tepexi-concrete: #cbd5e1;
+  --tepexi-border: rgba(148, 163, 184, 0.15);
+  --tepexi-logo-gray: #7d7d7d;
+  --tepexi-concrete-frame: #78716c;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --font-sans: var(--font-dm-sans), system-ui, sans-serif;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  margin: 0;
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.font-display {
+  font-family: var(--font-oswald), system-ui, sans-serif;
+}
+
+@keyframes whatsapp-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(37, 211, 102, 0.5);
+  }
+  50% {
+    transform: scale(1.02);
+    box-shadow: 0 0 0 12px rgba(37, 211, 102, 0);
+  }
+}
+
+.animate-whatsapp-pulse {
+  animation: whatsapp-pulse 2s ease-in-out infinite;
+}
+
+.cotizacion-modal-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: #78716c #0c0f14;
+}
+
+.cotizacion-modal-scroll::-webkit-scrollbar {
+  width: 8px;
+}
+
+.cotizacion-modal-scroll::-webkit-scrollbar-track {
+  background: #0c0f14;
+  border-radius: 6px;
+}
+
+.cotizacion-modal-scroll::-webkit-scrollbar-thumb {
+  background: #57534e;
+  border-radius: 6px;
+  border: 1px solid #334155;
+}
+
+.cotizacion-modal-scroll::-webkit-scrollbar-thumb:hover {
+  background: #78716c;
 }
