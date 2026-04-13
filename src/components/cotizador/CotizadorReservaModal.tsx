@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, ChevronLeft, ChevronRight } from "lucide-react";
+import { X, ChevronLeft, ChevronRight, CheckCircle2 } from "lucide-react";
 import { CONFIG } from "@/config";
 import { apiUrl, fetchApiJson } from "@/lib/api";
 import {
@@ -47,9 +47,18 @@ export function CotizadorReservaModal({ isOpen, onClose }: Props) {
 
   const [reservando, setReservando] = useState(false);
   const [errorReserva, setErrorReserva] = useState<string | null>(null);
+  const [mensajePagoAbierto, setMensajePagoAbierto] = useState(false);
+  const datosWaPendientes = useRef<{
+    total: number;
+    resistencia: string;
+    vaciado: string;
+    vol: number;
+  } | null>(null);
 
   useEffect(() => {
     if (!isOpen) return;
+    setMensajePagoAbierto(false);
+    datosWaPendientes.current = null;
     setStep(1);
     setLoadErr(null);
     setLoadingSheet(true);
@@ -95,6 +104,37 @@ export function CotizadorReservaModal({ isOpen, onClose }: Props) {
   const puedeAvanzar =
     parseFloat(volumen.replace(",", ".")) > 0 && !!cotizacion && precioM3Actual > 0 && !loadErr;
 
+  function resetReservaForm() {
+    setNombre("");
+    setEmpresa("");
+    setObra("residencial");
+    setFecha(new Date().toISOString().slice(0, 10));
+    setHora("09:00");
+    setComentarios("");
+    setVolumen("");
+    setResistenciaKg(250);
+    setTipoVaciado("tiro_directo");
+    setStep(1);
+  }
+
+  function cerrarModal() {
+    if (mensajePagoAbierto) {
+      datosWaPendientes.current = null;
+      setMensajePagoAbierto(false);
+      resetReservaForm();
+    }
+    onClose();
+  }
+
+  function confirmarMensajePagoYWhatsApp() {
+    const d = datosWaPendientes.current;
+    if (d) abrirWhatsAppReserva(d);
+    datosWaPendientes.current = null;
+    setMensajePagoAbierto(false);
+    resetReservaForm();
+    onClose();
+  }
+
   const abrirWhatsAppReserva = (extra: { total: number; resistencia: string; vaciado: string; vol: number }) => {
     const lineas = [
       `*Reserva Concretos Tepexi*`,
@@ -106,7 +146,7 @@ export function CotizadorReservaModal({ isOpen, onClose }: Props) {
       `Resistencia: ${extra.resistencia}`,
       `Vaciado: ${extra.vaciado}`,
       `Total estimado: $${extra.total.toLocaleString("es-MX", { minimumFractionDigits: 2 })}`,
-      `Estado: Reservado (pendiente de confirmación)`,
+      `Estado en agenda: Reservado`,
       comentarios.trim() ? `Comentarios: ${comentarios.trim()}` : null,
     ].filter(Boolean) as string[];
     const text = encodeURIComponent(lineas.join("\n"));
@@ -132,8 +172,6 @@ export function CotizadorReservaModal({ isOpen, onClose }: Props) {
     setReservando(true);
     try {
       const total = calcularTotalCotizacion(vol, tipoVaciado, p);
-      const comentarioFinal =
-        (comentarios.trim() ? `${comentarios.trim()}\n` : "") + `Total ref. cotización: $${total.toFixed(2)} MXN`;
 
       await fetchApiJson<{ ok?: boolean }>(apiUrl("/api/reserve"), {
         method: "POST",
@@ -145,17 +183,20 @@ export function CotizadorReservaModal({ isOpen, onClose }: Props) {
           fecha,
           hora,
           volumen: vol,
-          comentarios: comentarioFinal,
+          comentarios: comentarios.trim(),
+          vaciado: tipoVaciado,
+          resistenciaKg,
+          cotizacionTotal: total,
         }),
       });
 
-      abrirWhatsAppReserva({
+      datosWaPendientes.current = {
         total,
         resistencia: labelResistenciaKg(resistenciaKg),
         vaciado: tipoVaciado === "bombeo" ? "Bombeo" : "Tiro directo",
         vol,
-      });
-      onClose();
+      };
+      setMensajePagoAbierto(true);
     } catch (e) {
       setErrorReserva(e instanceof Error ? e.message : "Error al reservar");
     } finally {
@@ -171,7 +212,7 @@ export function CotizadorReservaModal({ isOpen, onClose }: Props) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            onClick={onClose}
+            onClick={cerrarModal}
             className="absolute inset-0 bg-black/70 backdrop-blur-sm"
             aria-hidden
           />
@@ -183,8 +224,36 @@ export function CotizadorReservaModal({ isOpen, onClose }: Props) {
             className="cotizacion-modal-scroll relative w-full max-w-lg max-h-[min(92vh,40rem)] overflow-y-auto rounded-2xl border-2 border-[#c62828]/40 bg-[#141922] p-5 shadow-2xl sm:p-6"
             role="dialog"
             aria-modal="true"
+            aria-labelledby={mensajePagoAbierto ? "mensaje-pago-titulo" : undefined}
             onClick={(e) => e.stopPropagation()}
           >
+            {mensajePagoAbierto ? (
+              <div className="text-center py-2 sm:py-4">
+                <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-[#c62828]/20">
+                  <CheckCircle2 className="h-9 w-9 text-[#86efac]" aria-hidden />
+                </div>
+                <h3
+                  id="mensaje-pago-titulo"
+                  className="font-display text-xl font-bold text-white tracking-wide sm:text-2xl mb-3"
+                >
+                  Pedido registrado
+                </h3>
+                <p className="text-sm leading-relaxed text-[#cbd5e1] mb-6 text-left sm:text-center">
+                  Tu reserva quedó guardada. Tienes un máximo de{" "}
+                  <span className="text-white font-semibold">2 horas</span> para realizar el pago y enviar el
+                  comprobante por WhatsApp. Si no recibimos el comprobante en ese plazo, el horario dejará de estar
+                  reservado y volverá a estar libre.
+                </p>
+                <button
+                  type="button"
+                  onClick={confirmarMensajePagoYWhatsApp}
+                  className="w-full sm:w-auto min-w-[200px] py-3.5 px-6 rounded-lg bg-[#c62828] hover:bg-[#e53935] text-white font-display font-bold uppercase tracking-wide text-sm transition-colors"
+                >
+                  Entendido, continuar a WhatsApp
+                </button>
+              </div>
+            ) : (
+              <>
             <div className="flex justify-between items-start gap-3 mb-4">
               <div>
                 <p className="text-xs uppercase tracking-wide text-[#c62828] font-semibold mb-1">
@@ -196,7 +265,7 @@ export function CotizadorReservaModal({ isOpen, onClose }: Props) {
               </div>
               <button
                 type="button"
-                onClick={onClose}
+                onClick={cerrarModal}
                 className="shrink-0 p-2 hover:bg-white/10 rounded-full transition-colors"
                 aria-label="Cerrar"
               >
@@ -262,6 +331,8 @@ export function CotizadorReservaModal({ isOpen, onClose }: Props) {
                   reservando={reservando}
                   errorReserva={errorReserva}
                 />
+              </>
+            )}
               </>
             )}
           </motion.div>

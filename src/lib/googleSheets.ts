@@ -172,7 +172,78 @@ export function normalizeFecha(fecha: string): string {
   return s.slice(0, 10);
 }
 
-/** Suma volúmenes en Agenda para fecha+hora con estado Reservado o Confirmado. */
+/** Ventana de reserva sin confirmar pago (2 h). */
+export const RESERVA_HOLD_MS = 2 * 60 * 60 * 1000;
+
+/**
+ * Formato de columna Timestamp_Reserva: dd/mm/aaaa, hh:mm:ss (hora CDMX).
+ * America/Mexico_City no usa DST; el offset fijo UTC−6 es suficiente para el valor almacenado.
+ */
+export function formatTimestampReservaCDMX(date: Date = new Date()): string {
+  const tz = "America/Mexico_City";
+  const datePart = new Intl.DateTimeFormat("en-GB", {
+    timeZone: tz,
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  }).format(date);
+  const timePart = new Intl.DateTimeFormat("en-GB", {
+    timeZone: tz,
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false,
+  }).format(date);
+  return `${datePart}, ${timePart}`;
+}
+
+/**
+ * Interpreta Timestamp_Reserva (ISO legado o dd/mm/aaaa, hh:mm:ss en CDMX) como instante UTC.
+ */
+export function parseTimestampReserva(raw: string): Date | null {
+  const s = raw.trim();
+  if (!s) return null;
+  if (/^\d{4}-\d{2}-\d{2}/.test(s) || s.includes("T")) {
+    const d = new Date(s);
+    return Number.isNaN(d.getTime()) ? null : d;
+  }
+  const m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4}),\s*(\d{1,2}):(\d{1,2}):(\d{1,2})$/);
+  if (!m) return null;
+  const day = parseInt(m[1], 10);
+  const month = parseInt(m[2], 10);
+  const year = parseInt(m[3], 10);
+  const hour = parseInt(m[4], 10);
+  const minute = parseInt(m[5], 10);
+  const second = parseInt(m[6], 10);
+  // CDMX (UTC−6): instante = UTC ms con +6 h respecto a hora local civil
+  const ms = Date.UTC(year, month - 1, day, hour + 6, minute, second);
+  const d = new Date(ms);
+  return Number.isNaN(d.getTime()) ? null : d;
+}
+
+function esReservaExpirada(timestampStr: string, ahora: Date): boolean {
+  const t = parseTimestampReserva(timestampStr);
+  if (!t) return false;
+  return ahora.getTime() - t.getTime() > RESERVA_HOLD_MS;
+}
+
+/**
+ * Estados: Disponible, Reservado, Pagado (solo manual), Cancelado.
+ * Pagado y Reservado vigente ocupan cupo; Cancelado / Disponible / Reservado vencido no.
+ * "confirmado" se trata como legado de pagado.
+ */
+export function ocupaCupoEnAgenda(estadoRaw: string, timestampReserva: string, ahora: Date): boolean {
+  const estado = estadoRaw.trim().toLowerCase();
+  if (estado === "cancelado" || estado === "disponible") return false;
+  if (estado === "pagado" || estado === "confirmado") return true;
+  if (estado === "reservado") {
+    if (!timestampReserva.trim()) return true;
+    return !esReservaExpirada(timestampReserva, ahora);
+  }
+  return false;
+}
+
+/** Suma volúmenes en Agenda para fecha+hora; libera Reservados vencidos (→ Disponible). */
 export async function sumarVolumenAgendado(fecha: string, hora: string): Promise<number> {
   const doc = await getSpreadsheetDoc();
   const sheet = doc.sheetsByTitle["Agenda"];
@@ -180,12 +251,21 @@ export async function sumarVolumenAgendado(fecha: string, hora: string): Promise
   const rows = await sheet.getRows();
   const f = normalizeFecha(fecha);
   const h = normalizeHora(hora);
+  const ahora = new Date();
   let sum = 0;
   for (const row of rows) {
-    const estado = String(row.get("Estado") ?? "")
-      .trim()
-      .toLowerCase();
-    if (estado !== "reservado" && estado !== "confirmado") continue;
+    const estadoRaw = String(row.get("Estado") ?? "").trim();
+    const estado = estadoRaw.toLowerCase();
+    const tsStr = String(row.get("Timestamp_Reserva") ?? "").trim();
+
+    if (estado === "reservado" && tsStr && esReservaExpirada(tsStr, ahora)) {
+      row.set("Estado", "Disponible");
+      await row.save();
+      continue;
+    }
+
+    if (!ocupaCupoEnAgenda(estadoRaw, tsStr, ahora)) continue;
+
     const rf = normalizeFecha(String(row.get("Fecha") ?? ""));
     const rh = normalizeHora(String(row.get("Hora") ?? "0:0"));
     if (rf === f && rh === h) {
@@ -202,6 +282,12 @@ export interface ReservaPayload {
   Fecha: string;
   Hora: string;
   Volumen: number;
+  /** "Tiro Directo" | "Bombeo" — columna Vaciado en Agenda */
+  Vaciado: string;
+  /** 150, 250, 350 o 500 — columna "Resistencia f'c" en Agenda */
+  "Resistencia f'c": number;
+  /** Total estimado de la cotización (MXN) — columna Cotización */
+  Cotización: number;
   Comentarios: string;
   Estado: string;
   Timestamp_Reserva: string;
@@ -218,6 +304,9 @@ export async function appendReservaAgenda(payload: ReservaPayload): Promise<void
     Fecha: normalizeFecha(payload.Fecha),
     Hora: normalizeHora(payload.Hora),
     Volumen: payload.Volumen,
+    Vaciado: payload.Vaciado,
+    "Resistencia f'c": payload["Resistencia f'c"],
+    Cotización: payload.Cotización,
     Estado: payload.Estado,
     Timestamp_Reserva: payload.Timestamp_Reserva,
     Comentarios: payload.Comentarios,

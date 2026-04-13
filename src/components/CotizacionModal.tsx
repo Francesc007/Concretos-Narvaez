@@ -4,6 +4,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X } from "lucide-react";
 import { CONFIG } from "@/config";
+import { DateFieldCalendar, todayYmdLocal } from "@/components/ui/DateFieldCalendar";
 
 const RESISTENCIA_OPCIONES = [
   { value: "hasta-200", label: "Hasta 200 kg/cm²" },
@@ -56,8 +57,27 @@ export function CotizacionModal({ isOpen, onClose }: CotizacionModalProps) {
   const [volumen, setVolumen] = useState("");
   const [fecha, setFecha] = useState("");
   const [comentarios, setComentarios] = useState("");
+  const [autorizoDatos, setAutorizoDatos] = useState(false);
+
+  function cerrarModal() {
+    setAutorizoDatos(false);
+    onClose();
+  }
+
+  function resetForm() {
+    setNombre("");
+    setEntrega(ENTREGA_OPCIONES[0].value);
+    setTipoObra("residencial");
+    setResistencia(RESISTENCIA_OPCIONES[0].value);
+    setDistancia(DISTANCIA_OPCIONES[0].value);
+    setVolumen("");
+    setFecha("");
+    setComentarios("");
+    setAutorizoDatos(false);
+  }
 
   const handleEnviar = () => {
+    if (!autorizoDatos) return;
     const lineas = [
       `Hola Concretos Tepexi, solicito cotización de concreto premezclado.`,
       `Tiro directo o bombeo: ${labelEntrega(entrega)}`,
@@ -72,6 +92,7 @@ export function CotizacionModal({ isOpen, onClose }: CotizacionModalProps) {
     ].filter(Boolean) as string[];
     const mensaje = encodeURIComponent(lineas.join("\n"));
     window.open(`https://api.whatsapp.com/send?phone=${CONFIG.whatsappNumber}&text=${mensaje}`, "_blank");
+    resetForm();
     onClose();
   };
 
@@ -83,7 +104,7 @@ export function CotizacionModal({ isOpen, onClose }: CotizacionModalProps) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            onClick={onClose}
+            onClick={cerrarModal}
             className="absolute inset-0 bg-black/70 backdrop-blur-sm"
             aria-hidden
           />
@@ -107,7 +128,7 @@ export function CotizacionModal({ isOpen, onClose }: CotizacionModalProps) {
               </h3>
               <button
                 type="button"
-                onClick={onClose}
+                onClick={cerrarModal}
                 className="shrink-0 p-2 hover:bg-white/10 rounded-full transition-colors"
                 aria-label="Cerrar"
               >
@@ -222,12 +243,12 @@ export function CotizacionModal({ isOpen, onClose }: CotizacionModalProps) {
                 <label htmlFor="cot-fecha" className="block text-sm font-medium text-[#cbd5e1] mb-2">
                   Fecha tentativa
                 </label>
-                <input
+                <DateFieldCalendar
                   id="cot-fecha"
-                  type="date"
                   value={fecha}
-                  onChange={(e) => setFecha(e.target.value)}
-                  className="w-full py-3 px-4 bg-[#0c0f14] border border-[#94a3b8]/25 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#c62828]/60"
+                  onChange={setFecha}
+                  minDate={todayYmdLocal()}
+                  placeholder="Elegir fecha"
                 />
               </div>
 
@@ -246,18 +267,31 @@ export function CotizacionModal({ isOpen, onClose }: CotizacionModalProps) {
               </div>
             </div>
 
+            <label className="mt-6 flex cursor-pointer items-start gap-3 rounded-lg border border-[#94a3b8]/20 bg-[#0c0f14]/80 p-4 text-left text-sm text-[#cbd5e1]">
+              <input
+                type="checkbox"
+                checked={autorizoDatos}
+                onChange={(e) => setAutorizoDatos(e.target.checked)}
+                className="mt-1 h-4 w-4 shrink-0 rounded border-[#94a3b8]/50 text-[#25D366] focus:ring-[#25D366]"
+              />
+              <span>
+                Autorizo el uso de mis datos para que Concretos Tepexi me contacte con la cotización.
+              </span>
+            </label>
+
             <div className="mt-8 flex flex-col-reverse gap-3 sm:flex-row sm:gap-4">
               <button
                 type="button"
-                onClick={onClose}
+                onClick={cerrarModal}
                 className="flex-1 py-3 rounded-lg border border-[#94a3b8]/35 text-[#cbd5e1] hover:bg-white/5 transition-colors"
               >
                 Cancelar
               </button>
               <button
                 type="button"
+                disabled={!autorizoDatos}
                 onClick={handleEnviar}
-                className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-[#25D366] px-3 py-3 font-bold text-white transition-all hover:bg-[#20bd5a]"
+                className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-[#25D366] px-3 py-3 font-bold text-white transition-all hover:bg-[#20bd5a] disabled:cursor-not-allowed disabled:opacity-45"
               >
                 <WhatsAppIconSmall className="h-5 w-5 shrink-0" />
                 Enviar

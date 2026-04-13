@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { apiUrl, fetchApiJson } from "@/lib/api";
+import { DateFieldCalendar, todayYmdLocal } from "@/components/ui/DateFieldCalendar";
 
 const OBRA_OPTIONS = [
   { value: "residencial", label: "Residencial" },
@@ -105,8 +106,6 @@ export function AgendaSelector({
   const volNum = parseFloat(volumen.replace(",", ".")) || 0;
   const cupoOk = volNum > 0 && volNum <= disp.disponibleM3 && !disp.loading && !disp.error;
 
-  const minFecha = new Date().toISOString().slice(0, 10);
-
   return (
     <div className="space-y-5">
       <h4 className="font-display text-lg font-semibold text-white tracking-wide">Datos y agenda</h4>
@@ -149,12 +148,11 @@ export function AgendaSelector({
       <div className="grid sm:grid-cols-2 gap-4">
         <div>
           <label className="block text-sm font-medium text-[#cbd5e1] mb-2">Fecha</label>
-          <input
-            type="date"
-            min={minFecha}
+          <DateFieldCalendar
             value={fecha}
-            onChange={(e) => setFecha(e.target.value)}
-            className="w-full py-3 px-4 bg-[#0c0f14] border border-[#94a3b8]/25 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#c62828]/60"
+            onChange={setFecha}
+            minDate={todayYmdLocal()}
+            placeholder="Elegir fecha"
           />
         </div>
         <div>

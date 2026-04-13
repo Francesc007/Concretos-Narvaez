@@ -44,7 +44,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es-MX" className={`${dmSans.variable} ${oswald.variable} h-full antialiased`}>
-      <body className="min-h-full flex flex-col bg-[#0c0f14] text-[#e7e5e4]">{children}</body>
+      <body
+        suppressHydrationWarning
+        className="min-h-full flex flex-col bg-[#0c0f14] text-[#e7e5e4]"
+      >
+        {children}
+      </body>
     </html>
   );
 }

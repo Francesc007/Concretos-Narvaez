@@ -52,7 +52,7 @@ export function Cotizador({
 
       <div>
         <label htmlFor="cotiz-resistencia" className="block text-sm font-medium text-[#cbd5e1] mb-2">
-          Resistencia (kg/cm²)
+          Resistencia f'c
         </label>
         <select
           id="cotiz-resistencia"
@@ -67,7 +67,6 @@ export function Cotizador({
             </option>
           ))}
         </select>
-        <p className="text-xs text-[#64748b] mt-1">Precio por m³ según la columna B de la hoja Precios (fila de cada resistencia).</p>
       </div>
 
       <div>

@@ -71,3 +71,20 @@ body {
 .cotizacion-modal-scroll::-webkit-scrollbar-thumb:hover {
   background: #78716c;
 }
+
+/* react-day-picker (DateFieldCalendar): tema oscuro */
+.tepexi-rdp .rdp-root {
+  --rdp-accent-color: #c62828;
+  --rdp-accent-background-color: rgba(198, 40, 40, 0.22);
+  --rdp-outside-opacity: 0.45;
+  color: #e2e8f0;
+}
+
+.tepexi-rdp .rdp-caption_label,
+.tepexi-rdp .rdp-weekday {
+  color: #94a3b8;
+}
+
+.tepexi-rdp .rdp-nav_button {
+  color: #cbd5e1;
+}
