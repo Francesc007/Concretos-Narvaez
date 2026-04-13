@@ -53,13 +53,17 @@ export function Footer() {
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center justify-center gap-2 text-white hover:text-[#fecaca] transition-colors mb-3"
+              aria-label="Abrir ubicación en Google Maps"
             >
-              <MapPin size={18} />
-              <span>Concreto Premezclado Tepeji en Google Maps</span>
+              <MapPin size={18} className="shrink-0" aria-hidden />
+              <span>Haz clic aquí</span>
             </a>
-            <div className="flex items-center justify-center gap-2 text-[#d6d3d1] text-sm">
-              <Clock size={18} />
-              <p>{CONFIG.horarios.principal}</p>
+            <div className="flex items-start justify-center gap-2 text-[#d6d3d1] text-sm">
+              <Clock size={18} className="shrink-0 mt-0.5" aria-hidden />
+              <div className="text-center">
+                <p>L-V 8:00 – 17:00 h</p>
+                <p>S 8:00 – 13:00 h</p>
+              </div>
             </div>
           </motion.div>
 

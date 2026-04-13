@@ -13,7 +13,4 @@ export const CONFIG = {
   /** Mensaje predeterminado para el botón flotante de WhatsApp */
   whatsappDefaultMessage:
     "Hola Concretos Tepexi, me interesa información sobre concreto premezclado y una cotización para mi proyecto. ¿Me pueden apoyar?",
-  horarios: {
-    principal: "L-V 8:00 – 17:00 h · S 8:00 – 13:00 h",
-  },
 };

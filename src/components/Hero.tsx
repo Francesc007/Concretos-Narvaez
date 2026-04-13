@@ -1,9 +1,8 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { CalendarClock } from "lucide-react";
 
-export function Hero({ onReservasClick }: { onReservasClick: () => void }) {
+export function Hero() {
   return (
     <section
       id="inicio"
@@ -55,14 +54,6 @@ export function Hero({ onReservasClick }: { onReservasClick: () => void }) {
           >
             Ver servicios
           </a>
-          <button
-            type="button"
-            onClick={onReservasClick}
-            className="font-display inline-flex items-center justify-center gap-2 px-8 py-4 bg-[#c62828] hover:bg-[#e53935] text-white font-semibold rounded-lg transition-all hover:scale-[1.02] shadow-xl uppercase tracking-wide border-2 border-[#c62828]"
-          >
-            <CalendarClock size={22} className="shrink-0" />
-            Cotizador y Reservas Automáticas
-          </button>
         </motion.div>
       </div>
     </section>

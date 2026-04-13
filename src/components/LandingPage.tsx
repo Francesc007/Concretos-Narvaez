@@ -7,24 +7,27 @@ import { Servicios } from "@/components/Servicios";
 import { Galeria } from "@/components/Galeria";
 import { Cotizacion } from "@/components/Cotizacion";
 import { Footer } from "@/components/Footer";
-import { CotizacionModal } from "@/components/CotizacionModal";
+import { AgendaVisitaModal } from "@/components/AgendaVisitaModal";
 import { CotizadorReservaModal } from "@/components/cotizador/CotizadorReservaModal";
 import { WhatsAppButton } from "@/components/WhatsAppButton";
 
 export function LandingPage() {
-  const [modalOpen, setModalOpen] = useState(false);
   const [cotizadorOpen, setCotizadorOpen] = useState(false);
+  const [agendaVisitaOpen, setAgendaVisitaOpen] = useState(false);
 
   return (
     <>
       <Navbar onCotizadorClick={() => setCotizadorOpen(true)} />
-      <Hero onReservasClick={() => setCotizadorOpen(true)} />
+      <Hero />
       <Servicios />
       <Galeria />
-      <Cotizacion onOpenModal={() => setModalOpen(true)} />
+      <Cotizacion
+        onCotizadorClick={() => setCotizadorOpen(true)}
+        onAgendaVisitaClick={() => setAgendaVisitaOpen(true)}
+      />
       <Footer />
-      <CotizacionModal isOpen={modalOpen} onClose={() => setModalOpen(false)} />
       <CotizadorReservaModal isOpen={cotizadorOpen} onClose={() => setCotizadorOpen(false)} />
+      <AgendaVisitaModal isOpen={agendaVisitaOpen} onClose={() => setAgendaVisitaOpen(false)} />
       <WhatsAppButton />
     </>
   );

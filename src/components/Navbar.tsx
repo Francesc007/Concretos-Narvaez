@@ -8,7 +8,6 @@ const navLinks = [
   { href: "#inicio", label: "Inicio" },
   { href: "#servicios", label: "Servicios" },
   { href: "#galeria", label: "Galería" },
-  { href: "#cotizacion", label: "Cotización" },
   { href: "#ubicacion", label: "Ubicación" },
 ];
 
@@ -54,16 +53,16 @@ export function Navbar({ onCotizadorClick }: NavbarProps) {
       initial={{ y: -100 }}
       animate={{ y: 0 }}
       transition={{ duration: 0.5 }}
-      className={`${navBarClass} relative`}
+      className={navBarClass}
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20 md:h-24 py-2 gap-2 sm:gap-3">
           <a
             href="#inicio"
             className="inline-flex items-center gap-2 sm:gap-3 shrink-0 min-w-0"
             onClick={() => setMobileMenuOpen(false)}
           >
-            <div className="flex h-12 w-12 sm:h-14 sm:w-14 md:h-16 md:w-16 shrink-0 items-center justify-center rounded-full border border-white bg-white p-px shadow-sm">
+            <div className="flex h-14 w-14 sm:h-16 sm:w-16 md:h-[4.25rem] md:w-[4.25rem] shrink-0 items-center justify-center rounded-full border border-white bg-white p-px shadow-sm">
               <img
                 src="/Logo.jpg"
                 alt="Concretos Tepexi"
