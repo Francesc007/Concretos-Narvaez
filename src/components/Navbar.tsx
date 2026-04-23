@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, type CSSProperties } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { FileText, Menu, X } from "lucide-react";
 
@@ -8,6 +8,7 @@ const navLinks = [
   { href: "#inicio", label: "Inicio" },
   { href: "#servicios", label: "Servicios" },
   { href: "#galeria", label: "Galería" },
+  { href: "#calculadora-volumen", label: "Calculadora" },
   { href: "#ubicacion", label: "Ubicación" },
 ];
 
@@ -44,18 +45,30 @@ export function Navbar({ onCotizadorClick }: NavbarProps) {
     };
   }, [mobileMenuOpen]);
 
-  const navBarClass = `fixed top-0 left-0 right-0 z-50 backdrop-blur-md border-b transition-colors duration-300 ${
-    isScrolled ? "bg-[#7d7d7d]/96 border-white/25" : "bg-[#7d7d7d]/88 border-white/20"
-  }`;
+  const navBarClass =
+    "fixed top-0 left-0 right-0 z-[90] w-full min-w-0 border-b border-white/25 bg-transparent backdrop-blur-sm transition-all duration-300 overflow-hidden";
+
+  const texturaFondo: CSSProperties = {
+    backgroundColor: isScrolled ? "#a8a5a0" : "#a8a5a0",
+    backgroundImage: "url(/concrete-texture.svg)",
+    backgroundSize: "88px 88px",
+    backgroundRepeat: "repeat",
+  };
 
   return (
-    <motion.nav
-      initial={{ y: -100 }}
-      animate={{ y: 0 }}
-      transition={{ duration: 0.5 }}
-      className={navBarClass}
-    >
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <header className={navBarClass}>
+      <div
+        className="pointer-events-none absolute inset-0 z-0"
+        style={texturaFondo}
+        aria-hidden
+      />
+      <motion.div
+        className="relative z-10 w-full"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20 md:h-24 py-2 gap-2 sm:gap-3">
           <a
             href="#inicio"
@@ -111,7 +124,8 @@ export function Navbar({ onCotizadorClick }: NavbarProps) {
             </button>
           </div>
         </div>
-      </div>
+        </div>
+      </motion.div>
 
       <AnimatePresence>
         {mobileMenuOpen && (
@@ -133,9 +147,14 @@ export function Navbar({ onCotizadorClick }: NavbarProps) {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: -8, scale: 0.98 }}
               transition={{ duration: 0.2 }}
-              className="absolute right-3 top-full z-50 mt-2 w-[min(17.5rem,calc(100vw-1.5rem))] origin-top-right rounded-xl border border-white/25 bg-[#6a6a6a] py-2 shadow-2xl lg:hidden"
+              className="absolute right-3 top-full z-50 mt-2 w-[min(17.5rem,calc(100vw-1.5rem))] origin-top-right overflow-hidden rounded-xl border border-white/25 py-2 shadow-2xl lg:hidden"
             >
-              <nav className="flex flex-col gap-0.5 px-1">
+              <div
+                className="pointer-events-none absolute inset-0 -z-0"
+                style={texturaFondo}
+                aria-hidden
+              />
+              <nav className="relative z-10 flex flex-col gap-0.5 px-1" aria-label="Móvil">
                 {navLinks.map((link) => (
                   <a
                     key={link.href}
@@ -151,6 +170,6 @@ export function Navbar({ onCotizadorClick }: NavbarProps) {
           </>
         )}
       </AnimatePresence>
-    </motion.nav>
+    </header>
   );
 }

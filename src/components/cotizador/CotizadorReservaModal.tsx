@@ -25,9 +25,11 @@ const OBRA_LABELS: Record<string, string> = {
 interface Props {
   isOpen: boolean;
   onClose: () => void;
+  /** Al abrir el modal, rellena el volumen (m³) en el paso 1. */
+  volumenInicialM3?: number | null;
 }
 
-export function CotizadorReservaModal({ isOpen, onClose }: Props) {
+export function CotizadorReservaModal({ isOpen, onClose, volumenInicialM3 = null }: Props) {
   const [step, setStep] = useState<1 | 2>(1);
   const [cotizacion, setCotizacion] = useState<CotizacionPreciosConfig | null>(null);
   const [capacidadMaximaHora, setCapacidadMaximaHora] = useState(30);
@@ -89,6 +91,15 @@ export function CotizadorReservaModal({ isOpen, onClose }: Props) {
       }
     })();
   }, [isOpen]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    if (volumenInicialM3 == null) return;
+    if (!Number.isFinite(volumenInicialM3) || volumenInicialM3 <= 0) return;
+    const t =
+      Math.round(volumenInicialM3 * 1000) / 1000;
+    setVolumen(String(t));
+  }, [isOpen, volumenInicialM3]);
 
   const precioM3Actual = useMemo(
     () => precioM3ParaResistencia(cotizacion, resistenciaKg),

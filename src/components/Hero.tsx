@@ -59,3 +59,9 @@ export function Hero() {
     </section>
   );
 }
+// La imagen en el Hero está en la línea:
+// className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+// style={{
+//   backgroundImage: `url(${encodeURI("/Hero 3.jpg")})`,
+// }}
+// Es decir, la imagen está configurada como fondo en el div principal del Hero, justo después del comentario inicial.
