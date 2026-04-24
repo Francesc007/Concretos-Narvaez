@@ -11,7 +11,7 @@ interface CotizacionProps {
 export function Cotizacion({ onCotizadorClick, onAgendaVisitaClick }: CotizacionProps) {
   return (
     <section id="cotizacion" className="py-20 md:py-28 bg-[#0c0f14] border-y border-[#78716c]/25">
-      <div className="max-w-5xl mx-auto px-4 text-center">
+      <div className="mx-auto w-full min-w-0 max-w-5xl px-3 text-center sm:px-4">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}

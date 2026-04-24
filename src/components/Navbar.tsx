@@ -68,8 +68,8 @@ export function Navbar({ onCotizadorClick }: NavbarProps) {
         animate={{ opacity: 1 }}
         transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-20 md:h-24 py-2 gap-2 sm:gap-3">
+        <div className="mx-auto w-full min-w-0 max-w-7xl px-3 sm:px-6 lg:px-8">
+        <div className="flex h-20 w-full min-w-0 items-center justify-between gap-2 py-2 sm:gap-3 md:h-24">
           <a
             href="#inicio"
             className="inline-flex items-center gap-2 sm:gap-3 shrink-0 min-w-0"

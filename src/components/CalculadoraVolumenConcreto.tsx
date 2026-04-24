@@ -308,7 +308,7 @@ export function CalculadoraVolumenConcreto({ onCotizarVolumenM3 }: CalculadoraVo
         }}
       />
 
-      <div className="max-w-7xl mx-auto px-4 relative">
+      <div className="relative mx-auto w-full min-w-0 max-w-7xl px-3 sm:px-4">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -328,19 +328,19 @@ export function CalculadoraVolumenConcreto({ onCotizarVolumenM3 }: CalculadoraVo
           </p>
         </motion.div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-start">
+        <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-2 lg:gap-12">
           <motion.div
             initial={{ opacity: 0, y: 24 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.45 }}
-            className="rounded-2xl border-2 border-[#78716c]/50 bg-[#141922] p-5 sm:p-6 shadow-xl"
+            className="min-w-0 rounded-2xl border-2 border-[#78716c]/50 bg-[#141922] p-5 sm:p-6 shadow-xl"
           >
             <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#94a3b8] mb-3">
               Forma del elemento
             </p>
             <div
-              className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 sm:gap-3 mb-6"
+              className="mb-6 grid min-w-0 grid-cols-2 gap-2.5 sm:grid-cols-3 sm:gap-3"
               role="group"
               aria-label="Tipo de forma"
             >
@@ -696,24 +696,24 @@ export function CalculadoraVolumenConcreto({ onCotizarVolumenM3 }: CalculadoraVo
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.45, delay: 0.05 }}
-            className="lg:sticky lg:top-28"
+            className="min-w-0 lg:sticky lg:top-28"
           >
-            <div className="rounded-2xl border-2 border-[#c62828]/35 bg-gradient-to-b from-[#1a1f2e] to-[#141922] p-6 sm:p-8 shadow-2xl shadow-black/30">
+            <div className="rounded-2xl border-2 border-[#c62828]/35 bg-gradient-to-b from-[#1a1f2e] to-[#141922] p-5 shadow-2xl shadow-black/30 sm:p-8">
               <h3 className="font-display text-lg sm:text-xl font-bold text-white tracking-wide mb-1 flex items-center gap-2">
                 <span className="h-1 w-1 rounded-full bg-[#c62828]" />
                 Detalle del pedido
               </h3>
-              <div className="mb-5 flex items-center justify-between gap-3 rounded-xl border border-white/10 bg-[#0c0f14]/60 px-3 py-2.5">
+              <div className="mb-5 flex flex-col gap-2 rounded-xl border border-white/10 bg-[#0c0f14]/60 px-3 py-2.5 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
                 <div className="flex min-w-0 items-center gap-2.5">
                   <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-[#141922] text-[#e57373]">
                     <IconoForma className="h-5 w-5" strokeWidth={ICON_STROKE} aria-hidden />
                   </span>
                   <div className="min-w-0">
                     <p className="text-xs font-medium uppercase tracking-wider text-[#94a3b8]">Forma</p>
-                    <p className="truncate text-sm font-bold text-white">{formaActual.label}</p>
+                    <p className="text-sm font-bold text-white sm:truncate">{formaActual.label}</p>
                   </div>
                 </div>
-                <p className="shrink-0 text-right text-lg font-bold tabular-nums text-white sm:text-xl">
+                <p className="shrink-0 text-left text-lg font-bold tabular-nums text-white sm:text-right sm:text-xl">
                   {volumenNetoM3 != null && !avisoTubo ? formatM3(volumenNetoM3) : "—"}{" "}
                   <span className="text-sm font-semibold text-[#94a3b8]">m³</span>
                 </p>
@@ -721,16 +721,16 @@ export function CalculadoraVolumenConcreto({ onCotizarVolumenM3 }: CalculadoraVo
               {desgloseEscaleraM3 && (
                 <div className="mb-4 space-y-1.5 rounded-lg border border-white/5 bg-black/20 px-3 py-2.5 text-xs">
                   <p className="text-[#94a3b8]">Desglose (estimado)</p>
-                  <div className="flex justify-between gap-2 text-[#cbd5e1]">
-                    <span>Peldaños (N = {desgloseEscaleraM3.nEscalones})</span>
-                    <span className="tabular-nums text-white">
+                  <div className="flex min-w-0 flex-col justify-between gap-0.5 text-[#cbd5e1] min-[400px]:flex-row min-[400px]:items-baseline min-[400px]:gap-2">
+                    <span className="min-w-0">Peldaños (N = {desgloseEscaleraM3.nEscalones})</span>
+                    <span className="shrink-0 tabular-nums text-white sm:text-right">
                       {formatM3(desgloseEscaleraM3.vEscalones)} m³
                     </span>
                   </div>
                   {desgloseEscaleraM3.vPlat > 0 && (
-                    <div className="flex justify-between gap-2 text-[#cbd5e1]">
-                      <span>Plataforma de arranque</span>
-                      <span className="tabular-nums text-white">
+                    <div className="flex min-w-0 flex-col justify-between gap-0.5 text-[#cbd5e1] min-[400px]:flex-row min-[400px]:items-baseline min-[400px]:gap-2">
+                      <span className="min-w-0">Plataforma de arranque</span>
+                      <span className="shrink-0 tabular-nums text-white sm:text-right">
                         {formatM3(desgloseEscaleraM3.vPlat)} m³
                       </span>
                     </div>
@@ -746,20 +746,20 @@ export function CalculadoraVolumenConcreto({ onCotizarVolumenM3 }: CalculadoraVo
                       : "— m³"}
                   </dd>
                 </div>
-                <div className="flex justify-between gap-4">
-                  <dt className="text-[#94a3b8]">
+                <div className="flex min-w-0 flex-col gap-0.5 sm:flex-row sm:justify-between sm:gap-4">
+                  <dt className="min-w-0 break-words text-[#94a3b8]">
                     Extra por reserva (
                     {reservaValida ? `${pRes.toLocaleString("es-MX")}` : "—"}%)
                   </dt>
-                  <dd className="text-white font-medium tabular-nums">
+                  <dd className="min-w-0 break-words text-left font-medium text-white tabular-nums sm:text-right">
                     {extraM3 != null && !avisoTubo
                       ? `${formatM3(extraM3)} m³`
                       : "— m³"}
                   </dd>
                 </div>
-                <div className="border-t border-white/10 pt-4 flex justify-between gap-4 items-baseline">
-                  <dt className="text-[#e2e8f0] font-semibold">Volumen total</dt>
-                  <dd className="text-2xl sm:text-3xl font-bold text-white font-display tabular-nums">
+                <div className="flex min-w-0 flex-col items-start gap-1 border-t border-white/10 pt-4 sm:flex-row sm:items-baseline sm:justify-between sm:gap-4">
+                  <dt className="shrink-0 font-semibold text-[#e2e8f0]">Volumen total</dt>
+                  <dd className="w-full min-w-0 break-words text-2xl font-bold font-display text-white tabular-nums sm:w-auto sm:text-right sm:text-3xl">
                     {totalM3 != null && !avisoTubo
                       ? `${formatM3(totalM3)} m³`
                       : "— m³"}
@@ -779,6 +779,7 @@ export function CalculadoraVolumenConcreto({ onCotizarVolumenM3 }: CalculadoraVo
                   </button>
                 )}
                 <p className="text-center text-xs text-[#64748b]">
+                  Resultado en m³. Unidades de entrada convertidas a metros.
                 </p>
               </div>
             </div>

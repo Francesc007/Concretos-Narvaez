@@ -33,7 +33,7 @@ export function Galeria() {
         }}
       />
 
-      <div className="max-w-7xl mx-auto px-4 relative">
+      <div className="relative mx-auto w-full min-w-0 max-w-7xl px-3 sm:px-4">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}

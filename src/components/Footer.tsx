@@ -15,7 +15,7 @@ function FacebookIcon({ className }: { className?: string }) {
 export function Footer() {
   return (
     <footer id="ubicacion" className="bg-[#7d7d7d] border-t border-white/25 py-16">
-      <div className="max-w-7xl mx-auto px-4">
+      <div className="mx-auto w-full min-w-0 max-w-7xl px-3 sm:px-4">
         <div className="grid md:grid-cols-3 gap-12 mb-12">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -96,7 +96,7 @@ export function Footer() {
 
         <div className="border-t border-white/20 pt-8 text-center text-[#e7e5e4] text-sm space-y-2">
           <p>© {new Date().getFullYear()} Concretos Tepexi · Tepeji del Río, Hidalgo.</p>
-          <p className="text-xs">
+          <p className="break-words text-xs">
             Powered by{" "}
             <a
               href="https://sigmaaiagency.com"

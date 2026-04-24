@@ -6,7 +6,7 @@ export function Hero() {
   return (
     <section
       id="inicio"
-      className="relative min-h-screen flex items-center justify-center overflow-hidden"
+      className="relative flex min-h-screen min-h-[100dvh] w-full max-w-full items-center justify-center overflow-x-hidden"
     >
       <div
         className="absolute inset-0 bg-cover bg-center bg-no-repeat"
@@ -16,12 +16,12 @@ export function Hero() {
       />
       <div className="absolute inset-0 bg-gradient-to-b from-[#0c0f14]/45 via-[#0c0f14]/28 to-[#0c0f14]/60" />
 
-      <div className="relative z-10 max-w-5xl mx-auto px-4 text-center pt-28 pb-16">
+      <div className="relative z-10 mx-auto w-full min-w-0 max-w-5xl px-3 sm:px-4 text-center pt-28 pb-16 sm:pt-32">
         <motion.p
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="font-display text-[#ffcdd2] tracking-[0.2em] text-sm sm:text-base uppercase mb-4 drop-shadow-[0_2px_6px_rgba(0,0,0,0.9)] border-2 border-[#c62828]/90 rounded-md px-3 py-1.5 inline-block bg-[#0c0f14]/40"
+          className="font-display mb-4 inline-block max-w-full rounded-md border-2 border-[#c62828]/90 bg-[#0c0f14]/40 px-2 py-1.5 text-sm uppercase tracking-[0.2em] text-[#ffcdd2] [text-wrap:balance] drop-shadow-[0_2px_6px_rgba(0,0,0,0.9)] sm:px-3 sm:py-1.5 sm:text-base"
         >
           Concreto premezclado · Tepeji del Río, Hgo.
         </motion.p>
@@ -29,7 +29,7 @@ export function Hero() {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.15 }}
-          className="font-display text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-6 leading-tight"
+          className="font-display text-4xl [text-wrap:balance] sm:text-5xl md:text-6xl lg:text-7xl font-bold leading-tight text-white mb-6"
         >
           Solidez y confianza para cada metro de tu obra
         </motion.h1>
@@ -37,7 +37,7 @@ export function Hero() {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.3 }}
-          className="text-lg sm:text-xl text-[#cbd5e1] mb-12 max-w-2xl mx-auto"
+          className="mx-auto mb-12 max-w-2xl text-pretty text-lg text-[#cbd5e1] sm:text-xl"
         >
           En Concretos Tepexi entregamos mezclas certificadas, asesoría técnica y puntualidad en
           planta y obra. Cotiza por WhatsApp y recibe acompañamiento de principio a fin.
@@ -46,11 +46,11 @@ export function Hero() {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.45 }}
-          className="flex flex-col sm:flex-row gap-4 justify-center"
+          className="mx-auto flex w-full max-w-sm flex-col justify-center gap-4 sm:max-w-none sm:flex-row"
         >
           <a
             href="#servicios"
-            className="font-display px-8 py-4 bg-white/10 hover:bg-white/15 text-white font-semibold rounded-lg transition-all hover:scale-[1.02] shadow-xl uppercase tracking-wide border border-white/20"
+            className="font-display w-full rounded-lg border border-white/20 bg-white/10 px-6 py-3.5 text-center text-white font-semibold uppercase tracking-wide shadow-xl transition-all hover:scale-[1.02] hover:bg-white/15 sm:w-auto sm:px-8 sm:py-4"
           >
             Ver servicios
           </a>
@@ -59,9 +59,3 @@ export function Hero() {
     </section>
   );
 }
-// La imagen en el Hero está en la línea:
-// className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-// style={{
-//   backgroundImage: `url(${encodeURI("/Hero 3.jpg")})`,
-// }}
-// Es decir, la imagen está configurada como fondo en el div principal del Hero, justo después del comentario inicial.
