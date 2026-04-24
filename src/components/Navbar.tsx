@@ -46,7 +46,7 @@ export function Navbar({ onCotizadorClick }: NavbarProps) {
   }, [mobileMenuOpen]);
 
   const navBarClass =
-    "fixed top-0 left-0 right-0 z-[90] w-full min-w-0 border-b border-white/25 bg-transparent backdrop-blur-sm transition-all duration-300 overflow-hidden";
+    "fixed top-0 left-0 right-0 z-[90] w-full min-w-0 border-b border-white/25 bg-transparent backdrop-blur-sm transition-all duration-300";
 
   const texturaFondo: CSSProperties = {
     backgroundColor: isScrolled ? "#a8a5a0" : "#a8a5a0",
@@ -150,7 +150,7 @@ export function Navbar({ onCotizadorClick }: NavbarProps) {
               className="absolute right-3 top-full z-50 mt-2 w-[min(17.5rem,calc(100vw-1.5rem))] origin-top-right overflow-hidden rounded-xl border border-white/25 py-2 shadow-2xl lg:hidden"
             >
               <div
-                className="pointer-events-none absolute inset-0 -z-0"
+                className="pointer-events-none absolute inset-0 z-0"
                 style={texturaFondo}
                 aria-hidden
               />

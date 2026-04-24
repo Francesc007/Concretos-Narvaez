@@ -46,7 +46,7 @@ export function Footer() {
             className="text-center"
           >
             <h4 className="font-display text-xl font-semibold text-white mb-4 tracking-wide">
-              Ubicación y horario
+              Ubicación y Horario
             </h4>
             <a
               href={CONFIG.googleMapsUrl}
@@ -95,7 +95,7 @@ export function Footer() {
         </div>
 
         <div className="border-t border-white/20 pt-8 text-center text-[#e7e5e4] text-sm space-y-2">
-          <p>© {new Date().getFullYear()} Concretos Tepexi · Tepeji del Río, Hidalgo.</p>
+          <p>© {new Date().getFullYear()} CONCRETOS TEPEXI · TODOS LOS DERECHOS RESERVADOS.</p>
           <p className="break-words text-xs">
             Powered by{" "}
             <a
