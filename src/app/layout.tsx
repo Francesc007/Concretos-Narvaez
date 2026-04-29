@@ -32,9 +32,6 @@ export const metadata: Metadata = {
       "Solidez y confianza para tu obra. Concreto premezclado con respaldo técnico en la región.",
     type: "website",
   },
-  icons: {
-    icon: "/Logo.jpg",
-  },
 };
 
 export default function RootLayout({
