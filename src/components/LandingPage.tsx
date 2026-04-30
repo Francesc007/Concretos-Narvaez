@@ -7,6 +7,7 @@ import { Servicios } from "@/components/Servicios";
 import { Galeria } from "@/components/Galeria";
 import { CalculadoraVolumenConcreto } from "@/components/CalculadoraVolumenConcreto";
 import { Cotizacion } from "@/components/Cotizacion";
+import { Clientes } from "@/components/Clientes";
 import { Footer } from "@/components/Footer";
 import { AgendaVisitaModal } from "@/components/AgendaVisitaModal";
 import { CotizadorReservaModal } from "@/components/cotizador/CotizadorReservaModal";
@@ -33,6 +34,7 @@ export function LandingPage() {
         onCotizadorClick={() => setCotizadorOpen(true)}
         onAgendaVisitaClick={() => setAgendaVisitaOpen(true)}
       />
+      <Clientes />
       <Footer />
       <CotizadorReservaModal
         isOpen={cotizadorOpen}

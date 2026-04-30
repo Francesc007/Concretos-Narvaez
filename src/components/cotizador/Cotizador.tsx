@@ -45,13 +45,13 @@ export function Cotizador({
   return (
     <div className="space-y-5">
       <h4 className="font-display text-lg font-semibold text-white tracking-wide">Cotización en tiempo real</h4>
-      {loading && <p className="text-sm text-[#94a3b8]">Cargando precios desde la tabla…</p>}
+      {loading && <p className="text-sm text-[#d8e3ee]">Cargando precios desde la tabla…</p>}
       {error && (
         <p className="text-sm text-red-300 rounded-lg border border-red-500/40 bg-red-950/40 px-3 py-2">{error}</p>
       )}
 
       <div>
-        <label htmlFor="cotiz-resistencia" className="block text-sm font-medium text-[#cbd5e1] mb-2">
+        <label htmlFor="cotiz-resistencia" className="block text-sm font-medium text-[#ecf0f6] mb-2">
           Resistencia f'c
         </label>
         <select
@@ -59,7 +59,7 @@ export function Cotizador({
           value={resistenciaKg}
           onChange={(e) => setResistenciaKg(Number(e.target.value) as ResistenciaKg)}
           disabled={!cotizacion}
-          className="w-full py-3 px-4 bg-[#0c0f14] border border-[#94a3b8]/25 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#c62828]/60"
+          className="w-full py-3 px-4 bg-[#0c0f14] border border-[#cfd8e4]/25 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#c62828]/60"
         >
           {RESISTENCIAS_KG.map((kg) => (
             <option key={kg} value={kg}>
@@ -70,7 +70,7 @@ export function Cotizador({
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-[#cbd5e1] mb-2">Tiro directo o bombeo</label>
+        <label className="block text-sm font-medium text-[#ecf0f6] mb-2">Tiro directo o bombeo</label>
         <div className="flex gap-3">
           <button
             type="button"
@@ -78,7 +78,7 @@ export function Cotizador({
             className={`flex-1 py-3 rounded-lg border text-sm font-semibold uppercase tracking-wide transition-colors ${
               tipoVaciado === "tiro_directo"
                 ? "border-[#c62828] bg-[#c62828]/20 text-white"
-                : "border-[#94a3b8]/30 text-[#cbd5e1] hover:bg-white/5"
+                : "border-[#cfd8e4]/30 text-[#ecf0f6] hover:bg-white/5"
             }`}
           >
             {labelTipoSheet("tiro_directo")}
@@ -89,32 +89,32 @@ export function Cotizador({
             className={`flex-1 py-3 rounded-lg border text-sm font-semibold uppercase tracking-wide transition-colors ${
               tipoVaciado === "bombeo"
                 ? "border-[#c62828] bg-[#c62828]/20 text-white"
-                : "border-[#94a3b8]/30 text-[#cbd5e1] hover:bg-white/5"
+                : "border-[#cfd8e4]/30 text-[#ecf0f6] hover:bg-white/5"
             }`}
           >
             {labelTipoSheet("bombeo")}
           </button>
         </div>
-        <p className="text-xs text-[#64748b] mt-2">
+        <p className="text-xs text-[#b0bcc9] mt-2">
           Bombeo con volumen menor a 15 m³: se cobra $15,000 MXN.
         </p>
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-[#cbd5e1] mb-2">Volumen (m³)</label>
+        <label className="block text-sm font-medium text-[#ecf0f6] mb-2">Volumen (m³)</label>
         <input
           inputMode="decimal"
           value={volumen}
           onChange={(e) => setVolumen(e.target.value)}
-          className="w-full py-3 px-4 bg-[#0c0f14] border border-[#94a3b8]/25 rounded-lg text-white placeholder:text-[#64748b] focus:outline-none focus:ring-2 focus:ring-[#c62828]/60"
+          className="w-full py-3 px-4 bg-[#0c0f14] border border-[#cfd8e4]/25 rounded-lg text-white placeholder:text-[#b0bcc9] focus:outline-none focus:ring-2 focus:ring-[#c62828]/60"
           placeholder="Ej. 12"
         />
       </div>
 
       <div className="rounded-xl border border-[#78716c]/40 bg-[#0c0f14]/80 px-4 py-3 space-y-2">
-        <p className="text-xs uppercase tracking-wide text-[#94a3b8] mb-1">Desglose</p>
+        <p className="text-xs uppercase tracking-wide text-[#d8e3ee] mb-1">Desglose</p>
         {cotizacion && precioM3 > 0 && vol > 0 && (
-          <p className="text-sm text-[#cbd5e1]">
+          <p className="text-sm text-[#ecf0f6]">
             {vol.toLocaleString("es-MX", { maximumFractionDigits: 2 })} m³ ×{" "}
             {precioM3.toLocaleString("es-MX", { minimumFractionDigits: 2 })} ={" "}
             <span className="text-white">${subtotalVol.toLocaleString("es-MX", { minimumFractionDigits: 2 })}</span>
@@ -127,14 +127,14 @@ export function Cotizador({
           </p>
         )}
         <div className="border-t border-[#78716c]/30 pt-2 mt-2">
-          <p className="text-xs uppercase tracking-wide text-[#94a3b8] mb-1">Total estimado</p>
-          <p className="font-display text-2xl font-bold text-[#ffcdd2]">
+          <p className="text-xs uppercase tracking-wide text-[#d8e3ee] mb-1">Total estimado</p>
+          <p className="font-display text-2xl font-bold text-[#ffe8eb]">
             {Number.isFinite(totalEstimado) && totalEstimado > 0
               ? `$${totalEstimado.toLocaleString("es-MX", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
               : "—"}
           </p>
         </div>
-        <p className="text-xs text-[#64748b]">Revisa y ajusta antes de continuar.</p>
+        <p className="text-xs text-[#b0bcc9]">Revisa y ajusta antes de continuar.</p>
       </div>
     </div>
   );

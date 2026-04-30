@@ -291,7 +291,7 @@ export function CalculadoraVolumenConcreto({ onCotizarVolumenM3 }: CalculadoraVo
   }
 
   const inputClass =
-    "w-full rounded-lg border border-white/10 bg-[#0c0f14] px-3 py-2.5 text-sm text-white placeholder:text-[#64748b] outline-none transition focus:border-[#c62828]/70 focus:ring-2 focus:ring-[#c62828]/20";
+    "w-full rounded-lg border border-white/10 bg-[#0c0f14] px-3 py-2.5 text-sm text-white placeholder:text-[#b0bcc9] outline-none transition focus:border-[#c62828]/70 focus:ring-2 focus:ring-[#c62828]/20";
 
   const formaActual = FORMAS.find((f) => f.id === forma) ?? FORMAS[0]!;
   const IconoForma = formaActual.icon;
@@ -315,14 +315,14 @@ export function CalculadoraVolumenConcreto({ onCotizarVolumenM3 }: CalculadoraVo
           viewport={{ once: true }}
           className="text-center mb-12 md:mb-16"
         >
-          <div className="inline-flex items-center justify-center gap-2 rounded-full border border-[#c62828]/40 bg-[#c62828]/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-[#fecaca] mb-4">
+          <div className="inline-flex items-center justify-center gap-2 rounded-full border border-[#c62828]/40 bg-[#c62828]/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-[#ffe4e9] mb-4">
             <Box className="h-3.5 w-3.5" aria-hidden />
-            Herramienta de obra
+            Herramienta para tu obra
           </div>
           <h2 className="font-display text-4xl md:text-5xl font-bold text-white mb-4 tracking-wide">
             Calculadora de volumen de concreto
           </h2>
-          <p className="text-[#94a3b8] max-w-2xl mx-auto">
+          <p className="text-[#d8e3ee] max-w-2xl mx-auto">
             Selecciona la forma, ingresa medidas y obtén el volumen en metros cúbicos (m³) con reserva
             de desperdicio.
           </p>
@@ -334,9 +334,9 @@ export function CalculadoraVolumenConcreto({ onCotizarVolumenM3 }: CalculadoraVo
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.45 }}
-            className="min-w-0 rounded-2xl border-2 border-[#78716c]/50 bg-[#141922] p-5 sm:p-6 shadow-xl"
+            className="group min-w-0 rounded-2xl border-2 border-[#78716c]/50 bg-[#141922] p-5 sm:p-6 shadow-xl transition-[border-color,box-shadow,ring] duration-300 hover:border-[#c62828]/60 hover:shadow-[0_0_0_1px_rgba(198,40,40,0.35),0_0_28px_-4px_rgba(198,40,40,0.22)] hover:ring-2 hover:ring-[#c62828]/25"
           >
-            <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#94a3b8] mb-3">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#d8e3ee] mb-3">
               Forma del elemento
             </p>
             <div
@@ -364,7 +364,7 @@ export function CalculadoraVolumenConcreto({ onCotizarVolumenM3 }: CalculadoraVo
                     <span
                       className={[
                         "flex h-8 w-8 shrink-0 items-center justify-center transition-colors",
-                        active ? "text-[#e57373]" : "text-[#94a3b8] group-hover:text-[#cbd5e1]",
+                        active ? "text-[#e57373]" : "text-[#d8e3ee] group-hover:text-[#ecf0f6]",
                       ].join(" ")}
                     >
                       <Icon
@@ -376,7 +376,7 @@ export function CalculadoraVolumenConcreto({ onCotizarVolumenM3 }: CalculadoraVo
                     <span
                       className={[
                         "text-[13px] font-bold leading-tight",
-                        active ? "text-white" : "text-slate-100",
+                        active ? "text-white" : "text-[#fafafa]",
                       ].join(" ")}
                     >
                       {f.label}
@@ -384,7 +384,7 @@ export function CalculadoraVolumenConcreto({ onCotizarVolumenM3 }: CalculadoraVo
                     <span
                       className={[
                         "line-clamp-2 text-[10px] leading-snug sm:text-[11px]",
-                        active ? "text-[#cbd5e1]/90" : "text-[#94a3b8]",
+                        active ? "text-[#ecf0f6]/95" : "text-[#d8e3ee]",
                       ].join(" ")}
                     >
                       {f.descripcion}
@@ -396,7 +396,7 @@ export function CalculadoraVolumenConcreto({ onCotizarVolumenM3 }: CalculadoraVo
 
             <div className="flex flex-col sm:flex-row sm:items-end gap-3 mb-5">
               <div className="sm:flex-1">
-                <label htmlFor="unidad-global" className="text-xs text-[#94a3b8] block mb-1.5">
+                <label htmlFor="unidad-global" className="text-xs text-[#d8e3ee] block mb-1.5">
                   Unidad de medida
                 </label>
                 <select
@@ -418,7 +418,7 @@ export function CalculadoraVolumenConcreto({ onCotizarVolumenM3 }: CalculadoraVo
               {forma === "losa" && (
                 <>
                   <div>
-                    <label className="text-xs text-[#94a3b8] block mb-1">Largo (L)</label>
+                    <label className="text-xs text-[#d8e3ee] block mb-1">Largo (L)</label>
                     <input
                       className={inputClass}
                       inputMode="decimal"
@@ -428,7 +428,7 @@ export function CalculadoraVolumenConcreto({ onCotizarVolumenM3 }: CalculadoraVo
                     />
                   </div>
                   <div>
-                    <label className="text-xs text-[#94a3b8] block mb-1">Ancho (A)</label>
+                    <label className="text-xs text-[#d8e3ee] block mb-1">Ancho (A)</label>
                     <input
                       className={inputClass}
                       inputMode="decimal"
@@ -438,7 +438,7 @@ export function CalculadoraVolumenConcreto({ onCotizarVolumenM3 }: CalculadoraVo
                     />
                   </div>
                   <div>
-                    <label className="text-xs text-[#94a3b8] block mb-1">Espesor (E)</label>
+                    <label className="text-xs text-[#d8e3ee] block mb-1">Espesor (E)</label>
                     <input
                       className={inputClass}
                       inputMode="decimal"
@@ -453,7 +453,7 @@ export function CalculadoraVolumenConcreto({ onCotizarVolumenM3 }: CalculadoraVo
               {forma === "columna" && (
                 <>
                   <div>
-                    <label className="text-xs text-[#94a3b8] block mb-1">Diámetro (D)</label>
+                    <label className="text-xs text-[#d8e3ee] block mb-1">Diámetro (D)</label>
                     <input
                       className={inputClass}
                       inputMode="decimal"
@@ -463,7 +463,7 @@ export function CalculadoraVolumenConcreto({ onCotizarVolumenM3 }: CalculadoraVo
                     />
                   </div>
                   <div>
-                    <label className="text-xs text-[#94a3b8] block mb-1">Altura (h)</label>
+                    <label className="text-xs text-[#d8e3ee] block mb-1">Altura (h)</label>
                     <input
                       className={inputClass}
                       inputMode="decimal"
@@ -478,7 +478,7 @@ export function CalculadoraVolumenConcreto({ onCotizarVolumenM3 }: CalculadoraVo
               {forma === "tubo" && (
                 <>
                   <div>
-                    <label className="text-xs text-[#94a3b8] block mb-1">Diámetro exterior (D)</label>
+                    <label className="text-xs text-[#d8e3ee] block mb-1">Diámetro exterior (D)</label>
                     <input
                       className={inputClass}
                       inputMode="decimal"
@@ -488,7 +488,7 @@ export function CalculadoraVolumenConcreto({ onCotizarVolumenM3 }: CalculadoraVo
                     />
                   </div>
                   <div>
-                    <label className="text-xs text-[#94a3b8] block mb-1">Diámetro interior (d)</label>
+                    <label className="text-xs text-[#d8e3ee] block mb-1">Diámetro interior (d)</label>
                     <input
                       className={inputClass}
                       inputMode="decimal"
@@ -498,7 +498,7 @@ export function CalculadoraVolumenConcreto({ onCotizarVolumenM3 }: CalculadoraVo
                     />
                   </div>
                   <div>
-                    <label className="text-xs text-[#94a3b8] block mb-1">Altura (h)</label>
+                    <label className="text-xs text-[#d8e3ee] block mb-1">Altura (h)</label>
                     <input
                       className={inputClass}
                       inputMode="decimal"
@@ -513,7 +513,7 @@ export function CalculadoraVolumenConcreto({ onCotizarVolumenM3 }: CalculadoraVo
               {forma === "pared" && (
                 <>
                   <div>
-                    <label className="text-xs text-[#94a3b8] block mb-1">Longitud de la pared</label>
+                    <label className="text-xs text-[#d8e3ee] block mb-1">Longitud de la pared</label>
                     <input
                       className={inputClass}
                       inputMode="decimal"
@@ -523,7 +523,7 @@ export function CalculadoraVolumenConcreto({ onCotizarVolumenM3 }: CalculadoraVo
                     />
                   </div>
                   <div>
-                    <label className="text-xs text-[#94a3b8] block mb-1">Espesor (t)</label>
+                    <label className="text-xs text-[#d8e3ee] block mb-1">Espesor (t)</label>
                     <input
                       className={inputClass}
                       inputMode="decimal"
@@ -533,7 +533,7 @@ export function CalculadoraVolumenConcreto({ onCotizarVolumenM3 }: CalculadoraVo
                     />
                   </div>
                   <div>
-                    <label className="text-xs text-[#94a3b8] block mb-1">Altura (h)</label>
+                    <label className="text-xs text-[#d8e3ee] block mb-1">Altura (h)</label>
                     <input
                       className={inputClass}
                       inputMode="decimal"
@@ -548,7 +548,7 @@ export function CalculadoraVolumenConcreto({ onCotizarVolumenM3 }: CalculadoraVo
               {forma === "cimientos" && (
                 <>
                   <div>
-                    <label className="text-xs text-[#94a3b8] block mb-1">Longitud (tramo)</label>
+                    <label className="text-xs text-[#d8e3ee] block mb-1">Longitud (tramo)</label>
                     <input
                       className={inputClass}
                       inputMode="decimal"
@@ -558,7 +558,7 @@ export function CalculadoraVolumenConcreto({ onCotizarVolumenM3 }: CalculadoraVo
                     />
                   </div>
                   <div>
-                    <label className="text-xs text-[#94a3b8] block mb-1">Ancho (sección)</label>
+                    <label className="text-xs text-[#d8e3ee] block mb-1">Ancho (sección)</label>
                     <input
                       className={inputClass}
                       inputMode="decimal"
@@ -568,7 +568,7 @@ export function CalculadoraVolumenConcreto({ onCotizarVolumenM3 }: CalculadoraVo
                     />
                   </div>
                   <div>
-                    <label className="text-xs text-[#94a3b8] block mb-1">Profundidad</label>
+                    <label className="text-xs text-[#d8e3ee] block mb-1">Profundidad</label>
                     <input
                       className={inputClass}
                       inputMode="decimal"
@@ -582,12 +582,12 @@ export function CalculadoraVolumenConcreto({ onCotizarVolumenM3 }: CalculadoraVo
 
               {forma === "escalera" && (
                 <>
-                  <p className="text-xs text-[#94a3b8] -mt-1 mb-1 leading-relaxed">
+                  <p className="text-xs text-[#d8e3ee] -mt-1 mb-1 leading-relaxed">
                     Modelo: por cada peldaño, prisma con sección triangular (huella × contrahuella) / 2 y longitud
                     igual al ancho. Opcional: plataforma de arranque como losa.
                   </p>
                   <div>
-                    <label className="text-xs text-[#94a3b8] block mb-1">Ancho del tramo (A)</label>
+                    <label className="text-xs text-[#d8e3ee] block mb-1">Ancho del tramo (A)</label>
                     <input
                       className={inputClass}
                       inputMode="decimal"
@@ -619,7 +619,7 @@ export function CalculadoraVolumenConcreto({ onCotizarVolumenM3 }: CalculadoraVo
                     />
                   </div>
                   <div>
-                    <label className="text-xs text-[#94a3b8] block mb-1">Número de escalones (N)</label>
+                    <label className="text-xs text-[#d8e3ee] block mb-1">Número de escalones (N)</label>
                     <input
                       className={inputClass}
                       inputMode="numeric"
@@ -628,12 +628,12 @@ export function CalculadoraVolumenConcreto({ onCotizarVolumenM3 }: CalculadoraVo
                       placeholder="0"
                     />
                   </div>
-                  <p className="text-[10px] uppercase tracking-wider text-[#64748b] pt-1">
+                  <p className="text-[10px] uppercase tracking-wider text-[#b0bcc9] pt-1">
                     Plataforma de arranque (opcional)
                   </p>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
-                      <label className="text-xs text-[#94a3b8] block mb-1">Largo de la plataforma</label>
+                      <label className="text-xs text-[#d8e3ee] block mb-1">Largo de la plataforma</label>
                       <input
                         className={inputClass}
                         inputMode="decimal"
@@ -643,7 +643,7 @@ export function CalculadoraVolumenConcreto({ onCotizarVolumenM3 }: CalculadoraVo
                       />
                     </div>
                     <div>
-                      <label className="text-xs text-[#94a3b8] block mb-1">Espesor / profundidad</label>
+                      <label className="text-xs text-[#d8e3ee] block mb-1">Espesor / profundidad</label>
                       <input
                         className={inputClass}
                         inputMode="decimal"
@@ -657,7 +657,7 @@ export function CalculadoraVolumenConcreto({ onCotizarVolumenM3 }: CalculadoraVo
               )}
 
               <div className="pt-1">
-                <label htmlFor="reserva-pct" className="text-xs text-[#94a3b8] block mb-1">
+                <label htmlFor="reserva-pct" className="text-xs text-[#d8e3ee] block mb-1">
                   Volumen de reserva (desperdicio)
                 </label>
                 <div className="flex gap-2 items-center">
@@ -669,7 +669,7 @@ export function CalculadoraVolumenConcreto({ onCotizarVolumenM3 }: CalculadoraVo
                     onChange={(e) => setReservaPct(e.target.value)}
                     placeholder="0"
                   />
-                  <span className="text-sm text-[#94a3b8]">%</span>
+                  <span className="text-sm text-[#d8e3ee]">%</span>
                 </div>
                 {!reservaValida && reservaPct.trim() !== "" && (
                   <p className="text-xs text-amber-400/90 mt-1">Usa un porcentaje entre 0 y 100.</p>
@@ -684,8 +684,8 @@ export function CalculadoraVolumenConcreto({ onCotizarVolumenM3 }: CalculadoraVo
               </p>
             )}
 
-            <p className="text-xs text-[#64748b] leading-relaxed mt-6 flex items-start gap-2">
-              <Info className="h-4 w-4 shrink-0 text-[#78716c]" aria-hidden />
+            <p className="text-xs text-[#b0bcc9] leading-relaxed mt-6 flex items-start gap-2">
+              <Info className="h-4 w-4 shrink-0 text-[#a8a4a1]" aria-hidden />
               Este cálculo es una estimación. Recomendamos validar con nuestros técnicos antes de
               realizar el pedido final.
             </p>
@@ -698,7 +698,7 @@ export function CalculadoraVolumenConcreto({ onCotizarVolumenM3 }: CalculadoraVo
             transition={{ duration: 0.45, delay: 0.05 }}
             className="min-w-0 lg:sticky lg:top-28"
           >
-            <div className="rounded-2xl border-2 border-[#c62828]/35 bg-gradient-to-b from-[#1a1f2e] to-[#141922] p-5 shadow-2xl shadow-black/30 sm:p-8">
+            <div className="group rounded-2xl border-2 border-[#c62828]/35 bg-gradient-to-b from-[#1a1f2e] to-[#141922] p-5 shadow-2xl shadow-black/30 sm:p-8 transition-[border-color,box-shadow,ring] duration-300 hover:border-[#ef5350]/90 hover:shadow-[0_0_0_1px_rgba(239,83,80,0.45),0_0_38px_-4px_rgba(198,40,40,0.45),0_20px_50px_-14px_rgba(0,0,0,0.5)] hover:ring-2 hover:ring-[#ffcdd2]/30">
               <h3 className="font-display text-lg sm:text-xl font-bold text-white tracking-wide mb-1 flex items-center gap-2">
                 <span className="h-1 w-1 rounded-full bg-[#c62828]" />
                 Detalle del pedido
@@ -709,26 +709,26 @@ export function CalculadoraVolumenConcreto({ onCotizarVolumenM3 }: CalculadoraVo
                     <IconoForma className="h-5 w-5" strokeWidth={ICON_STROKE} aria-hidden />
                   </span>
                   <div className="min-w-0">
-                    <p className="text-xs font-medium uppercase tracking-wider text-[#94a3b8]">Forma</p>
+                    <p className="text-xs font-medium uppercase tracking-wider text-[#d8e3ee]">Forma</p>
                     <p className="text-sm font-bold text-white sm:truncate">{formaActual.label}</p>
                   </div>
                 </div>
                 <p className="shrink-0 text-left text-lg font-bold tabular-nums text-white sm:text-right sm:text-xl">
                   {volumenNetoM3 != null && !avisoTubo ? formatM3(volumenNetoM3) : "—"}{" "}
-                  <span className="text-sm font-semibold text-[#94a3b8]">m³</span>
+                  <span className="text-sm font-semibold text-[#d8e3ee]">m³</span>
                 </p>
               </div>
               {desgloseEscaleraM3 && (
                 <div className="mb-4 space-y-1.5 rounded-lg border border-white/5 bg-black/20 px-3 py-2.5 text-xs">
-                  <p className="text-[#94a3b8]">Desglose (estimado)</p>
-                  <div className="flex min-w-0 flex-col justify-between gap-0.5 text-[#cbd5e1] min-[400px]:flex-row min-[400px]:items-baseline min-[400px]:gap-2">
+                  <p className="text-[#d8e3ee]">Desglose (estimado)</p>
+                  <div className="flex min-w-0 flex-col justify-between gap-0.5 text-[#ecf0f6] min-[400px]:flex-row min-[400px]:items-baseline min-[400px]:gap-2">
                     <span className="min-w-0">Peldaños (N = {desgloseEscaleraM3.nEscalones})</span>
                     <span className="shrink-0 tabular-nums text-white sm:text-right">
                       {formatM3(desgloseEscaleraM3.vEscalones)} m³
                     </span>
                   </div>
                   {desgloseEscaleraM3.vPlat > 0 && (
-                    <div className="flex min-w-0 flex-col justify-between gap-0.5 text-[#cbd5e1] min-[400px]:flex-row min-[400px]:items-baseline min-[400px]:gap-2">
+                    <div className="flex min-w-0 flex-col justify-between gap-0.5 text-[#ecf0f6] min-[400px]:flex-row min-[400px]:items-baseline min-[400px]:gap-2">
                       <span className="min-w-0">Plataforma de arranque</span>
                       <span className="shrink-0 tabular-nums text-white sm:text-right">
                         {formatM3(desgloseEscaleraM3.vPlat)} m³
@@ -739,7 +739,7 @@ export function CalculadoraVolumenConcreto({ onCotizarVolumenM3 }: CalculadoraVo
               )}
               <dl className="space-y-4 text-sm">
                 <div className="flex justify-between gap-4">
-                  <dt className="text-[#94a3b8]">Volumen neto</dt>
+                  <dt className="text-[#d8e3ee]">Volumen neto</dt>
                   <dd className="text-white font-medium tabular-nums">
                     {volumenNetoM3 != null && !avisoTubo
                       ? `${formatM3(volumenNetoM3)} m³`
@@ -747,7 +747,7 @@ export function CalculadoraVolumenConcreto({ onCotizarVolumenM3 }: CalculadoraVo
                   </dd>
                 </div>
                 <div className="flex min-w-0 flex-col gap-0.5 sm:flex-row sm:justify-between sm:gap-4">
-                  <dt className="min-w-0 break-words text-[#94a3b8]">
+                  <dt className="min-w-0 break-words text-[#d8e3ee]">
                     Extra por reserva (
                     {reservaValida ? `${pRes.toLocaleString("es-MX")}` : "—"}%)
                   </dt>
@@ -758,7 +758,7 @@ export function CalculadoraVolumenConcreto({ onCotizarVolumenM3 }: CalculadoraVo
                   </dd>
                 </div>
                 <div className="flex min-w-0 flex-col items-start gap-1 border-t border-white/10 pt-4 sm:flex-row sm:items-baseline sm:justify-between sm:gap-4">
-                  <dt className="shrink-0 font-semibold text-[#e2e8f0]">Volumen total</dt>
+                  <dt className="shrink-0 font-semibold text-[#f4f8fc]">Volumen total</dt>
                   <dd className="w-full min-w-0 break-words text-2xl font-bold font-display text-white tabular-nums sm:w-auto sm:text-right sm:text-3xl">
                     {totalM3 != null && !avisoTubo
                       ? `${formatM3(totalM3)} m³`
@@ -778,7 +778,7 @@ export function CalculadoraVolumenConcreto({ onCotizarVolumenM3 }: CalculadoraVo
                     Cotizar este volumen
                   </button>
                 )}
-                <p className="text-center text-xs text-[#64748b]">
+                <p className="text-center text-xs text-[#b0bcc9]">
                   Resultado en m³. Unidades de entrada convertidas a metros.
                 </p>
               </div>

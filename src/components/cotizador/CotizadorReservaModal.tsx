@@ -232,7 +232,7 @@ export function CotizadorReservaModal({ isOpen, onClose, volumenInicialM3 = null
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.96, y: 12 }}
             transition={{ type: "spring", damping: 26, stiffness: 320 }}
-            className="cotizacion-modal-scroll relative w-full max-w-lg max-h-[min(92vh,40rem)] overflow-y-auto rounded-2xl border-2 border-[#c62828]/40 bg-[#141922] p-5 shadow-2xl sm:p-6"
+            className="cotizacion-modal-scroll relative w-full max-w-lg max-h-[min(92vh,40rem)] overflow-y-auto rounded-2xl border-2 border-[#c62828]/75 bg-[#141922] p-5 shadow-[0_0_0_1px_rgba(198,40,40,0.45),0_0_36px_-4px_rgba(198,40,40,0.35),0_20px_50px_-12px_rgba(0,0,0,0.55)] ring-2 ring-[#c62828]/25 sm:p-6"
             role="dialog"
             aria-modal="true"
             aria-labelledby={mensajePagoAbierto ? "mensaje-pago-titulo" : undefined}
@@ -249,7 +249,7 @@ export function CotizadorReservaModal({ isOpen, onClose, volumenInicialM3 = null
                 >
                   Pedido registrado
                 </h3>
-                <p className="text-sm leading-relaxed text-[#cbd5e1] mb-6 text-left sm:text-center">
+                <p className="text-sm leading-relaxed text-[#ecf0f6] mb-6 text-left sm:text-center">
                   Tu reserva quedó guardada. Tienes un máximo de{" "}
                   <span className="text-white font-semibold">2 horas</span> para realizar el pago y enviar el
                   comprobante por WhatsApp. Si no recibimos el comprobante en ese plazo, el horario dejará de estar
@@ -280,7 +280,7 @@ export function CotizadorReservaModal({ isOpen, onClose, volumenInicialM3 = null
                 className="shrink-0 p-2 hover:bg-white/10 rounded-full transition-colors"
                 aria-label="Cerrar"
               >
-                <X size={24} className="text-[#94a3b8]" />
+                <X size={24} className="text-[#d8e3ee]" />
               </button>
             </div>
 
@@ -317,7 +317,7 @@ export function CotizadorReservaModal({ isOpen, onClose, volumenInicialM3 = null
                 <button
                   type="button"
                   onClick={() => setStep(1)}
-                  className="mb-4 inline-flex items-center gap-1 text-sm text-[#94a3b8] hover:text-white"
+                  className="mb-4 inline-flex items-center gap-1 text-sm text-[#d8e3ee] hover:text-white"
                 >
                   <ChevronLeft size={18} />
                   Volver a cotización

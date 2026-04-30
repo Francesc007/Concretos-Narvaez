@@ -2,15 +2,15 @@
 
 :root {
   --background: #0c0f14;
-  --foreground: #e7e5e4;
+  --foreground: #f3f2f2;
   --tepexi-bg: #0c0f14;
   --tepexi-surface: #141922;
   --tepexi-elevated: #1c2433;
   --tepexi-accent: #c62828;
   --tepexi-accent-hover: #e53935;
-  --tepexi-steel: #94a3b8;
-  --tepexi-concrete: #cbd5e1;
-  --tepexi-border: rgba(148, 163, 184, 0.15);
+  --tepexi-steel: #d8e3ee;
+  --tepexi-concrete: #ecf0f6;
+  --tepexi-border: rgba(203, 213, 225, 0.22);
   --tepexi-logo-gray: #7d7d7d;
   --tepexi-concrete-frame: #78716c;
 }
@@ -55,6 +55,33 @@ body {
   animation: whatsapp-pulse 2s ease-in-out infinite;
 }
 
+@keyframes clientes-marquee {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+.tepexi-clientes-marquee {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: center;
+  width: max-content;
+  animation: clientes-marquee 60s linear infinite;
+  will-change: transform;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tepexi-clientes-marquee {
+    animation: none !important;
+  }
+}
+
 .cotizacion-modal-scroll {
   scrollbar-width: thin;
   scrollbar-color: #78716c #0c0f14;
@@ -84,14 +111,14 @@ body {
   --rdp-accent-color: #c62828;
   --rdp-accent-background-color: rgba(198, 40, 40, 0.22);
   --rdp-outside-opacity: 0.45;
-  color: #e2e8f0;
+  color: #f1f5f9;
 }
 
 .tepexi-rdp .rdp-caption_label,
 .tepexi-rdp .rdp-weekday {
-  color: #94a3b8;
+  color: #d8e3ee;
 }
 
 .tepexi-rdp .rdp-nav_button {
-  color: #cbd5e1;
+  color: #ecf0f6;
 }

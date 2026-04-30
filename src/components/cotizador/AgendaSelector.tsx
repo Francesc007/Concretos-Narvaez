@@ -112,30 +112,30 @@ export function AgendaSelector({
 
       <div className="grid sm:grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium text-[#cbd5e1] mb-2">Nombre</label>
+          <label className="block text-sm font-medium text-[#ecf0f6] mb-2">Nombre</label>
           <input
             value={nombre}
             onChange={(e) => setNombre(e.target.value)}
-            className="w-full py-3 px-4 bg-[#0c0f14] border border-[#94a3b8]/25 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#c62828]/60"
+            className="w-full py-3 px-4 bg-[#0c0f14] border border-[#cfd8e4]/25 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#c62828]/60"
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-[#cbd5e1] mb-2">Empresa</label>
+          <label className="block text-sm font-medium text-[#ecf0f6] mb-2">Empresa</label>
           <input
             value={empresa}
             onChange={(e) => setEmpresa(e.target.value)}
-            className="w-full py-3 px-4 bg-[#0c0f14] border border-[#94a3b8]/25 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#c62828]/60"
+            className="w-full py-3 px-4 bg-[#0c0f14] border border-[#cfd8e4]/25 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#c62828]/60"
             placeholder="Opcional"
           />
         </div>
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-[#cbd5e1] mb-2">Obra</label>
+        <label className="block text-sm font-medium text-[#ecf0f6] mb-2">Obra</label>
         <select
           value={obra}
           onChange={(e) => setObra(e.target.value)}
-          className="w-full py-3 px-4 bg-[#0c0f14] border border-[#94a3b8]/25 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#c62828]/60"
+          className="w-full py-3 px-4 bg-[#0c0f14] border border-[#cfd8e4]/25 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#c62828]/60"
         >
           {OBRA_OPTIONS.map((o) => (
             <option key={o.value} value={o.value}>
@@ -147,7 +147,7 @@ export function AgendaSelector({
 
       <div className="grid sm:grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium text-[#cbd5e1] mb-2">Fecha</label>
+          <label className="block text-sm font-medium text-[#ecf0f6] mb-2">Fecha</label>
           <DateFieldCalendar
             value={fecha}
             onChange={setFecha}
@@ -156,11 +156,11 @@ export function AgendaSelector({
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-[#cbd5e1] mb-2">Hora</label>
+          <label className="block text-sm font-medium text-[#ecf0f6] mb-2">Hora</label>
           <select
             value={hora}
             onChange={(e) => setHora(e.target.value)}
-            className="w-full py-3 px-4 bg-[#0c0f14] border border-[#94a3b8]/25 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#c62828]/60"
+            className="w-full py-3 px-4 bg-[#0c0f14] border border-[#cfd8e4]/25 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#c62828]/60"
           >
             {HORAS.map((h) => (
               <option key={h} value={h}>
@@ -172,22 +172,22 @@ export function AgendaSelector({
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-[#cbd5e1] mb-2">Volumen a reservar (m³)</label>
+        <label className="block text-sm font-medium text-[#ecf0f6] mb-2">Volumen a reservar (m³)</label>
         <input
           inputMode="decimal"
           value={volumen}
           onChange={(e) => setVolumen(e.target.value)}
-          className="w-full py-3 px-4 bg-[#0c0f14] border border-[#94a3b8]/25 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#c62828]/60"
+          className="w-full py-3 px-4 bg-[#0c0f14] border border-[#cfd8e4]/25 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#c62828]/60"
         />
       </div>
 
       <div className="rounded-xl border border-[#78716c]/35 bg-[#0c0f14]/60 px-4 py-3 text-sm">
-        <p className="text-[#94a3b8]">
+        <p className="text-[#d8e3ee]">
           Capacidad máxima por hora: <span className="text-white font-semibold">{capacidadMaximaHora} m³</span>
         </p>
-        {disp.loading && <p className="text-[#94a3b8] mt-2">Consultando disponibilidad…</p>}
+        {disp.loading && <p className="text-[#d8e3ee] mt-2">Consultando disponibilidad…</p>}
         {!disp.loading && !disp.error && (
-          <p className="text-[#cbd5e1] mt-2">
+          <p className="text-[#ecf0f6] mt-2">
             Ocupado en este horario: <span className="text-white">{disp.usadoM3.toFixed(2)} m³</span> · Libre:{" "}
             <span className="text-[#86efac] font-semibold">{disp.disponibleM3.toFixed(2)} m³</span>
           </p>
@@ -199,12 +199,12 @@ export function AgendaSelector({
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-[#cbd5e1] mb-2">Comentarios</label>
+        <label className="block text-sm font-medium text-[#ecf0f6] mb-2">Comentarios</label>
         <textarea
           rows={3}
           value={comentarios}
           onChange={(e) => setComentarios(e.target.value)}
-          className="w-full py-3 px-4 bg-[#0c0f14] border border-[#94a3b8]/25 rounded-lg text-white placeholder:text-[#64748b] focus:outline-none focus:ring-2 focus:ring-[#c62828]/60 resize-none"
+          className="w-full py-3 px-4 bg-[#0c0f14] border border-[#cfd8e4]/25 rounded-lg text-white placeholder:text-[#b0bcc9] focus:outline-none focus:ring-2 focus:ring-[#c62828]/60 resize-none"
           placeholder="Acceso, bombeo, dudas…"
         />
       </div>

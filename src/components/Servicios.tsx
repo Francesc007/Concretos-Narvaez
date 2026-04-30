@@ -7,7 +7,7 @@ import { Truck, HardHat, Gauge, ClipboardCheck } from "lucide-react";
 
 const servicios = [
   {
-    titulo: "Concreto premezclado",
+    titulo: "Concreto Premezclado",
     descripcion:
       "Mezclas diseñadas según normatividad y resistencia requerida. Ideal para losas, muros, columnas y cimentaciones.",
     imagen: "/Tepexi1.jpg",
@@ -15,7 +15,7 @@ const servicios = [
     destacado: true,
   },
   {
-    titulo: "Bombeo y colado",
+    titulo: "Bombeo y Colado",
     descripcion:
       "Coordinación de bombeo para llegar a alturas y zonas de difícil acceso, con enfoque en seguridad y continuidad del colado.",
     imagen: "/Tepexi2.jpg",
@@ -23,7 +23,7 @@ const servicios = [
     destacado: true,
   },
   {
-    titulo: "Asesoría en obra",
+    titulo: "Asesoría en Obra",
     descripcion:
       "Acompañamiento para programar volúmenes, juntas y curado. Te ayudamos a optimizar tiempos y calidad del terminado.",
     imagen: "/Tepexi3.jpg",
@@ -31,9 +31,9 @@ const servicios = [
     destacado: false,
   },
   {
-    titulo: "Entrega y logística",
+    titulo: "Entrega y Logística",
     descripcion:
-      "Ventanas de entrega acordadas con tu obra en Tepeji y zona. Comunicación clara desde el pedido hasta el camión en sitio.",
+      "Seguimiento de entregas acordadas con tu obra en Tepeji y zona. Comunicación clara desde el pedido hasta el camión en sitio.",
     imagen: "/Hero.jpg",
     icon: ClipboardCheck,
     destacado: false,
@@ -57,13 +57,13 @@ function ServicioCard({
       initial={{ opacity: 0, y: 50 }}
       animate={isInView ? { opacity: 1, y: 0 } : {}}
       transition={{ duration: 0.5, delay: index * 0.08 }}
-      whileHover={{ scale: 1.02, boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.45)" }}
-      className="bg-[#141922] rounded-xl overflow-hidden border-2 border-[#78716c]/65 hover:border-[#78716c] transition-all cursor-default shadow-[0_0_0_1px_rgba(120,113,108,0.2)]"
+      whileHover={{ y: -4 }}
+      className="group bg-[#141922] rounded-xl overflow-hidden border-2 border-[#78716c]/65 shadow-[inset_0_0_0_1px_rgba(120,113,108,0.18)] shadow-xl transition-[border-color,box-shadow,ring] duration-300 hover:border-[#ebe9e8] hover:shadow-[0_0_0_1px_rgba(250,250,249,0.5),0_0_36px_-4px_rgba(255,255,255,0.28)] hover:ring-2 hover:ring-white/65 cursor-default"
     >
-      <div className="h-44 bg-[#0c0f14] overflow-hidden relative">
-        <img src={item.imagen} alt="" className="w-full h-full object-cover" />
+      <div className="relative h-44 bg-[#0c0f14] overflow-hidden shadow-[inset_0_0_0_2px_transparent] transition-[box-shadow] duration-300 group-hover:shadow-[inset_0_0_0_2px_rgba(255,255,255,0.65)]">
+        <img src={item.imagen} alt="" className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-105" />
         <div className="absolute top-3 left-3 flex items-center gap-2">
-          <span className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-[#0c0f14]/85 text-[#d6d3d1] border-2 border-[#78716c]/90">
+          <span className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-[#0c0f14]/85 text-[#eae9e9] border-2 border-[#78716c]/90">
             <Icon size={20} />
           </span>
           {item.destacado && (
@@ -75,7 +75,7 @@ function ServicioCard({
       </div>
       <div className="p-6">
         <h3 className="font-display text-xl font-semibold text-white tracking-wide">{item.titulo}</h3>
-        <p className="text-[#94a3b8] mt-2 text-sm leading-relaxed">{item.descripcion}</p>
+        <p className="text-[#d8e3ee] mt-2 text-sm leading-relaxed">{item.descripcion}</p>
       </div>
     </motion.div>
   );
@@ -94,7 +94,7 @@ export function Servicios() {
           <h2 className="font-display text-4xl md:text-5xl font-bold text-white mb-4 tracking-wide">
             Servicios para tu proyecto
           </h2>
-          <p className="text-[#94a3b8] max-w-2xl mx-auto">
+          <p className="text-[#d8e3ee] max-w-2xl mx-auto">
             Cubrimos desde la mezcla hasta la puesta en obra, con el respaldo de un equipo enfocado
             en resultados duraderos.
           </p>

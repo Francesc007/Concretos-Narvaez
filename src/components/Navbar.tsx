@@ -75,14 +75,14 @@ export function Navbar({ onCotizadorClick }: NavbarProps) {
             className="inline-flex items-center gap-2 sm:gap-3 shrink-0 min-w-0"
             onClick={() => setMobileMenuOpen(false)}
           >
-            <div className="flex h-14 w-14 sm:h-16 sm:w-16 md:h-[4.25rem] md:w-[4.25rem] shrink-0 items-center justify-center rounded-full border border-white bg-white p-px shadow-sm">
+            <div className="flex h-[4rem] w-[4rem] sm:h-[4rem] sm:w-[4rem] md:h-[4.7em] md:w-[4.7rem] shrink-0 items-center justify-center rounded-full border border-white bg-white p-px shadow-sm">
               <img
                 src="/Logo.jpg"
                 alt="Concretos Tepexi"
                 className="h-full w-full rounded-full object-contain"
               />
             </div>
-            <span className="font-display text-base sm:text-xl md:text-2xl font-semibold text-[#f1f5f9] tracking-wide hidden sm:inline truncate max-w-[40vw] sm:max-w-none">
+            <span className="font-display text-base sm:text-xl md:text-2xl font-semibold text-white tracking-wide hidden sm:inline truncate max-w-[40vw] sm:max-w-none drop-shadow-sm">
               CONCRETOS TEPEXI
             </span>
           </a>
@@ -92,7 +92,7 @@ export function Navbar({ onCotizadorClick }: NavbarProps) {
               <a
                 key={link.href}
                 href={link.href}
-                className="text-[#e7e5e4] hover:text-[#c62828] transition-colors font-medium text-sm uppercase tracking-wide"
+                className="text-white hover:text-[#c62828] transition-colors font-medium text-sm uppercase tracking-wide"
               >
                 {link.label}
               </a>
@@ -159,7 +159,7 @@ export function Navbar({ onCotizadorClick }: NavbarProps) {
                   <a
                     key={link.href}
                     href={link.href}
-                    className="rounded-lg px-4 py-3 text-left text-sm font-semibold uppercase tracking-wide text-[#f5f5f4] transition-colors hover:bg-white/10 hover:text-white"
+                    className="rounded-lg px-4 py-3 text-left text-sm font-semibold uppercase tracking-wide text-white transition-colors hover:bg-white/15 hover:text-white"
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     {link.label}

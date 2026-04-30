@@ -4,22 +4,40 @@ import { motion } from "framer-motion";
 
 const items = [
   {
-    titulo: "Operación y planta",
-    descripcion: "Procesos controlados para consistencia en cada camión.",
+    titulo: "Colado de vialidades, Tepeji del Río, Hgo.",
     imagen: "/Tepexi1.jpg",
-    borde: "border-[#78716c]/80",
   },
   {
-    titulo: "Obra y colado",
-    descripcion: "Mezcla lista cuando tu estructura lo necesita.",
+    titulo: "Cimentaciones industriales, Tula de Allende, Hgo.",
+    imagen: "/Hero.jpg",
+  },
+  {
+    titulo: "Patio de maniobras, Apaxco, Hgo.",
+    imagen: "/Hero%202.jpg",
+  },
+  {
+    titulo: "Nivelación de lámina, Soyaniquilpan de Juárez, Hgo.",
     imagen: "/Tepexi2.jpg",
-    borde: "border-[#78716c]/80",
   },
   {
-    titulo: "Resultados sólidos",
-    descripcion: "Concreto que respalda tus plazos y especificaciones.",
+    titulo: "Rampas de accesibilidad, Tepeji del Río, Hgo.",
     imagen: "/Tepexi3.jpg",
-    borde: "border-[#78716c]/80",
+  },
+  {
+    titulo: "Obra habitacional, Atotonilco de Tula, Hgo.",
+    imagen: "/Hero%203.jpg",
+  },
+  {
+    titulo: "Bombeo plaza comercial, Huehuetla, Hgo.",
+    imagen: "/Tepexi1.jpg",
+  },
+  {
+    titulo: "Zapatas y nivelación, Tecozautla, Hgo.",
+    imagen: "/Tepexi2.jpg",
+  },
+  {
+    titulo: "Área institucional, Chilcuautla, Hgo.",
+    imagen: "/Tepexi3.jpg",
   },
 ];
 
@@ -43,7 +61,7 @@ export function Galeria() {
           <h2 className="font-display text-4xl md:text-5xl font-bold text-white mb-4 tracking-wide">
             Galería
           </h2>
-          <p className="text-[#94a3b8] max-w-2xl mx-auto">
+          <p className="text-[#d8e3ee] max-w-2xl mx-auto">
             Un vistazo a nuestra operación y al tipo de proyectos que acompañamos en la región.
           </p>
         </motion.div>
@@ -51,26 +69,25 @@ export function Galeria() {
         <div className="grid md:grid-cols-3 gap-8 lg:gap-10">
           {items.map((item, i) => (
             <motion.div
-              key={item.titulo}
+              key={`${item.titulo}-${i}`}
               initial={{ opacity: 0, y: 40 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: i * 0.12 }}
               whileHover={{ y: -4 }}
-              className={`group bg-[#0c0f14] rounded-2xl overflow-hidden border-2 ${item.borde} shadow-[0_0_0_1px_rgba(120,113,108,0.2)] shadow-xl hover:shadow-2xl hover:shadow-[#78716c]/20 transition-shadow`}
+              className="group bg-[#0c0f14] rounded-2xl overflow-hidden border-2 border-[#78716c]/65 shadow-[inset_0_0_0_1px_rgba(120,113,108,0.18)] shadow-xl transition-[border-color,box-shadow,ring] duration-300 hover:border-[#ebe9e8] hover:shadow-[0_0_0_1px_rgba(250,250,249,0.5),0_0_36px_-4px_rgba(255,255,255,0.28)] hover:ring-2 hover:ring-white/65"
             >
-              <div className="h-56 overflow-hidden">
+              <div className="relative h-56 overflow-hidden shadow-[inset_0_0_0_2px_transparent] transition-[box-shadow] duration-300 group-hover:shadow-[inset_0_0_0_2px_rgba(255,255,255,0.65)]">
                 <img
                   src={item.imagen}
                   alt=""
                   className="w-full h-full object-cover object-center transition-transform duration-500 ease-out group-hover:scale-105"
                 />
               </div>
-              <div className="p-5">
-                <h3 className="font-display text-xl font-semibold text-white mb-2 tracking-wide">
+              <div className="p-5 pt-4">
+                <h3 className="font-display text-lg sm:text-xl font-semibold text-white tracking-wide leading-snug">
                   {item.titulo}
                 </h3>
-                <p className="text-[#94a3b8] text-sm leading-relaxed">{item.descripcion}</p>
               </div>
             </motion.div>
           ))}

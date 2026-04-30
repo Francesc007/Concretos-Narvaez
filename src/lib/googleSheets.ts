@@ -4,13 +4,17 @@
 import { JWT } from "google-auth-library";
 import type { GoogleSpreadsheetRow, GoogleSpreadsheetWorksheet } from "google-spreadsheet";
 import { GoogleSpreadsheet } from "google-spreadsheet";
+import type { TipoVisitaAgendada } from "@/lib/agendaVisita";
 import {
   buildCotizacionConfigFromRows,
   cotizacionTieneAlgunPrecio,
   parseResistenciaKg,
 } from "@/lib/cotizacion";
 
-const SCOPES = ["https://www.googleapis.com/auth/spreadsheets"];
+const SCOPES = [
+  "https://www.googleapis.com/auth/spreadsheets",
+  "https://www.googleapis.com/auth/calendar.events",
+] as const;
 
 let docSingleton: GoogleSpreadsheet | null = null;
 
@@ -20,20 +24,24 @@ function getPrivateKey(): string {
   return raw.replace(/\\n/g, "\n");
 }
 
+/** JWT de la cuenta de servicio (Sheets + Calendar). Solo servidor. */
+export function getGoogleServiceAccountJwt(): JWT {
+  const email = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
+  if (!email) throw new Error("GOOGLE_SERVICE_ACCOUNT_EMAIL no está definida");
+  return new JWT({
+    email,
+    key: getPrivateKey(),
+    scopes: [...SCOPES],
+  });
+}
+
 export async function getSpreadsheetDoc(): Promise<GoogleSpreadsheet> {
   if (docSingleton) return docSingleton;
 
   const sheetId = process.env.GOOGLE_SHEET_ID;
-  const email = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
   if (!sheetId) throw new Error("GOOGLE_SHEET_ID no está definida");
-  if (!email) throw new Error("GOOGLE_SERVICE_ACCOUNT_EMAIL no está definida");
 
-  const key = getPrivateKey();
-  const auth = new JWT({
-    email,
-    key,
-    scopes: SCOPES,
-  });
+  const auth = getGoogleServiceAccountJwt();
 
   const doc = new GoogleSpreadsheet(sheetId, auth);
   await doc.loadInfo();
@@ -291,6 +299,32 @@ export interface ReservaPayload {
   Comentarios: string;
   Estado: string;
   Timestamp_Reserva: string;
+}
+
+export interface VisitaAgendadaSheetPayload {
+  Nombre: string;
+  Empresa: string;
+  Correo: string;
+  Telefono: string;
+  Fecha: string;
+  Horario: string;
+  Visita: TipoVisitaAgendada;
+}
+
+/** Fila en la pestaña "Visitas Agendadas" (encabezados: Nombre, Empresa, Correo, Teléfono, Fecha, Horario, Visita). */
+export async function appendVisitaAgendadaRow(payload: VisitaAgendadaSheetPayload): Promise<void> {
+  const doc = await getSpreadsheetDoc();
+  const sheet = doc.sheetsByTitle["Visitas Agendadas"];
+  if (!sheet) throw new Error('No existe la hoja "Visitas Agendadas"');
+  await sheet.addRow({
+    Nombre: payload.Nombre,
+    Empresa: payload.Empresa,
+    Correo: payload.Correo,
+    Teléfono: payload.Telefono,
+    Fecha: normalizeFecha(payload.Fecha),
+    Horario: normalizeHora(payload.Horario),
+    Visita: payload.Visita,
+  });
 }
 
 export async function appendReservaAgenda(payload: ReservaPayload): Promise<void> {

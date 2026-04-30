@@ -21,7 +21,7 @@ export function Hero() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="font-display mb-4 inline-block max-w-full rounded-md border-2 border-[#c62828]/90 bg-[#0c0f14]/40 px-2 py-1.5 text-sm uppercase tracking-[0.2em] text-[#ffcdd2] [text-wrap:balance] drop-shadow-[0_2px_6px_rgba(0,0,0,0.9)] sm:px-3 sm:py-1.5 sm:text-base"
+          className="font-display mb-4 inline-block max-w-full rounded-md border-2 border-[#c62828]/90 bg-[#0c0f14]/40 px-2 py-1.5 text-sm uppercase tracking-[0.2em] text-[#ffe8eb] [text-wrap:balance] drop-shadow-[0_2px_6px_rgba(0,0,0,0.9)] sm:px-3 sm:py-1.5 sm:text-base"
         >
           Concreto premezclado · Tepeji del Río, Hgo.
         </motion.p>
@@ -37,10 +37,10 @@ export function Hero() {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.3 }}
-          className="mx-auto mb-12 max-w-2xl text-pretty text-lg text-[#cbd5e1] sm:text-xl"
+          className="mx-auto mb-12 max-w-2xl text-pretty text-lg text-[#ecf0f6] sm:text-xl"
         >
           En Concretos Tepexi entregamos mezclas certificadas, asesoría técnica y puntualidad en
-          planta y obra. Cotiza por WhatsApp y recibe acompañamiento de principio a fin.
+          planta y obra. Utiliza nuestra herramienta para cotizar y recibe acompañamiento de principio a fin.
         </motion.p>
         <motion.div
           initial={{ opacity: 0, y: 30 }}

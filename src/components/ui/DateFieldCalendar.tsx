@@ -114,10 +114,10 @@ export function DateFieldCalendar({
         onClick={() => setOpen((o) => !o)}
         aria-expanded={open}
         aria-haspopup="dialog"
-        className="w-full py-3 px-4 bg-[#0c0f14] border border-[#94a3b8]/25 rounded-lg text-left focus:outline-none focus:ring-2 focus:ring-[#c62828]/60 flex items-center justify-between gap-2 min-h-[48px]"
+        className="w-full py-3 px-4 bg-[#0c0f14] border border-[#cfd8e4]/25 rounded-lg text-left focus:outline-none focus:ring-2 focus:ring-[#c62828]/60 flex items-center justify-between gap-2 min-h-[48px]"
       >
-        <span className={selected ? "text-white text-sm sm:text-base" : "text-[#64748b]"}>{label}</span>
-        <Calendar className="h-5 w-5 shrink-0 text-[#94a3b8]" aria-hidden />
+        <span className={selected ? "text-white text-sm sm:text-base" : "text-[#b0bcc9]"}>{label}</span>
+        <Calendar className="h-5 w-5 shrink-0 text-[#d8e3ee]" aria-hidden />
       </button>
       {mounted &&
         open &&
@@ -125,7 +125,7 @@ export function DateFieldCalendar({
         createPortal(
           <div
             ref={panelRef}
-            className="tepexi-rdp fixed z-[10000] w-[min(100vw-1rem,20rem)] rounded-xl border border-[#94a3b8]/25 bg-[#141922] p-3 shadow-2xl"
+            className="tepexi-rdp fixed z-[10000] w-[min(100vw-1rem,20rem)] rounded-xl border border-[#cfd8e4]/25 bg-[#141922] p-3 shadow-2xl"
             style={{ top: panelPos.top, left: panelPos.left }}
             role="dialog"
             aria-label="Calendario"

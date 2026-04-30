@@ -113,7 +113,7 @@ export function CotizacionModal({ isOpen, onClose }: CotizacionModalProps) {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.96, y: 12 }}
             transition={{ type: "spring", damping: 26, stiffness: 320 }}
-            className="cotizacion-modal-scroll relative w-full max-w-md max-h-[min(90vh,36rem)] overflow-y-auto rounded-2xl border-2 border-[#c62828]/40 bg-[#141922] p-5 shadow-2xl sm:p-6"
+            className="cotizacion-modal-scroll relative w-full max-w-md max-h-[min(90vh,36rem)] overflow-y-auto rounded-2xl border-2 border-[#c62828]/75 bg-[#141922] p-5 shadow-[0_0_0_1px_rgba(198,40,40,0.45),0_0_36px_-4px_rgba(198,40,40,0.35),0_20px_50px_-12px_rgba(0,0,0,0.55)] ring-2 ring-[#c62828]/25 sm:p-6"
             role="dialog"
             aria-modal="true"
             aria-labelledby="cotizacion-modal-title"
@@ -132,24 +132,24 @@ export function CotizacionModal({ isOpen, onClose }: CotizacionModalProps) {
                 className="shrink-0 p-2 hover:bg-white/10 rounded-full transition-colors"
                 aria-label="Cerrar"
               >
-                <X size={24} className="text-[#94a3b8]" />
+                <X size={24} className="text-[#d8e3ee]" />
               </button>
             </div>
 
-            <p className="text-sm leading-relaxed text-[#cbd5e1] mb-6 text-center sm:text-left">
+            <p className="text-sm leading-relaxed text-[#ecf0f6] mb-6 text-center sm:text-left">
               Completa los datos y generaremos un mensaje listo para tu atención personalizada
             </p>
 
             <div className="space-y-4">
               <div>
-                <label htmlFor="cot-entrega" className="block text-sm font-medium text-[#cbd5e1] mb-2">
+                <label htmlFor="cot-entrega" className="block text-sm font-medium text-[#ecf0f6] mb-2">
                   Tiro directo o bombeo
                 </label>
                 <select
                   id="cot-entrega"
                   value={entrega}
                   onChange={(e) => setEntrega(e.target.value)}
-                  className="w-full py-3 px-4 bg-[#0c0f14] border border-[#94a3b8]/25 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#c62828]/60"
+                  className="w-full py-3 px-4 bg-[#0c0f14] border border-[#cfd8e4]/35 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#c62828]/60"
                 >
                   {ENTREGA_OPCIONES.map((o) => (
                     <option key={o.value} value={o.value}>
@@ -160,27 +160,27 @@ export function CotizacionModal({ isOpen, onClose }: CotizacionModalProps) {
               </div>
 
               <div>
-                <label htmlFor="cot-nombre" className="block text-sm font-medium text-[#cbd5e1] mb-2">
+                <label htmlFor="cot-nombre" className="block text-sm font-medium text-[#ecf0f6] mb-2">
                   Nombre o empresa
                 </label>
                 <input
                   id="cot-nombre"
                   value={nombre}
                   onChange={(e) => setNombre(e.target.value)}
-                  className="w-full py-3 px-4 bg-[#0c0f14] border border-[#94a3b8]/25 rounded-lg text-white placeholder:text-[#64748b] focus:outline-none focus:ring-2 focus:ring-[#c62828]/60"
+                  className="w-full py-3 px-4 bg-[#0c0f14] border border-[#cfd8e4]/35 rounded-lg text-white placeholder:text-[#b0bcc9] focus:outline-none focus:ring-2 focus:ring-[#c62828]/60"
                   placeholder="Opcional"
                 />
               </div>
 
               <div>
-                <label htmlFor="cot-tipo" className="block text-sm font-medium text-[#cbd5e1] mb-2">
+                <label htmlFor="cot-tipo" className="block text-sm font-medium text-[#ecf0f6] mb-2">
                   Tipo de obra
                 </label>
                 <select
                   id="cot-tipo"
                   value={tipoObra}
                   onChange={(e) => setTipoObra(e.target.value)}
-                  className="w-full py-3 px-4 bg-[#0c0f14] border border-[#94a3b8]/25 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#c62828]/60"
+                  className="w-full py-3 px-4 bg-[#0c0f14] border border-[#cfd8e4]/35 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#c62828]/60"
                 >
                   <option value="residencial">Residencial</option>
                   <option value="comercial">Comercial / industrial</option>
@@ -190,14 +190,14 @@ export function CotizacionModal({ isOpen, onClose }: CotizacionModalProps) {
               </div>
 
               <div>
-                <label htmlFor="cot-res" className="block text-sm font-medium text-[#cbd5e1] mb-2">
+                <label htmlFor="cot-res" className="block text-sm font-medium text-[#ecf0f6] mb-2">
                   Resistencia requerida
                 </label>
                 <select
                   id="cot-res"
                   value={resistencia}
                   onChange={(e) => setResistencia(e.target.value)}
-                  className="w-full py-3 px-4 bg-[#0c0f14] border border-[#94a3b8]/25 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#c62828]/60"
+                  className="w-full py-3 px-4 bg-[#0c0f14] border border-[#cfd8e4]/35 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#c62828]/60"
                 >
                   {RESISTENCIA_OPCIONES.map((o) => (
                     <option key={o.value} value={o.value}>
@@ -208,14 +208,14 @@ export function CotizacionModal({ isOpen, onClose }: CotizacionModalProps) {
               </div>
 
               <div>
-                <label htmlFor="cot-dist" className="block text-sm font-medium text-[#cbd5e1] mb-2">
+                <label htmlFor="cot-dist" className="block text-sm font-medium text-[#ecf0f6] mb-2">
                   Distancia (planta / entrega)
                 </label>
                 <select
                   id="cot-dist"
                   value={distancia}
                   onChange={(e) => setDistancia(e.target.value)}
-                  className="w-full py-3 px-4 bg-[#0c0f14] border border-[#94a3b8]/25 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#c62828]/60"
+                  className="w-full py-3 px-4 bg-[#0c0f14] border border-[#cfd8e4]/35 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#c62828]/60"
                 >
                   {DISTANCIA_OPCIONES.map((o) => (
                     <option key={o.value} value={o.value}>
@@ -226,7 +226,7 @@ export function CotizacionModal({ isOpen, onClose }: CotizacionModalProps) {
               </div>
 
               <div>
-                <label htmlFor="cot-vol" className="block text-sm font-medium text-[#cbd5e1] mb-2">
+                <label htmlFor="cot-vol" className="block text-sm font-medium text-[#ecf0f6] mb-2">
                   Volumen estimado (m³)
                 </label>
                 <input
@@ -234,13 +234,13 @@ export function CotizacionModal({ isOpen, onClose }: CotizacionModalProps) {
                   inputMode="decimal"
                   value={volumen}
                   onChange={(e) => setVolumen(e.target.value)}
-                  className="w-full py-3 px-4 bg-[#0c0f14] border border-[#94a3b8]/25 rounded-lg text-white placeholder:text-[#64748b] focus:outline-none focus:ring-2 focus:ring-[#c62828]/60"
+                  className="w-full py-3 px-4 bg-[#0c0f14] border border-[#cfd8e4]/35 rounded-lg text-white placeholder:text-[#b0bcc9] focus:outline-none focus:ring-2 focus:ring-[#c62828]/60"
                   placeholder="Ej. 12"
                 />
               </div>
 
               <div>
-                <label htmlFor="cot-fecha" className="block text-sm font-medium text-[#cbd5e1] mb-2">
+                <label htmlFor="cot-fecha" className="block text-sm font-medium text-[#ecf0f6] mb-2">
                   Fecha tentativa
                 </label>
                 <DateFieldCalendar
@@ -253,7 +253,7 @@ export function CotizacionModal({ isOpen, onClose }: CotizacionModalProps) {
               </div>
 
               <div>
-                <label htmlFor="cot-com" className="block text-sm font-medium text-[#cbd5e1] mb-2">
+                <label htmlFor="cot-com" className="block text-sm font-medium text-[#ecf0f6] mb-2">
                   Comentarios
                 </label>
                 <textarea
@@ -261,18 +261,18 @@ export function CotizacionModal({ isOpen, onClose }: CotizacionModalProps) {
                   rows={3}
                   value={comentarios}
                   onChange={(e) => setComentarios(e.target.value)}
-                  className="w-full py-3 px-4 bg-[#0c0f14] border border-[#94a3b8]/25 rounded-lg text-white placeholder:text-[#64748b] focus:outline-none focus:ring-2 focus:ring-[#c62828]/60 resize-none"
+                  className="w-full py-3 px-4 bg-[#0c0f14] border border-[#cfd8e4]/35 rounded-lg text-white placeholder:text-[#b0bcc9] focus:outline-none focus:ring-2 focus:ring-[#c62828]/60 resize-none"
                   placeholder="Acceso a obra, horario preferido…"
                 />
               </div>
             </div>
 
-            <label className="mt-6 flex cursor-pointer items-start gap-3 rounded-lg border border-[#94a3b8]/20 bg-[#0c0f14]/80 p-4 text-left text-sm text-[#cbd5e1]">
+            <label className="mt-6 flex cursor-pointer items-start gap-3 rounded-lg border border-[#cfd8e4]/20 bg-[#0c0f14]/80 p-4 text-left text-sm text-[#ecf0f6]">
               <input
                 type="checkbox"
                 checked={autorizoDatos}
                 onChange={(e) => setAutorizoDatos(e.target.checked)}
-                className="mt-1 h-4 w-4 shrink-0 rounded border-[#94a3b8]/50 text-[#25D366] focus:ring-[#25D366]"
+                className="mt-1 h-4 w-4 shrink-0 rounded border-[#b8c4d8]/55 text-[#25D366] focus:ring-[#25D366]"
               />
               <span>
                 Autorizo el uso de mis datos para que Concretos Tepexi me contacte con la cotización.
@@ -283,7 +283,7 @@ export function CotizacionModal({ isOpen, onClose }: CotizacionModalProps) {
               <button
                 type="button"
                 onClick={cerrarModal}
-                className="flex-1 py-3 rounded-lg border border-[#94a3b8]/35 text-[#cbd5e1] hover:bg-white/5 transition-colors"
+                className="flex-1 py-3 rounded-lg border border-[#cfd8e4]/35 text-[#ecf0f6] hover:bg-white/5 transition-colors"
               >
                 Cancelar
               </button>

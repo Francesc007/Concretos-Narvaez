@@ -13,4 +13,10 @@ export const CONFIG = {
   /** Mensaje predeterminado para el botón flotante de WhatsApp */
   whatsappDefaultMessage:
     "Hola Concretos Tepexi, me interesa información sobre concreto premezclado y una cotización para mi proyecto. ¿Me pueden apoyar?",
+  /** Correo institucional (contacto ARCO / aviso de privacidad) */
+  contactEmail: "concretos.narvaez@gmail.com",
+  /** Operación declarada para avisos simplificados (ajustar a domicilio fiscal si aplica) */
+  companyAddressShort: "Tepeji del Río, Estado de Hidalgo, México",
+  /** Razón social o denominación utilizada en el sitio público */
+  companyLegalName: "CONCRETOS TEPEXI",
 };

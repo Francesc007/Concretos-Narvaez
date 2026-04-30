@@ -20,7 +20,7 @@ export function Cotizacion({ onCotizadorClick, onAgendaVisitaClick }: Cotizacion
           <h2 className="font-display text-4xl md:text-5xl font-bold text-white mb-4 tracking-wide">
             Cotización en minutos
           </h2>
-          <p className="text-[#94a3b8] max-w-2xl mx-auto mb-10 leading-relaxed">
+          <p className="text-[#d8e3ee] max-w-2xl mx-auto mb-10 leading-relaxed">
             Compártenos algunos datos para tu proyecto en nuestro Cotizador Automático, te encantará la
             experiencia.
           </p>
@@ -34,7 +34,7 @@ export function Cotizacion({ onCotizadorClick, onAgendaVisitaClick }: Cotizacion
             Cotizador Automático
           </button>
 
-          <p className="mt-8 mb-8 text-sm sm:text-base text-[#cbd5e1] max-w-xl mx-auto leading-relaxed">
+          <p className="mt-8 mb-8 text-sm sm:text-base text-[#ecf0f6] max-w-xl mx-auto leading-relaxed">
             También puedes visitarnos:{" "}
             <span className="text-white font-medium">Concretos Tepexi</span> | Tepeji del Río, Hidalgo.
           </p>
@@ -42,9 +42,9 @@ export function Cotizacion({ onCotizadorClick, onAgendaVisitaClick }: Cotizacion
           <button
             type="button"
             onClick={onAgendaVisitaClick}
-            className="font-display inline-flex w-full max-w-md mx-auto items-center justify-center gap-2 px-8 py-4 bg-[#141922] hover:bg-[#1c2433] text-white font-semibold rounded-lg border border-[#94a3b8]/25 transition-all uppercase tracking-wide"
+            className="font-display inline-flex w-full max-w-md mx-auto items-center justify-center gap-2 px-8 py-4 bg-[#141922] hover:bg-[#1c2433] text-white font-semibold rounded-lg border border-[#cfd8e2]/35 transition-all uppercase tracking-wide"
           >
-            <Calendar size={22} className="shrink-0 text-[#94a3b8]" aria-hidden />
+            <Calendar size={22} className="shrink-0 text-[#d8e3ee]" aria-hidden />
             Agenda una visita
           </button>
         </motion.div>

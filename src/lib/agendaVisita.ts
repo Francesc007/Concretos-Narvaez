@@ -7,6 +7,11 @@ import { addDays, format } from "date-fns";
 
 export const DURACION_VISITA_MIN = 60;
 
+/** Valores exactos para la columna "Visita" en Sheets y el título del evento en Calendar. */
+export type TipoVisitaAgendada = "Obra" | "Planta";
+
+export const TIPOS_VISITA_AGENDADA = ["Obra", "Planta"] as const satisfies readonly TipoVisitaAgendada[];
+
 /** Lista de "HH:mm" disponibles para la fecha local yyyy-MM-dd */
 export function getHorariosVisita(fechaYmd: string): string[] {
   const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(fechaYmd.trim());
