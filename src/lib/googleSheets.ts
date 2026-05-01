@@ -5,11 +5,7 @@ import { JWT } from "google-auth-library";
 import type { GoogleSpreadsheetRow, GoogleSpreadsheetWorksheet } from "google-spreadsheet";
 import { GoogleSpreadsheet } from "google-spreadsheet";
 import type { TipoVisitaAgendada } from "@/lib/agendaVisita";
-import {
-  buildCotizacionConfigFromRows,
-  cotizacionTieneAlgunPrecio,
-  parseResistenciaKg,
-} from "@/lib/cotizacion";
+import { mergePreciosRowsPreferColumnasAb, parseResistenciaKg } from "@/lib/cotizacion";
 
 const SCOPES = [
   "https://www.googleapis.com/auth/spreadsheets",
@@ -109,16 +105,39 @@ function extractPrecioM3Flexible(row: GoogleSpreadsheetRow): number {
   return parseFloat(String(row.get("Precio_m3" as never) ?? "0").replace(",", ".")) || 0;
 }
 
+/** Precio en celda: número de Sheets, $, separadores de miles o coma decimal europea (p. ej. 1.234,56). */
+function valorCeldaANum(raw: unknown): number {
+  if (typeof raw === "number" && Number.isFinite(raw)) return raw;
+  let s = String(raw ?? "").trim();
+  if (s === "") return 0;
+  s = s.replace(/[$\s\u00a0]/g, "");
+  const lastComma = s.lastIndexOf(",");
+  const lastDot = s.lastIndexOf(".");
+  if (lastComma > lastDot) {
+    s = s.replace(/\./g, "").replace(",", ".");
+  } else {
+    s = s.replace(/,/g, "");
+  }
+  const x = Number.parseFloat(s);
+  return Number.isFinite(x) ? x : 0;
+}
+
+function valorCeldaATextoResistencia(raw: unknown): string {
+  if (typeof raw === "number" && Number.isFinite(raw)) return String(raw);
+  return String(raw ?? "").trim();
+}
+
+/** Lee A:B (precio en B). Columna A/B tiene prioridad al fusionarse con las filas con encabezado. */
 async function fetchPreciosDesdeColumnasAB(sheet: GoogleSpreadsheetWorksheet): Promise<PrecioRow[]> {
-  const maxR = Math.min(sheet.rowCount || 60, 200);
-  if (maxR < 2) return [];
-  await sheet.loadCells(`A2:B${maxR}`);
+  const sheetRows = sheet.rowCount || 120;
+  const maxR = Math.min(Math.max(sheetRows, 24), 400);
+  await sheet.loadCells(`A1:B${maxR}`);
   const out: PrecioRow[] = [];
-  for (let r = 2; r <= maxR; r++) {
+  for (let r = 1; r <= maxR; r++) {
     const a = sheet.getCellByA1(`A${r}`);
     const b = sheet.getCellByA1(`B${r}`);
-    const resistenciaStr = String(a?.value ?? "").trim();
-    const precio = parseFloat(String(b?.value ?? "").replace(",", ".")) || 0;
+    const resistenciaStr = valorCeldaATextoResistencia(a?.value ?? "");
+    const precio = valorCeldaANum(b?.value ?? "");
     if (precio <= 0) continue;
     if (parseResistenciaKg(resistenciaStr) == null) continue;
     out.push({
@@ -132,7 +151,12 @@ async function fetchPreciosDesdeColumnasAB(sheet: GoogleSpreadsheetWorksheet): P
 }
 
 export async function fetchPreciosRows(): Promise<PrecioRow[]> {
-  const doc = await getSpreadsheetDoc();
+  /* Documento nuevo por petición: así los precios reflejan cambios en Sheets de inmediato
+   * (el singleton de getSpreadsheetDoc() podía dejar filas/celdas desactualizadas). */
+  const sheetId = process.env.GOOGLE_SHEET_ID;
+  if (!sheetId) throw new Error("GOOGLE_SHEET_ID no está definida");
+  const doc = new GoogleSpreadsheet(sheetId, getGoogleServiceAccountJwt());
+  await doc.loadInfo();
   const sheet = doc.sheetsByTitle["Precios"];
   if (!sheet) throw new Error('No existe la hoja "Precios"');
   const rows = await sheet.getRows();
@@ -149,11 +173,8 @@ export async function fetchPreciosRows(): Promise<PrecioRow[]> {
     };
   });
 
-  if (!cotizacionTieneAlgunPrecio(buildCotizacionConfigFromRows(mapped))) {
-    const desdeAb = await fetchPreciosDesdeColumnasAB(sheet);
-    if (desdeAb.length > 0) return desdeAb;
-  }
-  return mapped;
+  const desdeAb = await fetchPreciosDesdeColumnasAB(sheet);
+  return mergePreciosRowsPreferColumnasAb(mapped, desdeAb);
 }
 
 /** Lee capacidad m³/hora: celda B1 (A1 = Capacidad_Maxima_Hora, B1 = 30). */
@@ -292,7 +313,7 @@ export interface ReservaPayload {
   Volumen: number;
   /** "Tiro Directo" | "Bombeo" — columna Vaciado en Agenda */
   Vaciado: string;
-  /** 150, 250, 350 o 500 — columna "Resistencia f'c" en Agenda */
+  /** kg/cm² admitidos (catálogo cotizador / columna Agenda "Resistencia f'c") */
   "Resistencia f'c": number;
   /** Total estimado de la cotización (MXN) — columna Cotización */
   Cotización: number;
@@ -311,20 +332,45 @@ export interface VisitaAgendadaSheetPayload {
   Visita: TipoVisitaAgendada;
 }
 
-/** Fila en la pestaña "Visitas Agendadas" (encabezados: Nombre, Empresa, Correo, Teléfono, Fecha, Horario, Visita). */
+/** Nombre canónico y variante frecuente en hojas ya creadas. */
+function getSheetVisitasAgendadas(doc: GoogleSpreadsheet): GoogleSpreadsheetWorksheet | undefined {
+  return doc.sheetsByTitle["Visitas Agendadas"] ?? doc.sheetsByTitle["Visitas Agendades"];
+}
+
+const VISITAS_AGENDADAS_HEADERS = ["Nombre", "Empresa", "Correo", "WA - Teléfono", "Fecha", "Horario", "Visita"] as const;
+
+async function assertVisitasAgendadasHeaders(sheet: GoogleSpreadsheetWorksheet): Promise<void> {
+  await sheet.loadHeaderRow();
+  const missing = VISITAS_AGENDADAS_HEADERS.filter((header) => !sheet.headerValues.includes(header));
+  if (missing.length > 0) {
+    throw new Error(`Faltan encabezados en "Visitas Agendadas": ${missing.join(", ")}`);
+  }
+}
+
+/**
+ * Inserta una fila nueva al final de la pestaña «Visitas Agendadas».
+ * Siempre usa {@link GoogleSpreadsheetWorksheet.addRow} con insert=true para insertar filas nuevas,
+ * no sobrescribir el rango detectado por Google Sheets.
+ *
+ * Las llaves del objeto deben coincidir **carácter por carácter** con los encabezados del Sheet:
+ * Nombre, Empresa, Correo, WA - Teléfono, Fecha, Horario, Visita.
+ */
 export async function appendVisitaAgendadaRow(payload: VisitaAgendadaSheetPayload): Promise<void> {
   const doc = await getSpreadsheetDoc();
-  const sheet = doc.sheetsByTitle["Visitas Agendadas"];
-  if (!sheet) throw new Error('No existe la hoja "Visitas Agendadas"');
+  const sheet = getSheetVisitasAgendadas(doc);
+  if (!sheet) {
+    throw new Error('No existe la hoja "Visitas Agendadas" ni "Visitas Agendades"');
+  }
+  await assertVisitasAgendadasHeaders(sheet);
   await sheet.addRow({
     Nombre: payload.Nombre,
     Empresa: payload.Empresa,
     Correo: payload.Correo,
-    Teléfono: payload.Telefono,
+    "WA - Teléfono": payload.Telefono,
     Fecha: normalizeFecha(payload.Fecha),
     Horario: normalizeHora(payload.Horario),
     Visita: payload.Visita,
-  });
+  }, { insert: true });
 }
 
 export async function appendReservaAgenda(payload: ReservaPayload): Promise<void> {

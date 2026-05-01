@@ -6,6 +6,7 @@ import {
   labelResistenciaKg,
   precioM3ParaResistencia,
   type ResistenciaKg,
+  type TipoBombaCotizador,
 } from "@/lib/cotizacion";
 
 export interface CotizadorProps {
@@ -16,6 +17,8 @@ export interface CotizadorProps {
   error: string | null;
   tipoVaciado: "tiro_directo" | "bombeo";
   setTipoVaciado: (v: "tiro_directo" | "bombeo") => void;
+  tipoBomba: TipoBombaCotizador;
+  setTipoBomba: (v: TipoBombaCotizador) => void;
   volumen: string;
   setVolumen: (v: string) => void;
   totalEstimado: number;
@@ -33,6 +36,8 @@ export function Cotizador({
   error,
   tipoVaciado,
   setTipoVaciado,
+  tipoBomba,
+  setTipoBomba,
   volumen,
   setVolumen,
   totalEstimado,
@@ -95,6 +100,35 @@ export function Cotizador({
             {labelTipoSheet("bombeo")}
           </button>
         </div>
+        {tipoVaciado === "bombeo" && (
+          <div className="mt-4 space-y-2">
+            <p className="text-sm font-medium text-[#ecf0f6]">Tipo de bombeo</p>
+            <div className="flex flex-col gap-2 sm:flex-row sm:gap-3">
+              <button
+                type="button"
+                onClick={() => setTipoBomba("estacionaria")}
+                className={`flex-1 py-2.5 rounded-lg border px-3 text-sm font-semibold transition-colors ${
+                  tipoBomba === "estacionaria"
+                    ? "border-[#c62828] bg-[#c62828]/20 text-white"
+                    : "border-[#cfd8e4]/30 text-[#ecf0f6] hover:bg-white/5"
+                }`}
+              >
+                Bomba Estacionaria
+              </button>
+              <button
+                type="button"
+                onClick={() => setTipoBomba("pluma")}
+                className={`flex-1 py-2.5 rounded-lg border px-3 text-sm font-semibold transition-colors ${
+                  tipoBomba === "pluma"
+                    ? "border-[#c62828] bg-[#c62828]/20 text-white"
+                    : "border-[#cfd8e4]/30 text-[#ecf0f6] hover:bg-white/5"
+                }`}
+              >
+                Bomba Pluma
+              </button>
+            </div>
+          </div>
+        )}
         <p className="text-xs text-[#b0bcc9] mt-2">
           Bombeo con volumen menor a 15 m³: se cobra $15,000 MXN.
         </p>
@@ -118,6 +152,14 @@ export function Cotizador({
             {vol.toLocaleString("es-MX", { maximumFractionDigits: 2 })} m³ ×{" "}
             {precioM3.toLocaleString("es-MX", { minimumFractionDigits: 2 })} ={" "}
             <span className="text-white">${subtotalVol.toLocaleString("es-MX", { minimumFractionDigits: 2 })}</span>
+          </p>
+        )}
+        {tipoVaciado === "bombeo" && vol > 0 && (
+          <p className="text-sm text-[#d8e3ee]">
+            Tipo de bombeo:{" "}
+            <span className="text-[#ecf0f6]">
+              {tipoBomba === "pluma" ? "Bomba Pluma" : "Bomba Estacionaria"}
+            </span>
           </p>
         )}
         {bombeoExtra > 0 && (

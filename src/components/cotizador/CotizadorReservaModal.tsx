@@ -6,11 +6,15 @@ import { X, ChevronLeft, ChevronRight, CheckCircle2 } from "lucide-react";
 import { CONFIG } from "@/config";
 import { apiUrl, fetchApiJson } from "@/lib/api";
 import {
+  RESISTENCIAS_KG,
   calcularTotalCotizacion,
   cotizacionTieneAlgunPrecio,
   labelResistenciaKg,
+  labelVaciadoCliente,
   precioM3ParaResistencia,
+  vaciadoApiDesdeSeleccion,
   type ResistenciaKg,
+  type TipoBombaCotizador,
 } from "@/lib/cotizacion";
 import type { CotizacionPreciosConfig, PrecioRow } from "@/types/sheets";
 import { Cotizador } from "./Cotizador";
@@ -38,6 +42,7 @@ export function CotizadorReservaModal({ isOpen, onClose, volumenInicialM3 = null
 
   const [resistenciaKg, setResistenciaKg] = useState<ResistenciaKg>(250);
   const [tipoVaciado, setTipoVaciado] = useState<"tiro_directo" | "bombeo">("tiro_directo");
+  const [tipoBomba, setTipoBomba] = useState<TipoBombaCotizador>("estacionaria");
   const [volumen, setVolumen] = useState("");
 
   const [nombre, setNombre] = useState("");
@@ -75,7 +80,7 @@ export function CotizadorReservaModal({ isOpen, onClose, volumenInicialM3 = null
         setCotizacion(j1.cotizacion);
         if (!cotizacionTieneAlgunPrecio(j1.cotizacion)) {
           setLoadErr(
-            'No se pudo leer precio para 150, 250, 350 o 500 kg/cm². En la hoja "Precios", coloca en la columna A la resistencia y en la B el precio por m³ (o usa encabezados que incluyan "Resistencia" y "Precio" / precio por m³).',
+            `No hay precio en hoja "Precios" para alguna resistencia del catálogo (${RESISTENCIAS_KG.join(", ")} kg/cm²). Coloca en la columna A la resistencia y en la B el precio por m³ (o encabezados con "Resistencia" y precio por m³).`,
           );
         }
         setCapacidadMaximaHora(Number(j2.capacidadMaximaHora) || 30);
@@ -125,6 +130,7 @@ export function CotizadorReservaModal({ isOpen, onClose, volumenInicialM3 = null
     setVolumen("");
     setResistenciaKg(250);
     setTipoVaciado("tiro_directo");
+    setTipoBomba("estacionaria");
     setStep(1);
   }
 
@@ -195,7 +201,7 @@ export function CotizadorReservaModal({ isOpen, onClose, volumenInicialM3 = null
           hora,
           volumen: vol,
           comentarios: comentarios.trim(),
-          vaciado: tipoVaciado,
+          vaciado: vaciadoApiDesdeSeleccion(tipoVaciado, tipoBomba),
           resistenciaKg,
           cotizacionTotal: total,
         }),
@@ -204,7 +210,7 @@ export function CotizadorReservaModal({ isOpen, onClose, volumenInicialM3 = null
       datosWaPendientes.current = {
         total,
         resistencia: labelResistenciaKg(resistenciaKg),
-        vaciado: tipoVaciado === "bombeo" ? "Bombeo" : "Tiro directo",
+        vaciado: labelVaciadoCliente(tipoVaciado, tipoBomba),
         vol,
       };
       setMensajePagoAbierto(true);
@@ -294,6 +300,8 @@ export function CotizadorReservaModal({ isOpen, onClose, volumenInicialM3 = null
                   error={loadErr}
                   tipoVaciado={tipoVaciado}
                   setTipoVaciado={setTipoVaciado}
+                  tipoBomba={tipoBomba}
+                  setTipoBomba={setTipoBomba}
                   volumen={volumen}
                   setVolumen={setVolumen}
                   totalEstimado={totalEstimado}

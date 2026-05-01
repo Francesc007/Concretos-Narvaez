@@ -73,18 +73,91 @@ export function DateFieldCalendar({
 
   useLayoutEffect(() => {
     if (!open || !triggerRef.current) return;
-    const update = () => {
-      const r = triggerRef.current!.getBoundingClientRect();
-      const panelW = 320;
-      const left = Math.max(8, Math.min(r.left, window.innerWidth - panelW - 8));
-      setPanelPos({ top: r.bottom + 8, left });
+
+    const vv = typeof window !== "undefined" ? window.visualViewport : null;
+
+    let queued = false;
+    const scheduleUpdate = () => {
+      if (queued) return;
+      queued = true;
+      requestAnimationFrame(() => {
+        queued = false;
+        update();
+      });
     };
+
+    const update = () => {
+      const trigger = triggerRef.current;
+      const panel = panelRef.current;
+      if (!trigger) return;
+
+      const vHeight = vv?.height ?? window.innerHeight;
+      const vWidth = vv?.width ?? window.innerWidth;
+      const vTop = vv?.offsetTop ?? 0;
+      const vLeft = vv?.offsetLeft ?? 0;
+      const viewTop = vTop;
+      const viewBottom = vTop + vHeight;
+      const viewLeft = vLeft;
+      const viewRight = vLeft + vWidth;
+
+      const r = trigger.getBoundingClientRect();
+      const margin = 8;
+      const narrow = vWidth < 540;
+
+      const pwMeasured =
+        panel?.offsetWidth ??
+        Math.max(0, Math.min(vWidth - margin * 2, 320));
+
+      /** offsetHeight ya respeta max-height CSS del panel */
+      const phMeasured = panel?.offsetHeight ?? Math.min(vHeight - margin * 2, 360);
+
+      let left: number;
+      if (narrow) {
+        left = viewLeft + (vWidth - pwMeasured) / 2;
+        left = Math.max(viewLeft + margin, Math.min(left, viewRight - pwMeasured - margin));
+      } else {
+        left = Math.max(viewLeft + margin, Math.min(r.left, viewRight - pwMeasured - margin));
+      }
+
+      const spaceBelow = viewBottom - r.bottom - margin;
+      const spaceAbove = r.top - viewTop - margin;
+
+      let top = r.bottom + margin;
+      const fitsBelow = phMeasured <= spaceBelow + 0.5;
+      const fitsAbove = phMeasured <= spaceAbove + 0.5;
+
+      if (!fitsBelow && fitsAbove) {
+        top = Math.max(viewTop + margin, r.top - phMeasured - margin);
+      }
+      // Si no cabe arriba ni abajo sin recortar, el panel lleva max-h + overflow-y
+
+      top = Math.max(viewTop + margin, Math.min(top, viewBottom - phMeasured - margin));
+
+      setPanelPos({ top, left });
+    };
+
     update();
-    window.addEventListener("scroll", update, true);
-    window.addEventListener("resize", update);
+    const raf = requestAnimationFrame(update);
+
+    window.addEventListener("scroll", scheduleUpdate, true);
+    window.addEventListener("resize", scheduleUpdate);
+    vv?.addEventListener("resize", scheduleUpdate);
+    vv?.addEventListener("scroll", scheduleUpdate);
+
+    let ro: ResizeObserver | undefined;
+    const panelNow = panelRef.current;
+    if (panelNow && typeof ResizeObserver !== "undefined") {
+      ro = new ResizeObserver(scheduleUpdate);
+      ro.observe(panelNow);
+    }
+
     return () => {
-      window.removeEventListener("scroll", update, true);
-      window.removeEventListener("resize", update);
+      cancelAnimationFrame(raf);
+      window.removeEventListener("scroll", scheduleUpdate, true);
+      window.removeEventListener("resize", scheduleUpdate);
+      vv?.removeEventListener("resize", scheduleUpdate);
+      vv?.removeEventListener("scroll", scheduleUpdate);
+      ro?.disconnect();
     };
   }, [open]);
 
@@ -125,7 +198,7 @@ export function DateFieldCalendar({
         createPortal(
           <div
             ref={panelRef}
-            className="tepexi-rdp fixed z-[10000] w-[min(100vw-1rem,20rem)] rounded-xl border border-[#cfd8e4]/25 bg-[#141922] p-3 shadow-2xl"
+            className="tepexi-rdp fixed z-[10000] w-[min(100vw-1rem,20rem)] max-h-[calc(92dvh-24px-env(safe-area-inset-bottom,0px))] overflow-y-auto overscroll-contain rounded-xl border border-[#cfd8e4]/25 bg-[#141922] p-3 shadow-2xl"
             style={{ top: panelPos.top, left: panelPos.left }}
             role="dialog"
             aria-label="Calendario"

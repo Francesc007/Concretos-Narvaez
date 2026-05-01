@@ -5,7 +5,7 @@ export interface PrecioRow {
   Tipo_Vaciado: string;
 }
 
-/** Precios por m³ leídos de la hoja Precios (columna B / campo Precio_m3 por fila). */
+/** Precios por m³ leídos de la hoja Precios (columna B / campo Precio_m3 por fila). Claves: kg/cm² como string ("100", "150", …). */
 export interface CotizacionPreciosConfig {
-  preciosPorResistencia: Record<"150" | "250" | "350" | "500", number>;
+  preciosPorResistencia: Record<string, number>;
 }

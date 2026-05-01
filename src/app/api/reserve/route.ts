@@ -24,9 +24,16 @@ interface Body {
   cotizacionTotal?: number;
 }
 
-function labelVaciadoAgenda(v: string): "Tiro Directo" | "Bombeo" | null {
-  const t = v.trim().toLowerCase();
-  if (t === "tiro_directo" || t === "tiro directo") return "Tiro Directo";
+function labelVaciadoAgenda(v: string): string | null {
+  const raw = v.trim();
+  const t = raw
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/\u0300/g, "")
+    .replace(/[\s_]+/g, "_");
+  if (t === "tiro_directo" || t === "tirodirecto") return "Tiro Directo";
+  if (t === "bombeo_pluma" || t === "bombeo-pluma") return "Bombeo · Bomba Pluma";
+  if (t === "bombeo_estacionaria" || t === "bombeoestacionaria") return "Bombeo · Bomba Estacionaria";
   if (t === "bombeo") return "Bombeo";
   return null;
 }
@@ -62,10 +69,18 @@ export async function POST(request: Request) {
     return jsonWithCors({ error: "Volumen debe ser mayor a 0" }, 400, METHODS);
   }
   if (!vaciadoLabel) {
-    return jsonWithCors({ error: "Vaciado debe ser tiro_directo o bombeo" }, 400, METHODS);
+    return jsonWithCors(
+      { error: "Vaciado inválido (usa tiro_directo, bombeo, bombeo_estacionaria o bombeo_pluma)" },
+      400,
+      METHODS,
+    );
   }
   if (!Number.isFinite(resistenciaNum) || !RESISTENCIAS_KG.includes(resistenciaNum as ResistenciaKg)) {
-    return jsonWithCors({ error: "Resistencia debe ser 150, 250, 350 o 500" }, 400, METHODS);
+    return jsonWithCors(
+      { error: `Resistencia debe ser una de: ${RESISTENCIAS_KG.join(", ")} kg/cm²` },
+      400,
+      METHODS,
+    );
   }
   if (!Number.isFinite(cotizacionTotal) || cotizacionTotal < 0) {
     return jsonWithCors({ error: "Cotización total inválida" }, 400, METHODS);

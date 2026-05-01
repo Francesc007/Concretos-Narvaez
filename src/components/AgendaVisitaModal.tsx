@@ -122,7 +122,7 @@ export function AgendaVisitaModal({ isOpen, onClose }: AgendaVisitaModalProps) {
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
+        <div className="fixed inset-0 z-[100] flex items-start justify-center overflow-y-auto overscroll-contain px-4 py-8 pb-[max(2rem,calc(env(safe-area-inset-bottom,0px)+1rem))] sm:items-center sm:px-6 sm:py-6">
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -217,6 +217,7 @@ export function AgendaVisitaModal({ isOpen, onClose }: AgendaVisitaModalProps) {
                 </label>
                 <input
                   id="av-tel"
+                  name="telefono"
                   type="tel"
                   inputMode="tel"
                   value={telefono}

@@ -2,6 +2,8 @@ import { buildCotizacionConfigFromRows } from "@/lib/cotizacion";
 import { fetchPreciosRows } from "@/lib/googleSheets";
 import { emptyWithCors, jsonWithCors } from "@/lib/api-cors";
 
+export const dynamic = "force-dynamic";
+
 const METHODS = "GET, OPTIONS";
 
 export async function OPTIONS() {

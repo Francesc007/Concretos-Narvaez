@@ -46,10 +46,14 @@ export function Footer() {
                   <Mail size={15} className="shrink-0 opacity-90" aria-hidden />
                   <span>{CONFIG.contactEmail}</span>
                 </a>
-                <p className="flex items-center justify-center md:justify-start gap-2 text-sm text-[#eae9e8]">
-                  <Phone size={15} className="shrink-0 opacity-90" aria-hidden />
-                  <span>55 4260 0590</span>
-                </p>
+                <div className="flex items-start justify-center md:justify-start gap-2 text-sm text-[#eae9e8]">
+                  <Phone size={15} className="shrink-0 opacity-90 mt-0.5" aria-hidden />
+                  <ul className="text-left space-y-1 list-none">
+                    <li>55 4260 0590</li>
+                    <li>773 158 5835</li>
+                    <li>55 1555 2097</li>
+                  </ul>
+                </div>
               </address>
             </div>
           </motion.div>
@@ -68,17 +72,19 @@ export function Footer() {
               href={CONFIG.googleMapsUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center justify-center gap-2 text-white hover:text-[#fecaca] transition-colors mb-2"
+              className="flex items-start justify-center gap-2 text-white hover:text-[#fecaca] transition-colors mb-2"
               aria-label="Abrir ubicación en Google Maps"
             >
-              <MapPin size={18} className="shrink-0" aria-hidden />
-              <span>Haz clic aquí</span>
+              <MapPin size={18} className="shrink-0 mt-0.5" aria-hidden />
+              <span className="text-left max-w-md">
+                Carretera Tepeji-San Ignacio Nopala km6, San Ignacio Nopala, 42890, Hgo.
+              </span>
             </a>
-            <div className="flex items-start justify-center gap-2 text-[#d6d3d1] text-sm">
+            <div className="flex items-start justify-center gap-2 text-[#d6d3d1] text-sm mt-5">
               <Clock size={18} className="shrink-0 mt-0.5" aria-hidden />
               <div className="text-center">
-                <p>L-V 8:00 – 17:00 h</p>
-                <p>S 8:00 – 13:00 h</p>
+                <p>Lun - Vie 8:00 – 17:00 h</p>
+                <p>Sab 8:00 – 13:00 h</p>
               </div>
             </div>
           </motion.div>
