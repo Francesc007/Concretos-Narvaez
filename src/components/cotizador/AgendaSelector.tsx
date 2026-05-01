@@ -3,22 +3,18 @@
 import { useEffect, useState } from "react";
 import { apiUrl, fetchApiJson } from "@/lib/api";
 import { DateFieldCalendar, todayYmdLocal } from "@/components/ui/DateFieldCalendar";
+import {
+  buildAgendaHoursForDate,
+  isAgendaDateAllowed,
+  nextAllowedAgendaDateYmd,
+  validateAgendaSlot,
+} from "@/lib/agendaRules";
 
 const OBRA_OPTIONS = [
   { value: "residencial", label: "Residencial" },
   { value: "comercial", label: "Comercial / industrial" },
   { value: "infraestructura", label: "Infraestructura / civil" },
 ];
-
-function buildHoras(): string[] {
-  const out: string[] = [];
-  for (let h = 7; h <= 17; h++) {
-    out.push(`${String(h).padStart(2, "0")}:00`);
-  }
-  return out;
-}
-
-const HORAS = buildHoras();
 
 export interface AgendaSelectorProps {
   nombre: string;
@@ -67,9 +63,30 @@ export function AgendaSelector({
     loading: boolean;
     error: string | null;
   }>({ usadoM3: 0, disponibleM3: 0, loading: true, error: null });
+  const minAgendaDate = nextAllowedAgendaDateYmd();
+  const horasDisponibles = buildAgendaHoursForDate(fecha);
+  const horarioError = validateAgendaSlot(fecha, hora);
+
+  useEffect(() => {
+    const nextDate = nextAllowedAgendaDateYmd();
+    if (!isAgendaDateAllowed(fecha)) {
+      setFecha(nextDate);
+      return;
+    }
+
+    const horas = buildAgendaHoursForDate(fecha);
+    if (horas.length > 0 && !horas.includes(hora)) {
+      setHora(horas[0]);
+    }
+  }, [fecha, hora, setFecha, setHora]);
 
   useEffect(() => {
     if (!fecha || !hora) return;
+    if (horarioError) {
+      setDisp({ usadoM3: 0, disponibleM3: 0, loading: false, error: horarioError });
+      return;
+    }
+
     let cancelled = false;
     const t = setTimeout(async () => {
       setDisp((d) => ({ ...d, loading: true, error: null }));
@@ -101,10 +118,10 @@ export function AgendaSelector({
       cancelled = true;
       clearTimeout(t);
     };
-  }, [fecha, hora]);
+  }, [fecha, hora, horarioError]);
 
   const volNum = parseFloat(volumen.replace(",", ".")) || 0;
-  const cupoOk = volNum > 0 && volNum <= disp.disponibleM3 && !disp.loading && !disp.error;
+  const cupoOk = volNum > 0 && volNum <= disp.disponibleM3 && !disp.loading && !disp.error && !horarioError;
 
   return (
     <div className="space-y-5">
@@ -112,16 +129,22 @@ export function AgendaSelector({
 
       <div className="grid sm:grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium text-[#ecf0f6] mb-2">Nombre</label>
+          <label htmlFor="agenda-nombre" className="block text-sm font-medium text-[#ecf0f6] mb-2">
+            Nombre
+          </label>
           <input
+            id="agenda-nombre"
             value={nombre}
             onChange={(e) => setNombre(e.target.value)}
             className="w-full py-3 px-4 bg-[#0c0f14] border border-[#cfd8e4]/25 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#c62828]/60"
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-[#ecf0f6] mb-2">Empresa</label>
+          <label htmlFor="agenda-empresa" className="block text-sm font-medium text-[#ecf0f6] mb-2">
+            Empresa
+          </label>
           <input
+            id="agenda-empresa"
             value={empresa}
             onChange={(e) => setEmpresa(e.target.value)}
             className="w-full py-3 px-4 bg-[#0c0f14] border border-[#cfd8e4]/25 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#c62828]/60"
@@ -131,8 +154,11 @@ export function AgendaSelector({
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-[#ecf0f6] mb-2">Obra</label>
+        <label htmlFor="agenda-obra" className="block text-sm font-medium text-[#ecf0f6] mb-2">
+          Obra
+        </label>
         <select
+          id="agenda-obra"
           value={obra}
           onChange={(e) => setObra(e.target.value)}
           className="w-full py-3 px-4 bg-[#0c0f14] border border-[#cfd8e4]/25 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#c62828]/60"
@@ -147,33 +173,45 @@ export function AgendaSelector({
 
       <div className="grid sm:grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium text-[#ecf0f6] mb-2">Fecha</label>
+          <label htmlFor="agenda-fecha" className="block text-sm font-medium text-[#ecf0f6] mb-2">
+            Fecha
+          </label>
           <DateFieldCalendar
+            id="agenda-fecha"
             value={fecha}
             onChange={setFecha}
-            minDate={todayYmdLocal()}
+            minDate={minAgendaDate || todayYmdLocal()}
+            disabledDays={(date) => date.getDay() === 0}
             placeholder="Elegir fecha"
           />
+          <p className="mt-1 text-xs text-[#b0bcc9]">Agenda disponible desde 2 días de anticipación. Domingos cerrado.</p>
         </div>
         <div>
-          <label className="block text-sm font-medium text-[#ecf0f6] mb-2">Hora</label>
+          <label htmlFor="agenda-hora" className="block text-sm font-medium text-[#ecf0f6] mb-2">
+            Hora
+          </label>
           <select
+            id="agenda-hora"
             value={hora}
             onChange={(e) => setHora(e.target.value)}
             className="w-full py-3 px-4 bg-[#0c0f14] border border-[#cfd8e4]/25 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#c62828]/60"
           >
-            {HORAS.map((h) => (
+            {horasDisponibles.map((h) => (
               <option key={h} value={h}>
                 {h}
               </option>
             ))}
           </select>
+          <p className="mt-1 text-xs text-[#b0bcc9]">L-V 06:00-16:00 h · Sáb 06:00-12:00 h.</p>
         </div>
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-[#ecf0f6] mb-2">Volumen a reservar (m³)</label>
+        <label htmlFor="agenda-volumen" className="block text-sm font-medium text-[#ecf0f6] mb-2">
+          Volumen a reservar (m³)
+        </label>
         <input
+          id="agenda-volumen"
           inputMode="decimal"
           value={volumen}
           onChange={(e) => setVolumen(e.target.value)}
@@ -199,8 +237,11 @@ export function AgendaSelector({
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-[#ecf0f6] mb-2">Comentarios</label>
+        <label htmlFor="agenda-comentarios" className="block text-sm font-medium text-[#ecf0f6] mb-2">
+          Comentarios
+        </label>
         <textarea
+          id="agenda-comentarios"
           rows={3}
           value={comentarios}
           onChange={(e) => setComentarios(e.target.value)}

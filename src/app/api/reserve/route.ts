@@ -3,10 +3,11 @@ import {
   fetchCapacidadMaximaHora,
   formatTimestampReservaCDMX,
   normalizeHora,
+  semanaIsoDesdeFecha,
   sumarVolumenAgendado,
 } from "@/lib/googleSheets";
-import { RESISTENCIAS_KG, type ResistenciaKg } from "@/lib/cotizacion";
 import { emptyWithCors, jsonWithCors } from "@/lib/api-cors";
+import { validateAgendaSlot } from "@/lib/agendaRules";
 
 const METHODS = "POST, OPTIONS";
 
@@ -22,6 +23,17 @@ interface Body {
   vaciado?: string;
   resistenciaKg?: number;
   cotizacionTotal?: number;
+  ubicacionObra?: string;
+  rutaMaps?: string;
+  zona?: string;
+  distancia?: string;
+  duracion?: string;
+  tipoBomba?: string;
+  metrosTuberia?: number;
+  aditivos?: string;
+  resistenciaRapida?: string;
+  precioM3?: number;
+  desglose?: string;
 }
 
 function labelVaciadoAgenda(v: string): string | null {
@@ -75,9 +87,9 @@ export async function POST(request: Request) {
       METHODS,
     );
   }
-  if (!Number.isFinite(resistenciaNum) || !RESISTENCIAS_KG.includes(resistenciaNum as ResistenciaKg)) {
+  if (!Number.isFinite(resistenciaNum) || resistenciaNum <= 0) {
     return jsonWithCors(
-      { error: `Resistencia debe ser una de: ${RESISTENCIAS_KG.join(", ")} kg/cm²` },
+      { error: 'Resistencia inválida. Usa una resistencia configurada en "Precios Concreto".' },
       400,
       METHODS,
     );
@@ -85,10 +97,14 @@ export async function POST(request: Request) {
   if (!Number.isFinite(cotizacionTotal) || cotizacionTotal < 0) {
     return jsonWithCors({ error: "Cotización total inválida" }, 400, METHODS);
   }
+  const horarioError = validateAgendaSlot(fecha, hora);
+  if (horarioError) {
+    return jsonWithCors({ error: horarioError }, 400, METHODS);
+  }
 
   try {
     const [capacidad, usado] = await Promise.all([
-      fetchCapacidadMaximaHora(),
+      fetchCapacidadMaximaHora().catch(() => 30),
       sumarVolumenAgendado(fecha, hora),
     ]);
     if (usado + volumen > capacidad) {
@@ -118,6 +134,18 @@ export async function POST(request: Request) {
       Estado: "Reservado",
       Timestamp_Reserva: ts,
       Comentarios: comentarios,
+      Semana: semanaIsoDesdeFecha(fecha),
+      UbicacionObra: String(body.ubicacionObra ?? "").trim(),
+      RutaMaps: String(body.rutaMaps ?? "").trim(),
+      Zona: String(body.zona ?? "").trim(),
+      Distancia: String(body.distancia ?? "").trim(),
+      Duracion: String(body.duracion ?? "").trim(),
+      TipoBomba: String(body.tipoBomba ?? "").trim(),
+      MetrosTuberia: Number.isFinite(Number(body.metrosTuberia)) ? Number(body.metrosTuberia) : undefined,
+      Aditivos: String(body.aditivos ?? "").trim(),
+      ResistenciaRapida: String(body.resistenciaRapida ?? "").trim(),
+      PrecioM3: Number.isFinite(Number(body.precioM3)) ? Number(body.precioM3) : undefined,
+      Desglose: String(body.desglose ?? "").trim(),
     });
 
     return jsonWithCors(

@@ -6,17 +6,18 @@ import { X, ChevronLeft, ChevronRight, CheckCircle2 } from "lucide-react";
 import { CONFIG } from "@/config";
 import { apiUrl, fetchApiJson } from "@/lib/api";
 import {
-  RESISTENCIAS_KG,
-  calcularTotalCotizacion,
+  calcularCotizacionDinamica,
   cotizacionTieneAlgunPrecio,
   labelResistenciaKg,
   labelVaciadoCliente,
-  precioM3ParaResistencia,
+  resistenciasCotizacion,
   vaciadoApiDesdeSeleccion,
+  type CotizacionDinamicaResultado,
   type ResistenciaKg,
   type TipoBombaCotizador,
 } from "@/lib/cotizacion";
-import type { CotizacionPreciosConfig, PrecioRow } from "@/types/sheets";
+import type { AditivoCotizacion, CotizacionPreciosConfig, PrecioRow, ResistenciaRapidaDias, ZonaCotizacion } from "@/types/sheets";
+import { buildAgendaHoursForDate, nextAllowedAgendaDateYmd, validateAgendaSlot } from "@/lib/agendaRules";
 import { Cotizador } from "./Cotizador";
 import { AgendaSelector } from "./AgendaSelector";
 
@@ -25,6 +26,17 @@ const OBRA_LABELS: Record<string, string> = {
   comercial: "Comercial / industrial",
   infraestructura: "Infraestructura / civil",
 };
+
+interface MapsDistanceInfo {
+  destino: string;
+  distanceKm: number;
+  distanceText: string;
+  durationText: string | null;
+  zona: ZonaCotizacion | null;
+  zonaLabel: string;
+  bloqueado: boolean;
+  mensaje: string | null;
+}
 
 interface Props {
   isOpen: boolean;
@@ -44,12 +56,22 @@ export function CotizadorReservaModal({ isOpen, onClose, volumenInicialM3 = null
   const [tipoVaciado, setTipoVaciado] = useState<"tiro_directo" | "bombeo">("tiro_directo");
   const [tipoBomba, setTipoBomba] = useState<TipoBombaCotizador>("estacionaria");
   const [volumen, setVolumen] = useState("");
+  const [destinoObra, setDestinoObra] = useState("");
+  const [distanciaObra, setDistanciaObra] = useState<MapsDistanceInfo | null>(null);
+  const [calculandoDistancia, setCalculandoDistancia] = useState(false);
+  const [errorDistancia, setErrorDistancia] = useState<string | null>(null);
+  const [metrosTuberia, setMetrosTuberia] = useState("30");
+  const [aditivos, setAditivos] = useState<Record<AditivoCotizacion, boolean>>({
+    fibra: false,
+    impermeabilizante: false,
+  });
+  const [resistenciaRapidaDias, setResistenciaRapidaDias] = useState<"" | ResistenciaRapidaDias>("");
 
   const [nombre, setNombre] = useState("");
   const [empresa, setEmpresa] = useState("");
   const [obra, setObra] = useState("residencial");
-  const [fecha, setFecha] = useState(() => new Date().toISOString().slice(0, 10));
-  const [hora, setHora] = useState("09:00");
+  const [fecha, setFecha] = useState(() => nextAllowedAgendaDateYmd());
+  const [hora, setHora] = useState(() => buildAgendaHoursForDate(nextAllowedAgendaDateYmd())[0] ?? "06:00");
   const [comentarios, setComentarios] = useState("");
 
   const [reservando, setReservando] = useState(false);
@@ -80,9 +102,11 @@ export function CotizadorReservaModal({ isOpen, onClose, volumenInicialM3 = null
         setCotizacion(j1.cotizacion);
         if (!cotizacionTieneAlgunPrecio(j1.cotizacion)) {
           setLoadErr(
-            `No hay precio en hoja "Precios" para alguna resistencia del catálogo (${RESISTENCIAS_KG.join(", ")} kg/cm²). Coloca en la columna A la resistencia y en la B el precio por m³ (o encabezados con "Resistencia" y precio por m³).`,
+            'No hay precios configurados en la hoja "Precios Concreto" para las zonas y servicios del cotizador.',
           );
         }
+        const resistencias = resistenciasCotizacion(j1.cotizacion);
+        setResistenciaKg((prev) => (resistencias.length > 0 && !resistencias.includes(prev) ? resistencias[0] : prev));
         setCapacidadMaximaHora(Number(j2.capacidadMaximaHora) || 30);
       } catch (e) {
         setLoadErr(
@@ -106,32 +130,86 @@ export function CotizadorReservaModal({ isOpen, onClose, volumenInicialM3 = null
     setVolumen(String(t));
   }, [isOpen, volumenInicialM3]);
 
-  const precioM3Actual = useMemo(
-    () => precioM3ParaResistencia(cotizacion, resistenciaKg),
-    [cotizacion, resistenciaKg],
+  const volumenNumerico = useMemo(() => parseFloat(volumen.replace(",", ".")) || 0, [volumen]);
+  const metrosTuberiaNumerico = useMemo(() => parseFloat(metrosTuberia.replace(",", ".")) || 0, [metrosTuberia]);
+  const aditivosSeleccionados = useMemo(
+    () => (Object.entries(aditivos).filter(([, activo]) => activo).map(([key]) => key) as AditivoCotizacion[]),
+    [aditivos],
   );
 
-  const totalEstimado = useMemo(() => {
-    const vol = parseFloat(volumen.replace(",", ".")) || 0;
-    if (!cotizacion) return 0;
-    return calcularTotalCotizacion(vol, tipoVaciado, precioM3ParaResistencia(cotizacion, resistenciaKg));
-  }, [cotizacion, tipoVaciado, volumen, resistenciaKg]);
+  const cotizacionResultado = useMemo<CotizacionDinamicaResultado>(
+    () =>
+      calcularCotizacionDinamica(cotizacion, {
+        volumen: volumenNumerico,
+        resistenciaKg,
+        tipoVaciado,
+        tipoBomba,
+        zona: distanciaObra?.zona ?? null,
+        metrosTuberia: metrosTuberiaNumerico,
+        aditivos: aditivosSeleccionados,
+        resistenciaRapidaDias: resistenciaRapidaDias === "" ? null : resistenciaRapidaDias,
+      }),
+    [
+      aditivosSeleccionados,
+      cotizacion,
+      distanciaObra?.zona,
+      metrosTuberiaNumerico,
+      resistenciaKg,
+      resistenciaRapidaDias,
+      tipoBomba,
+      tipoVaciado,
+      volumenNumerico,
+    ],
+  );
 
   const puedeAvanzar =
-    parseFloat(volumen.replace(",", ".")) > 0 && !!cotizacion && precioM3Actual > 0 && !loadErr;
+    volumenNumerico > 0 &&
+    !!cotizacion &&
+    !loadErr &&
+    !!distanciaObra?.zona &&
+    !distanciaObra.bloqueado &&
+    !cotizacionResultado.bloqueado;
 
   function resetReservaForm() {
     setNombre("");
     setEmpresa("");
     setObra("residencial");
-    setFecha(new Date().toISOString().slice(0, 10));
-    setHora("09:00");
+    const nextFecha = nextAllowedAgendaDateYmd();
+    setFecha(nextFecha);
+    setHora(buildAgendaHoursForDate(nextFecha)[0] ?? "06:00");
     setComentarios("");
     setVolumen("");
+    setDestinoObra("");
+    setDistanciaObra(null);
+    setErrorDistancia(null);
+    setMetrosTuberia("30");
+    setAditivos({ fibra: false, impermeabilizante: false });
+    setResistenciaRapidaDias("");
     setResistenciaKg(250);
     setTipoVaciado("tiro_directo");
     setTipoBomba("estacionaria");
     setStep(1);
+  }
+
+  async function calcularDistanciaObra() {
+    setErrorDistancia(null);
+    setDistanciaObra(null);
+    if (!destinoObra.trim()) {
+      setErrorDistancia("Escribe la ubicación de la obra para calcular la zona.");
+      return;
+    }
+    setCalculandoDistancia(true);
+    try {
+      const data = await fetchApiJson<MapsDistanceInfo>(
+        apiUrl(`/api/maps-distance?destino=${encodeURIComponent(destinoObra.trim())}`),
+      );
+      setDistanciaObra(data);
+      if (data.bloqueado && data.mensaje) setErrorDistancia(data.mensaje);
+    } catch (e) {
+      setErrorDistancia(e instanceof Error ? e.message : "No se pudo calcular la distancia.");
+    } finally {
+      setCalculandoDistancia(false);
+    }
   }
 
   function cerrarModal() {
@@ -153,17 +231,33 @@ export function CotizadorReservaModal({ isOpen, onClose, volumenInicialM3 = null
   }
 
   const abrirWhatsAppReserva = (extra: { total: number; resistencia: string; vaciado: string; vol: number }) => {
+    const rutaMaps = distanciaObra
+      ? `${distanciaObra.distanceText}${distanciaObra.durationText ? `, ${distanciaObra.durationText}` : ""} · ${distanciaObra.zonaLabel}`
+      : null;
+    const desglose = cotizacionResultado.lineas
+      .map((linea) => `${linea.concepto}: $${linea.importe.toFixed(2)}`)
+      .join(" | ");
+    const aditivosLabel = aditivosSeleccionados
+      .map((aditivo) => (aditivo === "fibra" ? "Fibra de polipropileno" : "Impermeabilizante integral"))
+      .join(", ");
     const lineas = [
       `*Reserva Concretos Tepexi*`,
       `Nombre: ${nombre.trim()}`,
       empresa.trim() ? `Empresa: ${empresa.trim()}` : null,
       `Obra: ${OBRA_LABELS[obra] ?? obra}`,
+      destinoObra.trim() ? `Ubicación obra: ${destinoObra.trim()}` : null,
+      rutaMaps ? `Ruta Maps: ${rutaMaps}` : null,
       `Fecha: ${fecha}  Hora: ${hora}`,
       `Volumen: ${extra.vol} m³`,
       `Resistencia: ${extra.resistencia}`,
       `Vaciado: ${extra.vaciado}`,
+      tipoVaciado === "bombeo" && tipoBomba === "estacionaria" ? `Tubería estacionaria: ${metrosTuberia} m` : null,
+      aditivosLabel ? `Aditivos: ${aditivosLabel}` : null,
+      resistenciaRapidaDias ? `Resistencia rápida: ${resistenciaRapidaDias} días` : null,
+      desglose ? `Desglose: ${desglose}` : null,
       `Total estimado: $${extra.total.toLocaleString("es-MX", { minimumFractionDigits: 2 })}`,
       `Estado en agenda: Reservado`,
+      `Importante: el horario se mantiene reservado por máximo 2 horas; si no recibimos el comprobante de pago en ese plazo, se libera automáticamente.`,
       comentarios.trim() ? `Comentarios: ${comentarios.trim()}` : null,
     ].filter(Boolean) as string[];
     const text = encodeURIComponent(lineas.join("\n"));
@@ -181,14 +275,27 @@ export function CotizadorReservaModal({ isOpen, onClose, volumenInicialM3 = null
       setErrorReserva("No hay datos de cotización.");
       return;
     }
-    const p = precioM3ParaResistencia(cotizacion, resistenciaKg);
-    if (p <= 0) {
-      setErrorReserva("Selecciona una resistencia con precio válido.");
+    if (cotizacionResultado.bloqueado || cotizacionResultado.total <= 0) {
+      setErrorReserva(cotizacionResultado.motivosBloqueo[0] ?? "La cotización no está lista para reservar.");
+      return;
+    }
+    const horarioError = validateAgendaSlot(fecha, hora);
+    if (horarioError) {
+      setErrorReserva(horarioError);
       return;
     }
     setReservando(true);
     try {
-      const total = calcularTotalCotizacion(vol, tipoVaciado, p);
+      const total = cotizacionResultado.total;
+      const rutaMaps = distanciaObra
+        ? `${distanciaObra.distanceText}${distanciaObra.durationText ? `, ${distanciaObra.durationText}` : ""} · ${distanciaObra.zonaLabel}`
+        : "";
+      const desgloseCotizacion = cotizacionResultado.lineas
+        .map((linea) => `${linea.concepto} $${linea.importe.toFixed(2)}`)
+        .join(" | ");
+      const aditivosLabel = aditivosSeleccionados
+        .map((aditivo) => (aditivo === "fibra" ? "Fibra de polipropileno" : "Impermeabilizante integral"))
+        .join(", ");
 
       await fetchApiJson<{ ok?: boolean }>(apiUrl("/api/reserve"), {
         method: "POST",
@@ -204,6 +311,17 @@ export function CotizadorReservaModal({ isOpen, onClose, volumenInicialM3 = null
           vaciado: vaciadoApiDesdeSeleccion(tipoVaciado, tipoBomba),
           resistenciaKg,
           cotizacionTotal: total,
+          ubicacionObra: destinoObra.trim(),
+          rutaMaps,
+          zona: distanciaObra?.zonaLabel ?? "",
+          distancia: distanciaObra?.distanceText ?? "",
+          duracion: distanciaObra?.durationText ?? "",
+          tipoBomba: tipoVaciado === "bombeo" ? labelVaciadoCliente(tipoVaciado, tipoBomba) : "",
+          metrosTuberia: tipoVaciado === "bombeo" && tipoBomba === "estacionaria" ? metrosTuberiaNumerico : undefined,
+          aditivos: aditivosLabel,
+          resistenciaRapida: resistenciaRapidaDias ? `${resistenciaRapidaDias} días` : "",
+          precioM3: cotizacionResultado.precioM3,
+          desglose: desgloseCotizacion,
         }),
       });
 
@@ -304,7 +422,23 @@ export function CotizadorReservaModal({ isOpen, onClose, volumenInicialM3 = null
                   setTipoBomba={setTipoBomba}
                   volumen={volumen}
                   setVolumen={setVolumen}
-                  totalEstimado={totalEstimado}
+                  destinoObra={destinoObra}
+                  setDestinoObra={(v) => {
+                    setDestinoObra(v);
+                    setDistanciaObra(null);
+                    setErrorDistancia(null);
+                  }}
+                  distanciaObra={distanciaObra}
+                  calcularDistanciaObra={calcularDistanciaObra}
+                  calculandoDistancia={calculandoDistancia}
+                  errorDistancia={errorDistancia}
+                  metrosTuberia={metrosTuberia}
+                  setMetrosTuberia={setMetrosTuberia}
+                  aditivos={aditivos}
+                  setAditivos={setAditivos}
+                  resistenciaRapidaDias={resistenciaRapidaDias}
+                  setResistenciaRapidaDias={setResistenciaRapidaDias}
+                  cotizacionResultado={cotizacionResultado}
                 />
                 <div className="mt-6 flex justify-end">
                   <button

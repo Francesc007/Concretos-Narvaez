@@ -2,18 +2,19 @@
 
 import { motion } from "framer-motion";
 
-const logos = [
-  { src: "/Clientes/Amanali.png", alt: "Amanali" },
-  { src: "/Clientes/AZ.png", alt: "AZ" },
-  { src: "/Clientes/BImbo.webp", alt: "Bimbo" },
-  { src: "/Clientes/cOCA.png", alt: "Coca-Cola" },
-  { src: "/Clientes/Corona.png", alt: "Corona" },
-  { src: "/Clientes/kfc.webp", alt: "KFC" },
-  { src: "/Clientes/La%20comer.png", alt: "La Comer" },
-  { src: "/Clientes/Oxxo.png", alt: "Oxxo" },
-  { src: "/Clientes/P%26G.png", alt: "P&G" },
-  { src: "/Clientes/weg.png", alt: "WEG" },
+/** Imágenes de `public/Clientes` en el carrusel. */
+const clientAssetFiles = [
+  { file: "Arlus.png", alt: "Arlus" },
+  { file: "Marvic.png", alt: "Marvic" },
+  { file: "Peri.png", alt: "Peri" },
+  { file: "Tubos y Barras.png", alt: "Tubos y Barras" },
+  { file: "under terra.gif", alt: "Under Terra" },
 ] as const;
+
+const logos = clientAssetFiles.map(({ file, alt }) => ({
+  src: `/Clientes/${encodeURIComponent(file)}`,
+  alt,
+}));
 
 const trackLogos = [...logos, ...logos];
 
@@ -57,7 +58,7 @@ export function Clientes() {
             Clientes
           </h2>
           <p className="text-[#d8e3ee] max-w-2xl mx-auto text-pretty text-sm sm:text-base">
-            Empresas y marcas de la región que confían en nuestro Concretos Tepexi.
+            Empresas y marcas que confían en nosotros: Concretos Tepexi.
           </p>
         </motion.div>
       </div>

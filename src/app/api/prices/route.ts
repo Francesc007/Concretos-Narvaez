@@ -1,5 +1,4 @@
-import { buildCotizacionConfigFromRows } from "@/lib/cotizacion";
-import { fetchPreciosRows } from "@/lib/googleSheets";
+import { fetchCotizacionPreciosConfig } from "@/lib/googleSheets";
 import { emptyWithCors, jsonWithCors } from "@/lib/api-cors";
 
 export const dynamic = "force-dynamic";
@@ -12,9 +11,8 @@ export async function OPTIONS() {
 
 export async function GET() {
   try {
-    const prices = await fetchPreciosRows();
-    const cotizacion = buildCotizacionConfigFromRows(prices);
-    return jsonWithCors({ prices, cotizacion }, 200, METHODS);
+    const cotizacion = await fetchCotizacionPreciosConfig();
+    return jsonWithCors({ prices: [], cotizacion }, 200, METHODS);
   } catch (e) {
     console.error(e);
     return jsonWithCors(

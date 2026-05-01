@@ -2,7 +2,7 @@
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { DayPicker } from "react-day-picker";
+import { DayPicker, type Matcher } from "react-day-picker";
 import { format, startOfDay } from "date-fns";
 import { es } from "date-fns/locale";
 import { Calendar } from "lucide-react";
@@ -36,6 +36,7 @@ export interface DateFieldCalendarProps {
   disablePast?: boolean;
   placeholder?: string;
   className?: string;
+  disabledDays?: Matcher | Matcher[];
 }
 
 export function DateFieldCalendar({
@@ -46,6 +47,7 @@ export function DateFieldCalendar({
   disablePast = true,
   placeholder = "Elegir fecha",
   className = "",
+  disabledDays,
 }: DateFieldCalendarProps) {
   const [open, setOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -177,6 +179,10 @@ export function DateFieldCalendar({
     selected && !Number.isNaN(selected.getTime())
       ? format(selected, "EEEE d 'de' MMMM yyyy", { locale: es })
       : placeholder;
+  const disabledMatchers = [
+    ...(minD ? [{ before: minD }] : []),
+    ...(Array.isArray(disabledDays) ? disabledDays : disabledDays ? [disabledDays] : []),
+  ];
 
   return (
     <div className={`relative ${className}`}>
@@ -185,7 +191,7 @@ export function DateFieldCalendar({
         type="button"
         id={id}
         onClick={() => setOpen((o) => !o)}
-        aria-expanded={open}
+        aria-expanded={open ? "true" : "false"}
         aria-haspopup="dialog"
         className="w-full py-3 px-4 bg-[#0c0f14] border border-[#cfd8e4]/25 rounded-lg text-left focus:outline-none focus:ring-2 focus:ring-[#c62828]/60 flex items-center justify-between gap-2 min-h-[48px]"
       >
@@ -213,7 +219,7 @@ export function DateFieldCalendar({
                 }
               }}
               locale={rdpEs}
-              disabled={minD ? { before: minD } : undefined}
+              disabled={disabledMatchers.length > 0 ? disabledMatchers : undefined}
               defaultMonth={selected ?? minD ?? new Date()}
               weekStartsOn={1}
               className="tepexi-rdp-inner"

@@ -5,6 +5,7 @@ import {
   sumarVolumenAgendado,
 } from "@/lib/googleSheets";
 import { emptyWithCors, jsonWithCors } from "@/lib/api-cors";
+import { validateAgendaSlot } from "@/lib/agendaRules";
 
 const METHODS = "GET, OPTIONS";
 
@@ -24,6 +25,22 @@ export async function GET(request: NextRequest) {
   }
   try {
     const hora = normalizeHora(horaRaw);
+    const horarioError = validateAgendaSlot(fecha, hora);
+    if (horarioError) {
+      return jsonWithCors(
+        {
+          error: horarioError,
+          fecha,
+          hora,
+          capacidadMaximaHora: 0,
+          usadoM3: 0,
+          disponibleM3: 0,
+        },
+        400,
+        METHODS,
+      );
+    }
+
     const [capacidadMaximaHora, usadoM3] = await Promise.all([
       fetchCapacidadMaximaHora(),
       sumarVolumenAgendado(fecha, hora),
