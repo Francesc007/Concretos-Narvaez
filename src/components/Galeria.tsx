@@ -37,7 +37,7 @@ const items = [
   },
   {
     titulo: "Área institucional, Chilcuautla, Hgo.",
-    imagen: "/9.jpg",
+    imagen: "/9.JPG",
   },
 ];
 

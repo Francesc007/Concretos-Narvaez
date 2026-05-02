@@ -50,7 +50,6 @@ export function DateFieldCalendar({
   disabledDays,
 }: DateFieldCalendarProps) {
   const [open, setOpen] = useState(false);
-  const [mounted, setMounted] = useState(false);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
   const [panelPos, setPanelPos] = useState({ top: 0, left: 0 });
@@ -61,8 +60,6 @@ export function DateFieldCalendar({
     : disablePast
       ? startOfDay(new Date())
       : undefined;
-
-  useEffect(() => setMounted(true), []);
 
   useEffect(() => {
     if (!open) return;
@@ -198,8 +195,7 @@ export function DateFieldCalendar({
         <span className={selected ? "text-white text-sm sm:text-base" : "text-[#b0bcc9]"}>{label}</span>
         <Calendar className="h-5 w-5 shrink-0 text-[#d8e3ee]" aria-hidden />
       </button>
-      {mounted &&
-        open &&
+      {open &&
         typeof document !== "undefined" &&
         createPortal(
           <div

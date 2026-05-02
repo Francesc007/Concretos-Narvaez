@@ -34,7 +34,7 @@ const servicios = [
     titulo: "Entrega y Logística",
     descripcion:
       "Seguimiento de entregas acordadas con tu obra en Tepeji y zona. Comunicación clara desde el pedido hasta el camión en sitio.",
-    imagen: "/logistica.JPG",
+    imagen: "/logistica.jpg",
     icon: Gauge,
     destacado: false,
   },
