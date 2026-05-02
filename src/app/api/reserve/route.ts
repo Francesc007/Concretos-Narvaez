@@ -2,6 +2,7 @@ import {
   appendReservaAgenda,
   fetchCapacidadMaximaHora,
   formatTimestampReservaCDMX,
+  liberarReservasExpiradasAgenda,
   normalizeHora,
   semanaIsoDesdeFecha,
   sumarVolumenAgendado,
@@ -103,6 +104,12 @@ export async function POST(request: Request) {
   }
 
   try {
+    try {
+      await liberarReservasExpiradasAgenda();
+    } catch (e) {
+      console.error("[api/reserve] liberarReservasExpiradasAgenda:", e);
+    }
+
     const [capacidad, usado] = await Promise.all([
       fetchCapacidadMaximaHora().catch(() => 30),
       sumarVolumenAgendado(fecha, hora),

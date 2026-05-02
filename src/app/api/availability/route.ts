@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import {
   fetchCapacidadMaximaHora,
+  liberarReservasExpiradasAgenda,
   normalizeHora,
   sumarVolumenAgendado,
 } from "@/lib/googleSheets";
@@ -39,6 +40,12 @@ export async function GET(request: NextRequest) {
         400,
         METHODS,
       );
+    }
+
+    try {
+      await liberarReservasExpiradasAgenda();
+    } catch (e) {
+      console.error("[api/availability] liberarReservasExpiradasAgenda:", e);
     }
 
     const [capacidadMaximaHora, usadoM3] = await Promise.all([

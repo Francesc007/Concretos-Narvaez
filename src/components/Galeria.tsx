@@ -5,39 +5,39 @@ import { motion } from "framer-motion";
 const items = [
   {
     titulo: "Colado de vialidades, Tepeji del Río, Hgo.",
-    imagen: "/11.jpg",
+    imagen: "/1.jpg",
   },
   {
     titulo: "Cimentaciones industriales, Tula de Allende, Hgo.",
-    imagen: "/12.jpg",
+    imagen: "/2.jpg",
   },
   {
     titulo: "Patio de maniobras, Apaxco, Hgo.",
-    imagen: "/13.jpg",
+    imagen: "/3.jpg",
   },
   {
     titulo: "Nivelación de lámina, Soyaniquilpan de Juárez, Hgo.",
-    imagen: "/14.jpg",
+    imagen: "/4.jpg",
   },
   {
     titulo: "Rampas de accesibilidad, Tepeji del Río, Hgo.",
-    imagen: "/15.jpg",
+    imagen: "/5.jpg",
   },
   {
     titulo: "Obra habitacional, Atotonilco de Tula, Hgo.",
-    imagen: "/16.jpg",
+    imagen: "/6.jpg",
   },
   {
     titulo: "Bombeo plaza comercial, Huehuetla, Hgo.",
-    imagen: "/17.jpg",
+    imagen: "/7.jpg",
   },
   {
     titulo: "Zapatas y nivelación, Tecozautla, Hgo.",
-    imagen: "/18.jpg",
+    imagen: "/8.jpg",
   },
   {
     titulo: "Área institucional, Chilcuautla, Hgo.",
-    imagen: "/19.JPG",
+    imagen: "/9.JPG",
   },
 ];
 
