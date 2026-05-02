@@ -2,7 +2,7 @@
   "crons": [
     {
       "path": "/api/reservations/release-expired",
-      "schedule": "*/15 * * * *"
+      "schedule": "*/0 5 * * *"
     }
   ]
 }
