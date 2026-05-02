@@ -38,23 +38,6 @@ export function Footer() {
                   Río y alrededores.
                 </p>
               </a>
-              <address className="not-italic mt-3 space-y-1.5 w-full max-w-xs mx-auto md:mx-0">
-                <a
-                  href={`mailto:${CONFIG.contactEmail}`}
-                  className="flex items-center justify-center md:justify-start gap-2 text-sm text-white hover:text-[#fecaca] transition-colors break-all"
-                >
-                  <Mail size={15} className="shrink-0 opacity-90" aria-hidden />
-                  <span>{CONFIG.contactEmail}</span>
-                </a>
-                <div className="flex items-start justify-center md:justify-start gap-2 text-sm text-[#eae9e8]">
-                  <Phone size={15} className="shrink-0 opacity-90 mt-0.5" aria-hidden />
-                  <ul className="text-left space-y-1 list-none">
-                    <li>55 4260 0590</li>
-                    <li>773 158 5835</li>
-                    <li>55 1555 2097</li>
-                  </ul>
-                </div>
-              </address>
             </div>
           </motion.div>
 
@@ -97,8 +80,25 @@ export function Footer() {
             className="text-center"
           >
             <h4 className="font-display text-lg md:text-xl font-semibold text-white mb-3 tracking-wide">
-              Redes
+              Contacto y redes
             </h4>
+            <address className="not-italic mb-6 space-y-1.5 w-full max-w-xs mx-auto">
+              <a
+                href={`mailto:${CONFIG.contactEmail}`}
+                className="flex items-center justify-center gap-2 text-sm text-white hover:text-[#fecaca] transition-colors break-all"
+              >
+                <Mail size={15} className="shrink-0 opacity-90" aria-hidden />
+                <span>{CONFIG.contactEmail}</span>
+              </a>
+              <div className="flex items-start justify-center gap-2 text-sm text-[#eae9e8]">
+                <Phone size={15} className="shrink-0 opacity-90 mt-0.5" aria-hidden />
+                <ul className="text-left space-y-1 list-none">
+                  <li>55 4260 0590</li>
+                  <li>773 158 5835</li>
+                  <li>55 1555 2097</li>
+                </ul>
+              </div>
+            </address>
             <div className="flex justify-center">
               <a
                 href={CONFIG.facebookUrl}
@@ -110,9 +110,6 @@ export function Footer() {
                 <FacebookIcon className="w-6 h-6" />
               </a>
             </div>
-            <p className="mt-3 text-xs sm:text-sm font-medium text-[#fafaf9] leading-snug drop-shadow-sm">
-              Síguenos para novedades y tips de obra.
-            </p>
           </motion.div>
         </div>
 

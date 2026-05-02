@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { useLayoutEffect, useRef } from "react";
 
 /** Imágenes de `public/Clientes` en el carrusel. */
 const clientAssetFiles = [
@@ -20,15 +21,16 @@ const trackLogos = [...logos, ...logos];
 
 function LogoSlide({ logo, duplicate }: { logo: (typeof logos)[number]; duplicate: boolean }) {
   return (
-    <div className="flex shrink-0 items-center justify-center">
+    <div className="flex h-14 w-[8.5rem] shrink-0 items-center justify-center sm:h-[3.5rem] sm:w-36 md:h-16 md:w-40">
       <img
         src={logo.src}
         alt={duplicate ? "" : logo.alt}
         {...(duplicate ? { "aria-hidden": true as const } : {})}
-        className={`max-h-[3rem] sm:max-h-[3.5rem] md:max-h-16 w-auto max-w-[8.5rem] object-contain object-center transition-opacity duration-300 select-none ${
+        className={`max-h-full w-auto max-w-full object-contain object-center transition-opacity duration-300 select-none ${
           duplicate ? "opacity-90" : "opacity-95 hover:opacity-100"
         }`}
         loading="lazy"
+        decoding="async"
         draggable={false}
       />
     </div>
@@ -36,6 +38,33 @@ function LogoSlide({ logo, duplicate }: { logo: (typeof logos)[number]; duplicat
 }
 
 export function Clientes() {
+  const trackRef = useRef<HTMLDivElement>(null);
+
+  useLayoutEffect(() => {
+    const node = trackRef.current;
+    if (!node) return;
+
+    const syncMarqueeDistance = () => {
+      const w = node.scrollWidth;
+      if (w <= 0) return;
+      const half = w / 2;
+      node.style.setProperty("--tepexi-clientes-marquee-x", `-${half}px`);
+    };
+
+    syncMarqueeDistance();
+
+    const ro = new ResizeObserver(() => syncMarqueeDistance());
+    ro.observe(node);
+
+    const imgs = node.querySelectorAll("img");
+    imgs.forEach((img) => {
+      if (img.complete) return;
+      img.addEventListener("load", syncMarqueeDistance, { once: true });
+    });
+
+    return () => ro.disconnect();
+  }, []);
+
   return (
     <section
       id="clientes"
@@ -77,7 +106,7 @@ export function Clientes() {
 
           <div className="py-2.5 md:py-7">
             {/* Sin padding en el elemento animado: -50 % = una repetición exacta */}
-            <div className="tepexi-clientes-marquee gap-10 sm:gap-10 md:gap-20">
+            <div ref={trackRef} className="tepexi-clientes-marquee gap-10 sm:gap-10 md:gap-20">
               {trackLogos.map((logo, i) => (
                 <LogoSlide
                   key={`${logo.src}-${i}`}

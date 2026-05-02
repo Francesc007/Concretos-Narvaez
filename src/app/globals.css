@@ -60,11 +60,13 @@ body {
     transform: translate3d(0, 0, 0);
   }
   to {
-    transform: translate3d(-50%, 0, 0);
+    /* Valor por defecto; Clientes.tsx lo sustituye por -{mitad}px para bucle exacto */
+    transform: translate3d(var(--tepexi-clientes-marquee-x, -50%), 0, 0);
   }
 }
 
 .tepexi-clientes-marquee {
+  --tepexi-clientes-marquee-x: -50%;
   display: flex;
   flex-direction: row;
   flex-wrap: nowrap;

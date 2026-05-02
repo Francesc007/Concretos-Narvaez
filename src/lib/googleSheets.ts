@@ -747,7 +747,47 @@ export function parseTimestampReserva(raw: string): Date | null {
 function esReservaExpirada(timestampStr: string, ahora: Date): boolean {
   const t = parseTimestampReserva(timestampStr);
   if (!t) return false;
-  return ahora.getTime() - t.getTime() > RESERVA_HOLD_MS;
+  return ahora.getTime() - t.getTime() >= RESERVA_HOLD_MS;
+}
+
+export interface LiberarReservasExpiradasResult {
+  revisadas: number;
+  liberadas: number;
+}
+
+async function liberarReservasExpiradasEnRows(
+  rows: GoogleSpreadsheetRow[],
+  ahora: Date,
+): Promise<LiberarReservasExpiradasResult> {
+  let revisadas = 0;
+  let liberadas = 0;
+
+  for (const row of rows) {
+    const estado = String(row.get("Estado") ?? "").trim().toLowerCase();
+    if (estado !== "reservado") continue;
+
+    revisadas += 1;
+    const tsStr = String(row.get("Timestamp_Reserva") ?? "").trim();
+    if (!tsStr || !esReservaExpirada(tsStr, ahora)) continue;
+
+    row.set("Estado", "Disponible");
+    await row.save();
+    liberadas += 1;
+  }
+
+  return { revisadas, liberadas };
+}
+
+/** Libera todas las filas de Agenda que siguen en Reservado después de 2 h. */
+export async function liberarReservasExpiradasAgenda(
+  ahora: Date = new Date(),
+): Promise<LiberarReservasExpiradasResult> {
+  const doc = await getSpreadsheetDoc();
+  const sheet = doc.sheetsByTitle["Agenda"];
+  if (!sheet) throw new Error('No existe la hoja "Agenda"');
+
+  const rows = await sheet.getRows();
+  return liberarReservasExpiradasEnRows(rows, ahora);
 }
 
 /**
@@ -766,7 +806,7 @@ export function ocupaCupoEnAgenda(estadoRaw: string, timestampReserva: string, a
   return false;
 }
 
-/** Suma volúmenes en Agenda para fecha+hora; libera Reservados vencidos (→ Disponible). */
+/** Suma volúmenes en Agenda para fecha+hora; primero libera Reservados vencidos (→ Disponible). */
 export async function sumarVolumenAgendado(fecha: string, hora: string): Promise<number> {
   const doc = await getSpreadsheetDoc();
   const sheet = doc.sheetsByTitle["Agenda"];
@@ -776,17 +816,12 @@ export async function sumarVolumenAgendado(fecha: string, hora: string): Promise
   const h = normalizeHora(hora);
   const ahora = new Date();
   let sum = 0;
+
+  await liberarReservasExpiradasEnRows(rows, ahora);
+
   for (const row of rows) {
     const estadoRaw = String(row.get("Estado") ?? "").trim();
-    const estado = estadoRaw.toLowerCase();
     const tsStr = String(row.get("Timestamp_Reserva") ?? "").trim();
-
-    /** Solo filas en Reservado: Pagado / Cancelado / Confirmado no se modifican aquí. */
-    if (estado === "reservado" && tsStr && esReservaExpirada(tsStr, ahora)) {
-      row.set("Estado", "Disponible");
-      await row.save();
-      continue;
-    }
 
     if (!ocupaCupoEnAgenda(estadoRaw, tsStr, ahora)) continue;
 
