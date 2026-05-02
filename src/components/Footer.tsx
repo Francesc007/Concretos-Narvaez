@@ -59,8 +59,11 @@ export function Footer() {
               aria-label="Abrir ubicación en Google Maps"
             >
               <MapPin size={18} className="shrink-0 mt-0.5" aria-hidden />
-              <span className="text-left max-w-md">
-                Carretera Tepeji-San Ignacio Nopala km6, San Ignacio Nopala, 42890, Hgo.
+              <span className="max-w-md">
+                <span className="block text-left">
+                  Carretera Tepeji-San Ignacio Nopala km6,
+                </span>
+                <span className="block text-center">San Ignacio Nopala, 42890, Hgo.</span>
               </span>
             </a>
             <div className="flex items-start justify-center gap-2 text-[#d6d3d1] text-sm mt-5">
@@ -82,15 +85,15 @@ export function Footer() {
             <h4 className="font-display text-lg md:text-xl font-semibold text-white mb-3 tracking-wide">
               Contacto y redes
             </h4>
-            <address className="not-italic mb-6 space-y-1.5 w-full max-w-xs mx-auto">
+            <address className="not-italic mx-auto mb-6 w-full max-w-xs space-y-5 text-left">
               <a
                 href={`mailto:${CONFIG.contactEmail}`}
-                className="flex items-center justify-center gap-2 text-sm text-white hover:text-[#fecaca] transition-colors break-all"
+                className="flex items-center justify-start gap-2 text-sm text-white hover:text-[#fecaca] transition-colors break-all"
               >
                 <Mail size={15} className="shrink-0 opacity-90" aria-hidden />
                 <span>{CONFIG.contactEmail}</span>
               </a>
-              <div className="flex items-start justify-center gap-2 text-sm text-[#eae9e8]">
+              <div className="flex items-start justify-start gap-2 text-sm text-[#eae9e8]">
                 <Phone size={15} className="shrink-0 opacity-90 mt-0.5" aria-hidden />
                 <ul className="text-left space-y-1 list-none">
                   <li>55 4260 0590</li>
