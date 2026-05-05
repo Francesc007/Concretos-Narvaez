@@ -1,5 +1,5 @@
 /**
- * Horarios de visita alineados al negocio: L–V 8:00–17:00 h, S 8:00–13:00 h. Domingo cerrado.
+ * Horarios de visita: Lun–Vie 9:00–16:00 h, Sáb 9:00–12:00 h. Domingo cerrado.
  * Citas de 1 h; último inicio L–V 16:00, sábado 12:00.
  */
 
@@ -24,10 +24,10 @@ export function getHorariosVisita(fechaYmd: string): string[] {
   const dow = dt.getDay();
   if (dow === 0) return [];
   if (dow === 6) {
-    return ["08:00", "09:00", "10:00", "11:00", "12:00"];
+    return ["09:00", "10:00", "11:00", "12:00"];
   }
   const out: string[] = [];
-  for (let h = 8; h <= 16; h++) {
+  for (let h = 9; h <= 16; h++) {
     out.push(`${String(h).padStart(2, "0")}:00`);
   }
   return out;

@@ -1,9 +1,31 @@
 /**
- * Solo servidor. Crea eventos con la cuenta de servicio (calendario compartido con GOOGLE_CALENDAR_ID).
+ * Solo servidor. Crea eventos con JWT de cuenta de servicio (no usa "API key" de Maps).
+ *
+ * Requisitos en Google Cloud: API "Google Calendar API" habilitada para el proyecto de la SA.
+ * En .env.local:
+ *   GOOGLE_SERVICE_ACCOUNT_EMAIL / GOOGLE_PRIVATE_KEY (mismos que Sheets)
+ *   GOOGLE_CALENDAR_ID = ID del calendario destino (p. ej. xxx@group.calendar.google.com)
+ *
+ * En Google Calendar → Configuración del calendario → Compartir con:
+ *   {GOOGLE_SERVICE_ACCOUNT_EMAIL} con permiso "Realizar cambios en los eventos".
+ * Sin ese paso, insert puede responder 403/404 y no verás eventos en el calendario del negocio.
  */
 import { google } from "googleapis";
+import type { GaxiosError } from "gaxios";
 import type { TipoVisitaAgendada } from "@/lib/agendaVisita";
 import { getGoogleServiceAccountJwt, normalizeFecha, normalizeHora } from "@/lib/googleSheets";
+
+function formatCalendarInsertError(err: unknown, calendarId: string): Error {
+  const ge = err as Partial<GaxiosError<{ error?: { message?: string; status?: string } }>>;
+  const apiMsg = ge.response?.data?.error?.message;
+  const status = ge.response?.status;
+  const hint =
+    "Revisa GOOGLE_CALENDAR_ID (ID del calendario, no un correo arbitrario si no es el primario de la SA) " +
+    "y que el calendario esté compartido con la cuenta de servicio con permiso de edición de eventos.";
+  const core = apiMsg || ge.message || String(err);
+  console.error("[googleCalendar] events.insert falló", { calendarId, status, response: ge.response?.data });
+  return new Error(`Calendar: ${core}. ${hint}`);
+}
 
 const TZ = "America/Mexico_City";
 
@@ -72,15 +94,18 @@ export async function createVisitaAgendadaCalendarEvent(opts: {
     .filter(Boolean)
     .join("\n");
 
-  const res = await calendar.events.insert({
-    calendarId,
-    requestBody: {
-      summary: titulo,
-      description,
-      start: { dateTime: startDateTime, timeZone: TZ },
-      end: { dateTime: endDateTime, timeZone: TZ },
-    },
-  });
-
-  return { htmlLink: res.data.htmlLink, id: res.data.id };
+  try {
+    const res = await calendar.events.insert({
+      calendarId,
+      requestBody: {
+        summary: titulo,
+        description,
+        start: { dateTime: startDateTime, timeZone: TZ },
+        end: { dateTime: endDateTime, timeZone: TZ },
+      },
+    });
+    return { htmlLink: res.data.htmlLink, id: res.data.id };
+  } catch (e) {
+    throw formatCalendarInsertError(e, calendarId);
+  }
 }

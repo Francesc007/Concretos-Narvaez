@@ -165,8 +165,8 @@ export function AgendaVisitaModal({ isOpen, onClose }: AgendaVisitaModalProps) {
             </div>
 
             <p className="text-sm text-[#d8e3ee] mb-6">
-              Horario de atención: <span className="text-[#ecf0f6]">L–V 8:00 – 17:00 h</span> ·{" "}
-              <span className="text-[#ecf0f6]">S 8:00 – 13:00 h</span>
+              Horario de atención: <span className="text-[#ecf0f6]">Lun–Vie 9:00 – 16:00 h</span> /{" "}
+              <span className="text-[#ecf0f6]">Sab 9:00 – 12:00 h</span>
             </p>
 
             <div className="space-y-4">
@@ -254,6 +254,7 @@ export function AgendaVisitaModal({ isOpen, onClose }: AgendaVisitaModalProps) {
                   value={fecha}
                   onChange={setFecha}
                   minDate={todayYmdLocal()}
+                  disabledDays={(date) => date.getDay() === 0}
                   placeholder="Elegir fecha"
                 />
               </div>

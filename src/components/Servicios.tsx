@@ -54,17 +54,18 @@ function ServicioCard({
   return (
     <motion.div
       ref={ref}
-      initial={{ opacity: 0, y: 50 }}
-      animate={isInView ? { opacity: 1, y: 0 } : {}}
-      transition={{ duration: 0.5, delay: index * 0.08 }}
+      initial={{ opacity: 0, y: 44, scale: 0.97 }}
+      animate={isInView ? { opacity: 1, y: 0, scale: 1 } : {}}
+      transition={{ type: "spring", stiffness: 300, damping: 26, delay: index * 0.08 }}
       whileHover={{ y: -4 }}
-      className="group relative h-full min-h-[400px] overflow-hidden rounded-xl border-2 border-[#78716c]/65 bg-[#0c0f14] shadow-[inset_0_0_0_1px_rgba(120,113,108,0.18)] shadow-xl transition-[border-color,box-shadow,ring] duration-300 hover:border-[#ebe9e8] hover:shadow-[0_0_0_1px_rgba(250,250,249,0.5),0_0_36px_-4px_rgba(255,255,255,0.28)] hover:ring-2 hover:ring-white/65 cursor-default md:min-h-[440px]"
+      whileTap={{ scale: 0.985 }}
+      className="group relative h-full min-h-[400px] overflow-hidden rounded-xl border-2 border-[#78716c]/65 bg-[#0c0f14] shadow-[inset_0_0_0_1px_rgba(120,113,108,0.18)] shadow-xl transition-[border-color,box-shadow,ring] duration-300 max-md:border-[#c62828]/45 max-md:shadow-[inset_0_0_0_1px_rgba(198,40,40,0.35),0_0_28px_-8px_rgba(198,40,40,0.4)] hover:border-[#ebe9e8] hover:shadow-[0_0_0_1px_rgba(250,250,249,0.5),0_0_36px_-4px_rgba(255,255,255,0.28)] hover:ring-2 hover:ring-white/65 cursor-default md:min-h-[440px]"
     >
-      <div className="absolute inset-0 overflow-hidden shadow-[inset_0_0_0_2px_transparent] transition-[box-shadow] duration-300 group-hover:shadow-[inset_0_0_0_2px_rgba(255,255,255,0.65)]">
+      <div className="absolute inset-0 overflow-hidden shadow-[inset_0_0_0_2px_transparent] transition-[box-shadow] duration-300 max-md:shadow-[inset_0_0_0_1px_rgba(255,255,255,0.12)] group-hover:shadow-[inset_0_0_0_2px_rgba(255,255,255,0.65)]">
         <img
           src={item.imagen}
           alt={item.titulo}
-          className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.04]"
+          className="h-full w-full object-cover transition-transform duration-500 ease-out max-md:group-hover:scale-[1.03] group-hover:scale-[1.04]"
         />
         <div
           className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#0c0f14] from-[10%] via-[#0c0f14]/70 via-[30%] to-transparent"
