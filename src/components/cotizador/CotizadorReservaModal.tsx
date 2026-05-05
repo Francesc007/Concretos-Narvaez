@@ -22,9 +22,9 @@ import { Cotizador } from "./Cotizador";
 import { AgendaSelector } from "./AgendaSelector";
 
 const OBRA_LABELS: Record<string, string> = {
-  residencial: "Residencial",
-  comercial: "Comercial / industrial",
-  infraestructura: "Infraestructura / civil",
+  residencial: "particular",
+  comercial: "Residencial",
+  infraestructura: "Comercial / industrial",
 };
 
 interface MapsDistanceInfo {
@@ -48,7 +48,7 @@ interface Props {
 export function CotizadorReservaModal({ isOpen, onClose, volumenInicialM3 = null }: Props) {
   const [step, setStep] = useState<1 | 2>(1);
   const [cotizacion, setCotizacion] = useState<CotizacionPreciosConfig | null>(null);
-  const [capacidadMaximaHora, setCapacidadMaximaHora] = useState(30);
+  const [capacidadMaximaHora, setCapacidadMaximaHora] = useState(50);
   const [loadErr, setLoadErr] = useState<string | null>(null);
   const [loadingSheet, setLoadingSheet] = useState(false);
 
@@ -107,7 +107,7 @@ export function CotizadorReservaModal({ isOpen, onClose, volumenInicialM3 = null
         }
         const resistencias = resistenciasCotizacion(j1.cotizacion);
         setResistenciaKg((prev) => (resistencias.length > 0 && !resistencias.includes(prev) ? resistencias[0] : prev));
-        setCapacidadMaximaHora(Number(j2.capacidadMaximaHora) || 30);
+        setCapacidadMaximaHora(Number(j2.capacidadMaximaHora) || 50);
       } catch (e) {
         setLoadErr(
           e instanceof Error

@@ -463,6 +463,7 @@ export function Cotizador({
           className="w-full py-3 px-4 bg-[#0c0f14] border border-[#cfd8e4]/25 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#c62828]/60"
         >
           <option value="">Sin resistencia rápida</option>
+          <option value={28}>Resistencia normal a 28 días</option>
           <option value={14}>Resistencia rápida a 14 días</option>
           <option value={7}>Resistencia rápida a 7 días</option>
           <option value={3}>Resistencia rápida a 3 días</option>

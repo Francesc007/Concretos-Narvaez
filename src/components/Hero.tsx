@@ -2,17 +2,24 @@
 
 import { motion } from "framer-motion";
 
+/** Misma ruta: `public/Hero.mp4`. Sube el número si cambias el archivo y ves el video antiguo por caché. */
+const HERO_VIDEO_VERSION = 2;
+
 export function Hero() {
   return (
     <section
       id="inicio"
       className="relative flex min-h-screen min-h-[100dvh] w-full max-w-full items-center justify-center overflow-x-hidden"
     >
-      <div
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-        style={{
-          backgroundImage: `url(${encodeURI("/Hero 3.jpg")})`,
-        }}
+      <video
+        className="pointer-events-none absolute inset-0 h-full w-full object-cover"
+        src={`/Hero.mp4?v=${HERO_VIDEO_VERSION}`}
+        autoPlay
+        muted
+        loop
+        playsInline
+        preload="auto"
+        aria-hidden
       />
       <div className="absolute inset-0 bg-gradient-to-b from-[#0c0f14]/45 via-[#0c0f14]/28 to-[#0c0f14]/60" />
 

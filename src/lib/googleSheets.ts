@@ -645,11 +645,11 @@ export async function fetchPreciosRows(): Promise<PrecioRow[]> {
   return mergePreciosRowsPreferColumnasAb(mapped, desdeAb);
 }
 
-/** Lee capacidad m³/hora. Si no está configurada, conserva el default operativo de 30 m³/hora. */
+/** Lee capacidad m³/hora. Si no está configurada, conserva el default operativo de 50 m³/hora. */
 export async function fetchCapacidadMaximaHora(): Promise<number> {
   const doc = await getSpreadsheetDoc();
   const sheet = doc.sheetsByTitle["Config Sistema"] ?? doc.sheetsByTitle["Config"];
-  if (!sheet) return 30;
+  if (!sheet) return 50;
 
   await sheet.loadCells("A1:B40");
   for (let r = 0; r < Math.min(sheet.rowCount || 40, 40); r++) {
@@ -661,7 +661,7 @@ export async function fetchCapacidadMaximaHora(): Promise<number> {
   }
 
   const b1 = valorCeldaANum(sheet.getCellByA1("B1")?.value ?? "");
-  return b1 > 0 ? b1 : 30;
+  return b1 > 0 ? b1 : 50;
 }
 
 export function normalizeHora(hora: string): string {

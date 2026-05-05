@@ -111,7 +111,7 @@ export async function POST(request: Request) {
     }
 
     const [capacidad, usado] = await Promise.all([
-      fetchCapacidadMaximaHora().catch(() => 30),
+      fetchCapacidadMaximaHora().catch(() => 50),
       sumarVolumenAgendado(fecha, hora),
     ]);
     if (usado + volumen > capacidad) {

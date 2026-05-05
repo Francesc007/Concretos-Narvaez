@@ -182,9 +182,9 @@ export function CotizacionModal({ isOpen, onClose }: CotizacionModalProps) {
                   onChange={(e) => setTipoObra(e.target.value)}
                   className="w-full py-3 px-4 bg-[#0c0f14] border border-[#cfd8e4]/35 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#c62828]/60"
                 >
-                  <option value="residencial">Residencial</option>
-                  <option value="comercial">Comercial / industrial</option>
-                  <option value="infraestructura">Infraestructura / civil</option>
+                  <option value="residencial">particular</option>
+                  <option value="comercial">Residencial</option>
+                  <option value="infraestructura">Comercial / industrial</option>
                   <option value="otro">Otro</option>
                 </select>
               </div>

@@ -11,9 +11,9 @@ import {
 } from "@/lib/agendaRules";
 
 const OBRA_OPTIONS = [
-  { value: "residencial", label: "Residencial" },
-  { value: "comercial", label: "Comercial / industrial" },
-  { value: "infraestructura", label: "Infraestructura / civil" },
+  { value: "residencial", label: "Particular" },
+  { value: "comercial", label: "Residencial" },
+  { value: "infraestructura", label: "Comercial / industrial" },
 ];
 
 export interface AgendaSelectorProps {
