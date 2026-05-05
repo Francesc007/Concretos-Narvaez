@@ -61,8 +61,7 @@ export function Footer() {
               <MapPin size={18} className="shrink-0 mt-0.5" aria-hidden />
               <span className="max-w-md text-center text-sm sm:text-base leading-snug [word-break:normal]">
                 <span className="block">Carretera Tepeji-San Ignacio Nopala,</span>
-                <span className="block whitespace-nowrap">Km&nbsp;6</span>
-                <span className="block">San Ignacio Nopala, 42890, Hgo.</span>
+                <span className="block">Km 6, San Ignacio Nopala, 42890, Hgo.</span>
               </span>
             </a>
             <div className="flex items-start justify-center gap-2 text-[#d6d3d1] text-sm mt-5">

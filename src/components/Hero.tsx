@@ -9,10 +9,10 @@ export function Hero() {
   return (
     <section
       id="inicio"
-      className="relative flex min-h-screen min-h-[100dvh] w-full max-w-full items-center justify-center overflow-x-hidden bg-[#0c0f14]"
+      className="relative flex min-h-screen min-h-[100dvh] w-full max-w-full items-center justify-center overflow-x-hidden"
     >
       <video
-        className="pointer-events-none absolute inset-0 h-full w-full bg-[#0c0f14] object-contain object-center md:object-cover"
+        className="pointer-events-none absolute inset-0 h-full w-full object-cover"
         src={`/Hero.mp4?v=${HERO_VIDEO_VERSION}`}
         autoPlay
         muted
