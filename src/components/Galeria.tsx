@@ -4,27 +4,27 @@ import { motion } from "framer-motion";
 
 const items = [
   {
-    titulo: "Colado de vialidades, Tepeji del Río, Hgo.",
+    titulo: "Acceso B Central Park 57, Tepeji del Río, Hgo.",
     imagen: "/1.jpg",
   },
   {
-    titulo: "Cimentaciones industriales, Tula de Allende, Hgo.",
+    titulo: "Muro de contención en Autopista Méx- Qro.",
     imagen: "/2.jpg",
   },
   {
-    titulo: "Patio de maniobras, Apaxco, Hgo.",
+    titulo: "Cimentación en Farmaceútica, Parque Industrial Tepeji del Río,Hgo.",
     imagen: "/3.jpg",
   },
   {
-    titulo: "Nivelación de lámina, Soyaniquilpan de Juárez, Hgo.",
+    titulo: "Suministro de Vialidades principales, Hgo.",
     imagen: "/4.jpg",
   },
   {
-    titulo: "Rampas de accesibilidad, Tepeji del Río, Hgo.",
+    titulo: "Parque QUMA, Huehuetoca, Edo. Méx.",
     imagen: "/5.jpg",
   },
   {
-    titulo: "Obra habitacional, Atotonilco de Tula, Hgo.",
+    titulo: "Parque QUMA, Huehuetoca, Edo. Méx.",
     imagen: "/6.jpg",
   },
   {

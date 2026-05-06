@@ -96,7 +96,7 @@ export function Footer() {
                 <ul className="space-y-1 list-none text-center">
                   <li>55 4260 0590</li>
                   <li>773 158 5835</li>
-                  <li>55 1555 2097</li>
+                  <li> Fijo: 55 1555 2097</li>
                 </ul>
               </div>
             </address>
