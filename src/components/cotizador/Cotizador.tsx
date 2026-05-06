@@ -6,6 +6,8 @@ import {
   labelResistenciaKg,
   labelZona,
   resistenciasCotizacion,
+  resistenciaRapidaDesdeSeleccion,
+  VOLUMEN_MINIMO_OLLA_M3,
   type ResistenciaKg,
   type CotizacionDinamicaResultado,
   type TipoBombaCotizador,
@@ -176,6 +178,7 @@ export function Cotizador({
   const [destinoSuggestions, setDestinoSuggestions] = useState<PlaceAutocompleteSuggestion[]>([]);
   const [mostrarDestinoSuggestions, setMostrarDestinoSuggestions] = useState(false);
   const vol = parseFloat(volumen.replace(",", ".")) || 0;
+  const avisoCargoVacio = vol > 0 && vol < VOLUMEN_MINIMO_OLLA_M3;
   const precioM3 = cotizacionResultado.precioM3;
   const totalEstimado = cotizacionResultado.total;
   const resistenciasDisponibles = resistenciasCotizacion(cotizacion);
@@ -426,6 +429,14 @@ export function Cotizador({
           className="w-full py-3 px-4 bg-[#0c0f14] border border-[#cfd8e4]/25 rounded-lg text-white placeholder:text-[#b0bcc9] focus:outline-none focus:ring-2 focus:ring-[#c62828]/60"
           placeholder="Ej. 12"
         />
+        {avisoCargoVacio && (
+          <div className="mt-3 rounded-lg border border-amber-500/45 bg-amber-950/35 px-3 py-2.5 text-sm text-amber-50/95">
+            <p className="text-amber-50/95 leading-relaxed">
+              Si el pedido es menor a 5 m³, se cobrará un cargo por vacío de{" "}
+              <span className="text-amber-100 font-semibold tabular-nums">$600 MXN</span> por m³ faltante.
+            </p>
+          </div>
+        )}
       </div>
 
       <div className="space-y-3">
@@ -456,19 +467,24 @@ export function Cotizador({
         </div>
         <select
           aria-label="Resistencia rápida"
-          value={resistenciaRapidaDias}
-          onChange={(e) =>
-            setResistenciaRapidaDias(e.target.value === "" ? "" : (Number(e.target.value) as ResistenciaRapidaDias))
-          }
+          value={resistenciaRapidaDesdeSeleccion(resistenciaRapidaDias) ?? ""}
+          onChange={(e) => {
+            const raw = e.target.value;
+            if (raw === "") {
+              setResistenciaRapidaDias("");
+              return;
+            }
+            const n = Number(raw);
+            if (n === 3 || n === 7 || n === 14) setResistenciaRapidaDias(n);
+          }}
           className="w-full py-3 px-4 bg-[#0c0f14] border border-[#cfd8e4]/25 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#c62828]/60"
         >
-          <option value="">Sin resistencia rápida</option>
-          <option value={28}>Resistencia normal a 28 días</option>
+          <option value="">Resistencia normal a 28 días</option>
           <option value={14}>Resistencia rápida a 14 días</option>
           <option value={7}>Resistencia rápida a 7 días</option>
           <option value={3}>Resistencia rápida a 3 días</option>
         </select>
-        {resistenciaKg < 200 && resistenciaRapidaDias !== "" && (
+        {resistenciaKg < 200 && resistenciaRapidaDesdeSeleccion(resistenciaRapidaDias) != null && (
           <p className="text-xs text-red-300">Las resistencias rápidas solo aplican con f&apos;c ≥ 200 kg/cm².</p>
         )}
       </div>

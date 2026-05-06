@@ -836,6 +836,7 @@ export async function sumarVolumenAgendado(fecha: string, hora: string): Promise
 
 export interface ReservaPayload {
   Nombre: string;
+  Teléfono: string;
   Empresa: string;
   Obra: string;
   Fecha: string;
@@ -923,6 +924,7 @@ export async function appendReservaAgenda(payload: ReservaPayload): Promise<void
 
   const row: Record<string, string | number> = {
     Nombre: payload.Nombre,
+    Teléfono: payload.Teléfono,
     Empresa: payload.Empresa,
     Obra: payload.Obra,
     Fecha: normalizeFecha(payload.Fecha),
@@ -992,8 +994,10 @@ async function findFirstEmptyAgendaRow(sheet: GoogleSpreadsheetWorksheet): Promi
   return null;
 }
 
+/** Cabeceras mínimas de Agenda. Reportes en Sheets: sumar «Cotización» solo si «Estado» = Pagado y «Semana» coincide (incl. semanas futuras); ver scripts/google-sheets/reportes-total-pagado-por-semana.gs */
 const AGENDA_HEADERS = [
   "Nombre",
+  "Teléfono",
   "Empresa",
   "Obra",
   "Vaciado",

@@ -19,6 +19,8 @@ const OBRA_OPTIONS = [
 export interface AgendaSelectorProps {
   nombre: string;
   setNombre: (v: string) => void;
+  telefono: string;
+  setTelefono: (v: string) => void;
   empresa: string;
   setEmpresa: (v: string) => void;
   obra: string;
@@ -40,6 +42,8 @@ export interface AgendaSelectorProps {
 export function AgendaSelector({
   nombre,
   setNombre,
+  telefono,
+  setTelefono,
   empresa,
   setEmpresa,
   obra,
@@ -130,12 +134,13 @@ export function AgendaSelector({
       <div className="grid sm:grid-cols-2 gap-4">
         <div>
           <label htmlFor="agenda-nombre" className="block text-sm font-medium text-[#ecf0f6] mb-2">
-            Nombre
+            Nombre <span className="text-[#c62828]" aria-hidden="true">*</span>
           </label>
           <input
             id="agenda-nombre"
             value={nombre}
             onChange={(e) => setNombre(e.target.value)}
+            aria-required="true"
             className="w-full py-3 px-4 bg-[#0c0f14] border border-[#cfd8e4]/25 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#c62828]/60"
           />
         </div>
@@ -153,22 +158,40 @@ export function AgendaSelector({
         </div>
       </div>
 
-      <div>
-        <label htmlFor="agenda-obra" className="block text-sm font-medium text-[#ecf0f6] mb-2">
-          Obra
-        </label>
-        <select
-          id="agenda-obra"
-          value={obra}
-          onChange={(e) => setObra(e.target.value)}
-          className="w-full py-3 px-4 bg-[#0c0f14] border border-[#cfd8e4]/25 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#c62828]/60"
-        >
-          {OBRA_OPTIONS.map((o) => (
-            <option key={o.value} value={o.value}>
-              {o.label}
-            </option>
-          ))}
-        </select>
+      <div className="grid sm:grid-cols-2 gap-4">
+        <div>
+          <label htmlFor="agenda-telefono" className="block text-sm font-medium text-[#ecf0f6] mb-2">
+            Teléfono <span className="text-[#c62828]" aria-hidden="true">*</span>
+          </label>
+          <input
+            id="agenda-telefono"
+            type="tel"
+            inputMode="tel"
+            autoComplete="tel"
+            value={telefono}
+            onChange={(e) => setTelefono(e.target.value)}
+            aria-required="true"
+            className="w-full py-3 px-4 bg-[#0c0f14] border border-[#cfd8e4]/25 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#c62828]/60"
+            placeholder="10 dígitos"
+          />
+        </div>
+        <div>
+          <label htmlFor="agenda-obra" className="block text-sm font-medium text-[#ecf0f6] mb-2">
+            Tipo de obra
+          </label>
+          <select
+            id="agenda-obra"
+            value={obra}
+            onChange={(e) => setObra(e.target.value)}
+            className="w-full py-3 px-4 bg-[#0c0f14] border border-[#cfd8e4]/25 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#c62828]/60"
+          >
+            {OBRA_OPTIONS.map((o) => (
+              <option key={o.value} value={o.value}>
+                {o.label}
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
 
       <div className="grid sm:grid-cols-2 gap-4">
@@ -256,7 +279,7 @@ export function AgendaSelector({
 
       <button
         type="button"
-        disabled={!nombre.trim() || !fecha || !cupoOk || reservando}
+        disabled={!nombre.trim() || !telefono.trim() || !fecha || !cupoOk || reservando}
         onClick={onSubmitReserva}
         className="w-full py-3 rounded-lg bg-[#c62828] hover:bg-[#e53935] disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold uppercase tracking-wide transition-colors"
       >

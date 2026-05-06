@@ -12,6 +12,7 @@ import {
   labelVaciadoCliente,
   resistenciasCotizacion,
   vaciadoApiDesdeSeleccion,
+  resistenciaRapidaDesdeSeleccion,
   type CotizacionDinamicaResultado,
   type ResistenciaKg,
   type TipoBombaCotizador,
@@ -68,6 +69,7 @@ export function CotizadorReservaModal({ isOpen, onClose, volumenInicialM3 = null
   const [resistenciaRapidaDias, setResistenciaRapidaDias] = useState<"" | ResistenciaRapidaDias>("");
 
   const [nombre, setNombre] = useState("");
+  const [telefono, setTelefono] = useState("");
   const [empresa, setEmpresa] = useState("");
   const [obra, setObra] = useState("residencial");
   const [fecha, setFecha] = useState(() => nextAllowedAgendaDateYmd());
@@ -131,7 +133,14 @@ export function CotizadorReservaModal({ isOpen, onClose, volumenInicialM3 = null
   }, [isOpen, volumenInicialM3]);
 
   const volumenNumerico = useMemo(() => parseFloat(volumen.replace(",", ".")) || 0, [volumen]);
+  const diasRapidosElegidos = resistenciaRapidaDesdeSeleccion(resistenciaRapidaDias);
   const metrosTuberiaNumerico = useMemo(() => parseFloat(metrosTuberia.replace(",", ".")) || 0, [metrosTuberia]);
+
+  useEffect(() => {
+    if (resistenciaRapidaDias !== "" && resistenciaRapidaDesdeSeleccion(resistenciaRapidaDias) == null) {
+      setResistenciaRapidaDias("");
+    }
+  }, [resistenciaRapidaDias]);
   const aditivosSeleccionados = useMemo(
     () => (Object.entries(aditivos).filter(([, activo]) => activo).map(([key]) => key) as AditivoCotizacion[]),
     [aditivos],
@@ -147,15 +156,15 @@ export function CotizadorReservaModal({ isOpen, onClose, volumenInicialM3 = null
         zona: distanciaObra?.zona ?? null,
         metrosTuberia: metrosTuberiaNumerico,
         aditivos: aditivosSeleccionados,
-        resistenciaRapidaDias: resistenciaRapidaDias === "" ? null : resistenciaRapidaDias,
+        resistenciaRapidaDias: diasRapidosElegidos,
       }),
     [
       aditivosSeleccionados,
       cotizacion,
+      diasRapidosElegidos,
       distanciaObra?.zona,
       metrosTuberiaNumerico,
       resistenciaKg,
-      resistenciaRapidaDias,
       tipoBomba,
       tipoVaciado,
       volumenNumerico,
@@ -172,6 +181,7 @@ export function CotizadorReservaModal({ isOpen, onClose, volumenInicialM3 = null
 
   function resetReservaForm() {
     setNombre("");
+    setTelefono("");
     setEmpresa("");
     setObra("residencial");
     const nextFecha = nextAllowedAgendaDateYmd();
@@ -243,6 +253,7 @@ export function CotizadorReservaModal({ isOpen, onClose, volumenInicialM3 = null
     const lineas = [
       `*Reserva Concretos Tepexi*`,
       `Nombre: ${nombre.trim()}`,
+      `Teléfono: ${telefono.trim()}`,
       empresa.trim() ? `Empresa: ${empresa.trim()}` : null,
       `Obra: ${OBRA_LABELS[obra] ?? obra}`,
       destinoObra.trim() ? `Ubicación obra: ${destinoObra.trim()}` : null,
@@ -253,7 +264,7 @@ export function CotizadorReservaModal({ isOpen, onClose, volumenInicialM3 = null
       `Vaciado: ${extra.vaciado}`,
       tipoVaciado === "bombeo" && tipoBomba === "estacionaria" ? `Tubería estacionaria: ${metrosTuberia} m` : null,
       aditivosLabel ? `Aditivos: ${aditivosLabel}` : null,
-      resistenciaRapidaDias ? `Resistencia rápida: ${resistenciaRapidaDias} días` : null,
+      diasRapidosElegidos ? `Resistencia rápida: ${diasRapidosElegidos} días` : null,
       desglose ? `Desglose: ${desglose}` : null,
       `Total estimado: $${extra.total.toLocaleString("es-MX", { minimumFractionDigits: 2 })}`,
       `Estado en agenda: Reservado`,
@@ -267,8 +278,8 @@ export function CotizadorReservaModal({ isOpen, onClose, volumenInicialM3 = null
   const handleReservar = async () => {
     setErrorReserva(null);
     const vol = parseFloat(volumen.replace(",", ".")) || 0;
-    if (!nombre.trim() || vol <= 0) {
-      setErrorReserva("Completa nombre y volumen válido.");
+    if (!nombre.trim() || !telefono.trim() || vol <= 0) {
+      setErrorReserva("Completa nombre, teléfono y volumen válido.");
       return;
     }
     if (!cotizacion) {
@@ -302,6 +313,7 @@ export function CotizadorReservaModal({ isOpen, onClose, volumenInicialM3 = null
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           nombre: nombre.trim(),
+          telefono: telefono.trim(),
           empresa: empresa.trim(),
           obra: OBRA_LABELS[obra] ?? obra,
           fecha,
@@ -319,7 +331,7 @@ export function CotizadorReservaModal({ isOpen, onClose, volumenInicialM3 = null
           tipoBomba: tipoVaciado === "bombeo" ? labelVaciadoCliente(tipoVaciado, tipoBomba) : "",
           metrosTuberia: tipoVaciado === "bombeo" && tipoBomba === "estacionaria" ? metrosTuberiaNumerico : undefined,
           aditivos: aditivosLabel,
-          resistenciaRapida: resistenciaRapidaDias ? `${resistenciaRapidaDias} días` : "",
+          resistenciaRapida: diasRapidosElegidos ? `${diasRapidosElegidos} días` : "",
           precioM3: cotizacionResultado.precioM3,
           desglose: desgloseCotizacion,
         }),
@@ -467,6 +479,8 @@ export function CotizadorReservaModal({ isOpen, onClose, volumenInicialM3 = null
                 <AgendaSelector
                   nombre={nombre}
                   setNombre={setNombre}
+                  telefono={telefono}
+                  setTelefono={setTelefono}
                   empresa={empresa}
                   setEmpresa={setEmpresa}
                   obra={obra}

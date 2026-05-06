@@ -16,6 +16,15 @@ export type TipoBombaCotizador = "estacionaria" | "pluma";
 export const RESISTENCIAS_KG = [100, 150, 200, 250, 300, 350] as const;
 export type ResistenciaKg = number;
 
+/** Solo 3, 7 y 14 son cargo «resistencia rápida»; 28 días es estándar (sin suplemento). */
+export function resistenciaRapidaDesdeSeleccion(
+  v: "" | ResistenciaRapidaDias | number | null | undefined,
+): ResistenciaRapidaDias | null {
+  if (v === "" || v == null) return null;
+  if (v === 3 || v === 7 || v === 14) return v;
+  return null;
+}
+
 export const PLANTA_TEPEXI = {
   lat: 19.8419145,
   lng: -99.3477361,
@@ -30,8 +39,28 @@ export const ZONAS_COTIZACION: Record<ZonaCotizacion, { minKm: number; maxKm: nu
 
 export const DISTANCIA_MAXIMA_COTIZACION_KM = 50;
 export const VOLUMEN_MINIMO_OLLA_M3 = 5;
+/** Cargo por m³ faltante hasta el mínimo de olla (LDP julio 2025 / nota en PDF). Fallback si la hoja no define el valor. */
+export const CARGO_VACIO_REFERENCIA_MXN = 600;
 export const TUBERIA_INCLUIDA_M = 30;
 export const TUBERIA_MAXIMA_AUTOMATICA_M = 100;
+
+/** Unitario para textos de ayuda; en el total rige el valor configurado por zona en Sheets. */
+export function cargoVacioUnitarioMxn(
+  config: CotizacionPreciosConfig | null,
+  zona: ZonaCotizacion | null | undefined,
+): number {
+  if (zona) {
+    const n = config?.zonas?.[zona]?.cargoVacioM3 ?? 0;
+    if (n > 0) return n;
+  }
+  if (config?.zonas) {
+    for (const z of Object.keys(config.zonas) as ZonaCotizacion[]) {
+      const n = config.zonas[z]?.cargoVacioM3 ?? 0;
+      if (n > 0) return n;
+    }
+  }
+  return CARGO_VACIO_REFERENCIA_MXN;
+}
 
 export function parseResistenciaKg(s: string): ResistenciaKg | null {
   const t = String(s).trim();
@@ -247,6 +276,7 @@ export function calcularCotizacionDinamica(
   const lineas: CotizacionDetalleLinea[] = [];
   const motivosBloqueo: string[] = [];
   const volumen = Number.isFinite(input.volumen) && input.volumen > 0 ? input.volumen : 0;
+  const diasRapidos = resistenciaRapidaDesdeSeleccion(input.resistenciaRapidaDias);
 
   if (!config) motivosBloqueo.push("No se pudieron cargar los precios.");
   if (!input.zona) {
@@ -257,7 +287,7 @@ export function calcularCotizacionDinamica(
   if (input.tipoVaciado === "bombeo" && input.tipoBomba === "estacionaria" && input.metrosTuberia > TUBERIA_MAXIMA_AUTOMATICA_M) {
     motivosBloqueo.push("Más de 100 m de tubería requiere validación de un asesor.");
   }
-  if (input.resistenciaRapidaDias && input.resistenciaKg < 200) {
+  if (diasRapidos != null && input.resistenciaKg < 200) {
     motivosBloqueo.push("Las resistencias rápidas solo aplican a concretos f'c ≥ 200 kg/cm².");
   }
 
@@ -277,13 +307,13 @@ export function calcularCotizacionDinamica(
   }
 
   const zonaConfig = input.zona ? config?.zonas?.[input.zona] : undefined;
-  const cargoVacioM3 = zonaConfig?.cargoVacioM3 ?? 0;
-  if (volumen > 0 && volumen < VOLUMEN_MINIMO_OLLA_M3 && cargoVacioM3 > 0) {
+  const cargoVacioUnitario = cargoVacioUnitarioMxn(config, input.zona ?? undefined);
+  if (volumen > 0 && volumen < VOLUMEN_MINIMO_OLLA_M3 && subtotalConcreto > 0 && cargoVacioUnitario > 0) {
     const faltante = VOLUMEN_MINIMO_OLLA_M3 - volumen;
     lineas.push({
       concepto: "Cargo por vacío",
-      importe: faltante * cargoVacioM3,
-      detalle: `${faltante.toLocaleString("es-MX", { maximumFractionDigits: 2 })} m³ faltantes para 5 m³`,
+      importe: faltante * cargoVacioUnitario,
+      detalle: `${faltante.toLocaleString("es-MX", { maximumFractionDigits: 2 })} m³ faltantes × $${cargoVacioUnitario.toLocaleString("es-MX", { minimumFractionDigits: 2 })} MXN/m³ (mín. olla ${VOLUMEN_MINIMO_OLLA_M3} m³)`,
     });
   }
 
@@ -330,13 +360,13 @@ export function calcularCotizacionDinamica(
     });
   }
 
-  if (input.resistenciaRapidaDias) {
-    const unitario = importeRapida(config, input.resistenciaRapidaDias);
+  if (diasRapidos != null) {
+    const unitario = importeRapida(config, diasRapidos);
     if (unitario <= 0) {
-      motivosBloqueo.push(`Falta configurar el precio de resistencia rápida a ${input.resistenciaRapidaDias} días.`);
+      motivosBloqueo.push(`Falta configurar el precio de resistencia rápida a ${diasRapidos} días.`);
     } else {
       lineas.push({
-        concepto: `Resistencia rápida a ${input.resistenciaRapidaDias} días`,
+        concepto: `Resistencia rápida a ${diasRapidos} días`,
         importe: unitario * volumen,
         detalle: `$${unitario.toLocaleString("es-MX", { minimumFractionDigits: 2 })}/m³`,
       });

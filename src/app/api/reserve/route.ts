@@ -14,6 +14,7 @@ const METHODS = "POST, OPTIONS";
 
 interface Body {
   nombre?: string;
+  telefono?: string;
   empresa?: string;
   obra?: string;
   fecha?: string;
@@ -64,6 +65,7 @@ export async function POST(request: Request) {
   }
 
   const nombre = String(body.nombre ?? "").trim();
+  const telefono = String(body.telefono ?? "").trim();
   const empresa = String(body.empresa ?? "").trim();
   const obra = String(body.obra ?? "").trim();
   const fecha = String(body.fecha ?? "").trim().slice(0, 10);
@@ -130,6 +132,7 @@ export async function POST(request: Request) {
     const ts = formatTimestampReservaCDMX(new Date());
     await appendReservaAgenda({
       Nombre: nombre,
+      Teléfono: telefono,
       Empresa: empresa,
       Obra: obra || "—",
       Fecha: fecha,
