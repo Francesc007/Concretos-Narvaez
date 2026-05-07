@@ -5,8 +5,12 @@ export const CONFIG = {
    * no 52 solo (ese formato suele fallar o apuntar mal). Equivale a +52 1 55 4260 0590.
    */
   whatsappNumber: "5215542600590",
+  /** Segundo contacto móvil por WhatsApp (773 158 5835). Formato API 521 + 10 dígitos. */
+  whatsappSecondaryNumber: "5217731585835",
   /** Mismo número en formato legible */
   whatsappDisplay: "+52 55 4260 0590",
+  /** Teléfono fijo en formato E.164 para `tel:` (55 1555 2097). */
+  landlinePhoneE164: "+525515552097",
   googleMapsUrl:
     "https://www.google.com.mx/maps/place/Concreto+Premezclado+Tepeji/@19.8419148,-99.3478345,17z/data=!4m6!3m5!1s0x85d22516dd4e0d03:0x864669e7244384be!8m2!3d19.8419145!4d-99.3477361!16s%2Fg%2F11h07_f0h9?entry=ttu",
   facebookUrl: "https://www.facebook.com/ConcretosTepexiOficial/",

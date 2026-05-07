@@ -13,14 +13,19 @@ import { AgendaVisitaModal } from "@/components/AgendaVisitaModal";
 import { CotizadorReservaModal } from "@/components/cotizador/CotizadorReservaModal";
 import { WhatsAppButton } from "@/components/WhatsAppButton";
 
-export function LandingPage() {
+type LandingPageProps = { clientesImageFiles: string[] };
+
+export function LandingPage({ clientesImageFiles }: LandingPageProps) {
   const [cotizadorOpen, setCotizadorOpen] = useState(false);
   const [volumenCotizadorInicial, setVolumenCotizadorInicial] = useState<number | null>(null);
   const [agendaVisitaOpen, setAgendaVisitaOpen] = useState(false);
 
   return (
     <>
-      <Navbar onCotizadorClick={() => setCotizadorOpen(true)} />
+      <Navbar
+        onCotizadorClick={() => setCotizadorOpen(true)}
+        onAgendaVisitaClick={() => setAgendaVisitaOpen(true)}
+      />
       <Hero />
       <Servicios />
       <Galeria />
@@ -34,7 +39,7 @@ export function LandingPage() {
         onCotizadorClick={() => setCotizadorOpen(true)}
         onAgendaVisitaClick={() => setAgendaVisitaOpen(true)}
       />
-      <Clientes />
+      <Clientes imageFiles={clientesImageFiles} />
       <Footer />
       <CotizadorReservaModal
         isOpen={cotizadorOpen}

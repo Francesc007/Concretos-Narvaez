@@ -23,7 +23,7 @@ import { Cotizador } from "./Cotizador";
 import { AgendaSelector } from "./AgendaSelector";
 
 const OBRA_LABELS: Record<string, string> = {
-  residencial: "particular",
+  residencial: "Particular",
   comercial: "Residencial",
   infraestructura: "Comercial / industrial",
 };
@@ -267,8 +267,7 @@ export function CotizadorReservaModal({ isOpen, onClose, volumenInicialM3 = null
       diasRapidosElegidos ? `Resistencia rápida: ${diasRapidosElegidos} días` : null,
       desglose ? `Desglose: ${desglose}` : null,
       `Total estimado: $${extra.total.toLocaleString("es-MX", { minimumFractionDigits: 2 })}`,
-      `Estado en agenda: Reservado`,
-      `Importante: el horario se mantiene reservado por máximo 2 horas; si no recibimos el comprobante de pago en ese plazo, se libera automáticamente.`,
+      `Estado en agenda: Agendado`,
       comentarios.trim() ? `Comentarios: ${comentarios.trim()}` : null,
     ].filter(Boolean) as string[];
     const text = encodeURIComponent(lineas.join("\n"));
@@ -368,55 +367,53 @@ export function CotizadorReservaModal({ isOpen, onClose, volumenInicialM3 = null
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.96, y: 12 }}
             transition={{ type: "spring", damping: 26, stiffness: 320 }}
-            className="cotizacion-modal-scroll relative w-full max-w-lg max-h-[min(92vh,40rem)] overflow-y-auto rounded-2xl border-2 border-[#c62828]/75 bg-[#141922] p-5 shadow-[0_0_0_1px_rgba(198,40,40,0.45),0_0_36px_-4px_rgba(198,40,40,0.35),0_20px_50px_-12px_rgba(0,0,0,0.55)] ring-2 ring-[#c62828]/25 sm:p-6"
+            className="cotizacion-modal-scroll relative w-full max-w-lg max-h-[min(92vh,40rem)] overflow-y-auto rounded-2xl border-2 border-slate-200 bg-white p-5 shadow-[0_20px_50px_-12px_rgba(19,47,76,0.15)] ring-1 ring-slate-200/80 sm:p-6"
             role="dialog"
             aria-modal="true"
             aria-labelledby={mensajePagoAbierto ? "mensaje-pago-titulo" : undefined}
             onClick={(e) => e.stopPropagation()}
           >
             {mensajePagoAbierto ? (
-              <div className="text-center py-2 sm:py-4">
-                <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-[#c62828]/20">
-                  <CheckCircle2 className="h-9 w-9 text-[#86efac]" aria-hidden />
+              <div className="py-2 text-center sm:py-4">
+                <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-100">
+                  <CheckCircle2 className="h-9 w-9 text-emerald-600" aria-hidden />
                 </div>
                 <h3
                   id="mensaje-pago-titulo"
-                  className="font-display text-xl font-bold text-white tracking-wide sm:text-2xl mb-3"
+                  className="font-display mb-3 text-xl font-bold tracking-wide text-[var(--tepexi-logo-navy)] sm:text-2xl"
                 >
                   Pedido registrado
                 </h3>
-                <p className="text-sm leading-relaxed text-[#ecf0f6] mb-6 text-left sm:text-center">
-                  Tu reserva quedó guardada. Tienes un máximo de{" "}
-                  <span className="text-white font-semibold">2 horas</span> para realizar el pago y enviar el
-                  comprobante por WhatsApp. Si no recibimos el comprobante en ese plazo, el horario dejará de estar
-                  reservado y volverá a estar libre.
+                <p className="mb-6 text-left text-sm leading-relaxed text-[var(--tepexi-text-body)] sm:text-center">
+                  Tu reserva quedó guardada. En unos momentos uno de nuestros Asesores se pondrá en contacto contigo para
+                  dar seguimiento al servicio agendado.
                 </p>
                 <button
                   type="button"
                   onClick={confirmarMensajePagoYWhatsApp}
-                  className="w-full sm:w-auto min-w-[200px] py-3.5 px-6 rounded-lg bg-[#c62828] hover:bg-[#e53935] text-white font-display font-bold uppercase tracking-wide text-sm transition-colors"
+                  className="w-full min-w-[200px] rounded-lg bg-[#c62828] px-6 py-3.5 font-display text-sm font-bold uppercase tracking-wide text-white transition-colors hover:bg-[#e53935] sm:w-auto"
                 >
                   Entendido, continuar a WhatsApp
                 </button>
               </div>
             ) : (
               <>
-            <div className="flex justify-between items-start gap-3 mb-4">
+            <div className="mb-4 flex items-start justify-between gap-3">
               <div>
-                <p className="text-xs uppercase tracking-wide text-[#c62828] font-semibold mb-1">
+                <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-[#c62828]">
                   Paso {step} de 2
                 </p>
-                <h3 className="font-display text-xl font-bold text-white tracking-wide sm:text-2xl">
+                <h3 className="font-display text-xl font-bold tracking-wide text-[var(--tepexi-logo-navy)] sm:text-2xl">
                   {step === 1 ? "Cotizar" : "Agenda y reserva"}
                 </h3>
               </div>
               <button
                 type="button"
                 onClick={cerrarModal}
-                className="shrink-0 p-2 hover:bg-white/10 rounded-full transition-colors"
+                className="shrink-0 rounded-full p-2 text-slate-500 transition-colors hover:bg-slate-100 hover:text-[var(--tepexi-logo-navy)]"
                 aria-label="Cerrar"
               >
-                <X size={24} className="text-[#d8e3ee]" />
+                <X size={24} aria-hidden />
               </button>
             </div>
 
@@ -471,7 +468,7 @@ export function CotizadorReservaModal({ isOpen, onClose, volumenInicialM3 = null
                 <button
                   type="button"
                   onClick={() => setStep(1)}
-                  className="mb-4 inline-flex items-center gap-1 text-sm text-[#d8e3ee] hover:text-white"
+                  className="mb-4 inline-flex items-center gap-1 text-sm font-medium text-[var(--tepexi-logo-navy)] transition-colors hover:text-[#c62828]"
                 >
                   <ChevronLeft size={18} />
                   Volver a cotización

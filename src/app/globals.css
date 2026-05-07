@@ -1,18 +1,33 @@
 @import "tailwindcss";
 
 :root {
-  --background: #0c0f14;
-  --foreground: #f3f2f2;
-  --tepexi-bg: #0c0f14;
-  --tepexi-surface: #141922;
-  --tepexi-elevated: #1c2433;
+  --background: #ffffff;
+  --foreground: #334155;
+  --tepexi-page: #ffffff;
+  /** Fondo general (blanco) */
+  --tepexi-bg: #ffffff;
+  /** Bloques / tarjetas */
+  --tepexi-surface: #f8fafc;
+  --tepexi-elevated: #f1f5f9;
   --tepexi-accent: #c62828;
   --tepexi-accent-hover: #e53935;
-  --tepexi-steel: #d8e3ee;
-  --tepexi-concrete: #ecf0f6;
-  --tepexi-border: rgba(203, 213, 225, 0.22);
+  /** Azul marino del logotipo */
+  --tepexi-logo-navy: #132f4c;
+  /** Texto principal (legible sobre blanco/gris claro) */
+  --tepexi-text: #132f4c;
+  --tepexi-text-body: #3d4f63;
+  --tepexi-text-muted: #5c6b7a;
+  --tepexi-steel: #475569;
+  --tepexi-concrete: #64748b;
+  --tepexi-border: rgba(19, 47, 76, 0.12);
+  --tepexi-border-light: #e2e8f0;
+  /** Secciones alternas */
+  --tepexi-section-gray: #f1f5f9;
+  --tepexi-section-bluewash: #e8eef5;
   --tepexi-logo-gray: #7d7d7d;
-  --tepexi-concrete-frame: #78716c;
+  --tepexi-concrete-frame: #94a3b8;
+  /** Modales / superficies oscuras (cotizador) */
+  --tepexi-surface-dark: #141922;
 }
 
 @theme inline {
@@ -24,6 +39,7 @@
 html {
   overflow-x: hidden;
   max-width: 100vw;
+  background-color: var(--tepexi-page);
 }
 
 body {
@@ -60,7 +76,6 @@ body {
     transform: translate3d(0, 0, 0);
   }
   to {
-    /* Valor por defecto; Clientes.tsx lo sustituye por -{mitad}px para bucle exacto */
     transform: translate3d(var(--tepexi-clientes-marquee-x, -50%), 0, 0);
   }
 }
@@ -86,7 +101,7 @@ body {
 
 .cotizacion-modal-scroll {
   scrollbar-width: thin;
-  scrollbar-color: #78716c #0c0f14;
+  scrollbar-color: #94a3b8 #f1f5f9;
 }
 
 .cotizacion-modal-scroll::-webkit-scrollbar {
@@ -94,33 +109,33 @@ body {
 }
 
 .cotizacion-modal-scroll::-webkit-scrollbar-track {
-  background: #0c0f14;
+  background: #f1f5f9;
   border-radius: 6px;
 }
 
 .cotizacion-modal-scroll::-webkit-scrollbar-thumb {
-  background: #57534e;
+  background: #cbd5e1;
   border-radius: 6px;
-  border: 1px solid #334155;
+  border: 1px solid #e2e8f0;
 }
 
 .cotizacion-modal-scroll::-webkit-scrollbar-thumb:hover {
-  background: #78716c;
+  background: #94a3b8;
 }
 
-/* react-day-picker (DateFieldCalendar): tema oscuro */
+/* react-day-picker (DateFieldCalendar): tema legible en UI clara */
 .tepexi-rdp .rdp-root {
   --rdp-accent-color: #c62828;
-  --rdp-accent-background-color: rgba(198, 40, 40, 0.22);
+  --rdp-accent-background-color: rgba(198, 40, 40, 0.12);
   --rdp-outside-opacity: 0.45;
-  color: #f1f5f9;
+  color: #132f4c;
 }
 
 .tepexi-rdp .rdp-caption_label,
 .tepexi-rdp .rdp-weekday {
-  color: #d8e3ee;
+  color: #475569;
 }
 
 .tepexi-rdp .rdp-nav_button {
-  color: #ecf0f6;
+  color: #132f4c;
 }

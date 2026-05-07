@@ -190,17 +190,25 @@ export function DateFieldCalendar({
         onClick={() => setOpen((o) => !o)}
         aria-expanded={open ? "true" : "false"}
         aria-haspopup="dialog"
-        className="w-full py-3 px-4 bg-[#0c0f14] border border-[#cfd8e4]/25 rounded-lg text-left focus:outline-none focus:ring-2 focus:ring-[#c62828]/60 flex items-center justify-between gap-2 min-h-[48px]"
+        className="flex w-full items-center justify-between gap-2 rounded-lg border border-slate-300 bg-white px-4 py-3 text-left text-base outline-none transition focus:border-[#c62828] focus:ring-2 focus:ring-[#c62828]/20"
       >
-        <span className={selected ? "text-white text-sm sm:text-base" : "text-[#b0bcc9]"}>{label}</span>
-        <Calendar className="h-5 w-5 shrink-0 text-[#d8e3ee]" aria-hidden />
+        <span
+          className={
+            selected
+              ? "min-w-0 flex-1 truncate text-[var(--tepexi-logo-navy)]"
+              : "min-w-0 flex-1 truncate text-slate-400"
+          }
+        >
+          {label}
+        </span>
+        <Calendar className="h-5 w-5 shrink-0 text-slate-500" aria-hidden />
       </button>
       {open &&
         typeof document !== "undefined" &&
         createPortal(
           <div
             ref={panelRef}
-            className="tepexi-rdp fixed z-[10000] w-[min(100vw-1rem,20rem)] max-h-[calc(92dvh-24px-env(safe-area-inset-bottom,0px))] overflow-y-auto overscroll-contain rounded-xl border border-[#cfd8e4]/25 bg-[#141922] p-3 shadow-2xl"
+            className="tepexi-rdp fixed z-[10000] w-[min(100vw-1rem,20rem)] max-h-[calc(92dvh-24px-env(safe-area-inset-bottom,0px))] overflow-y-auto overscroll-contain rounded-xl border border-slate-200 bg-white p-3 shadow-2xl"
             style={{ top: panelPos.top, left: panelPos.left }}
             role="dialog"
             aria-label="Calendario"

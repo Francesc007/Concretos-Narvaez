@@ -43,7 +43,7 @@ export default function RootLayout({
     <html lang="es-MX" className={`${dmSans.variable} ${oswald.variable} h-full antialiased`}>
       <body
         suppressHydrationWarning
-        className="min-h-full flex flex-col bg-[#0c0f14] text-[#f3f2f2]"
+        className="min-h-full flex flex-col bg-[var(--tepexi-page)] text-[var(--tepexi-text-body)]"
       >
         {children}
       </body>

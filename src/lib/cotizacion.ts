@@ -42,7 +42,23 @@ export const VOLUMEN_MINIMO_OLLA_M3 = 5;
 /** Cargo por m³ faltante hasta el mínimo de olla (LDP julio 2025 / nota en PDF). Fallback si la hoja no define el valor. */
 export const CARGO_VACIO_REFERENCIA_MXN = 600;
 export const TUBERIA_INCLUIDA_M = 30;
-export const TUBERIA_MAXIMA_AUTOMATICA_M = 100;
+/** Si «Config Sistema» no define máximo de tubería, se usa este valor (m). */
+export const TUBERIA_MAXIMA_AUTOMATICA_M = 60;
+/** Si «Config Sistema» no define máximo de volumen en cotizador, se usa este valor (m³). */
+export const VOLUMEN_MAXIMO_COTIZADOR_M3 = 100;
+
+export const MENSAJE_COTIZACION_ASESOR =
+  "Por favor, contacta a un asesor para una cotización personalizada.";
+
+export function tuberiaMaximaCotizadorM(config: CotizacionPreciosConfig | null): number {
+  const n = config?.tuberiaMaximaAutomaticaM;
+  return typeof n === "number" && Number.isFinite(n) && n > 0 ? n : TUBERIA_MAXIMA_AUTOMATICA_M;
+}
+
+export function volumenMaximoCotizadorM3(config: CotizacionPreciosConfig | null): number {
+  const n = config?.volumenMaximoCotizadorM3;
+  return typeof n === "number" && Number.isFinite(n) && n > 0 ? n : VOLUMEN_MAXIMO_COTIZADOR_M3;
+}
 
 /** Unitario para textos de ayuda; en el total rige el valor configurado por zona en Sheets. */
 export function cargoVacioUnitarioMxn(
@@ -277,6 +293,19 @@ export function calcularCotizacionDinamica(
   const motivosBloqueo: string[] = [];
   const volumen = Number.isFinite(input.volumen) && input.volumen > 0 ? input.volumen : 0;
   const diasRapidos = resistenciaRapidaDesdeSeleccion(input.resistenciaRapidaDias);
+  const tubMax = tuberiaMaximaCotizadorM(config);
+  const volMax = volumenMaximoCotizadorM3(config);
+
+  let requiereAsesorCotizacion = false;
+  if (input.tipoVaciado === "bombeo" && input.tipoBomba === "estacionaria" && input.metrosTuberia > tubMax) {
+    requiereAsesorCotizacion = true;
+  }
+  if (volumen > volMax) {
+    requiereAsesorCotizacion = true;
+  }
+  if (requiereAsesorCotizacion) {
+    motivosBloqueo.push(MENSAJE_COTIZACION_ASESOR);
+  }
 
   if (!config) motivosBloqueo.push("No se pudieron cargar los precios.");
   if (!input.zona) {
@@ -284,12 +313,8 @@ export function calcularCotizacionDinamica(
       "Tu ubicación requiere logística especial. Por favor, contacta a un asesor para una cotización personalizada.",
     );
   }
-  if (input.tipoVaciado === "bombeo" && input.tipoBomba === "estacionaria" && input.metrosTuberia > TUBERIA_MAXIMA_AUTOMATICA_M) {
-    motivosBloqueo.push("Más de 100 m de tubería requiere validación de un asesor.");
-  }
-  if (diasRapidos != null && input.resistenciaKg < 200) {
-    motivosBloqueo.push("Las resistencias rápidas solo aplican a concretos f'c ≥ 200 kg/cm².");
-  }
+
+  const resistenciaRapidaInvalida = diasRapidos != null && input.resistenciaKg < 200;
 
   const servicio = servicioConcretoDesdeSeleccion(input.tipoVaciado, input.tipoBomba);
   const precioM3 = precioM3ZonaServicio(config, input.resistenciaKg, input.zona, servicio);
@@ -333,7 +358,12 @@ export function calcularCotizacionDinamica(
     }
   }
 
-  if (input.tipoVaciado === "bombeo" && input.tipoBomba === "estacionaria" && input.metrosTuberia > TUBERIA_INCLUIDA_M) {
+  if (
+    input.tipoVaciado === "bombeo" &&
+    input.tipoBomba === "estacionaria" &&
+    input.metrosTuberia > TUBERIA_INCLUIDA_M &&
+    input.metrosTuberia <= tubMax
+  ) {
     const precioTramo = config?.tuberiaExtraTramo10mM3 ?? 0;
     if (precioTramo > 0 && volumen > 0) {
       const tramosExtra = Math.ceil((input.metrosTuberia - TUBERIA_INCLUIDA_M) / 10);
@@ -360,7 +390,7 @@ export function calcularCotizacionDinamica(
     });
   }
 
-  if (diasRapidos != null) {
+  if (diasRapidos != null && !resistenciaRapidaInvalida) {
     const unitario = importeRapida(config, diasRapidos);
     if (unitario <= 0) {
       motivosBloqueo.push(`Falta configurar el precio de resistencia rápida a ${diasRapidos} días.`);
@@ -379,7 +409,7 @@ export function calcularCotizacionDinamica(
     precioM3,
     subtotalConcreto,
     lineas,
-    bloqueado: motivosBloqueo.length > 0,
+    bloqueado: motivosBloqueo.length > 0 || resistenciaRapidaInvalida,
     motivosBloqueo,
   };
 }

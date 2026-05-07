@@ -39,8 +39,26 @@ export function addDaysYmd(ymd: string, days: number) {
   return formatYmdLocal(d);
 }
 
+/**
+ * Primera fecha de servicio permitida (zona CDMX).
+ * - Anticipación mínima aumentada: tres días naturales respecto a hoy, sin contar el domingo como día de servicio.
+ * - Excepción: si hoy es viernes, se puede agendar el sábado inmediato (sin obligar a esperar al lunes).
+ */
 export function earliestCotizacionDateYmd(todayYmd = todayYmdCdmx()) {
-  return addDaysYmd(todayYmd, 2);
+  const today = parseYmdLocal(todayYmd);
+  if (!today) return "";
+
+  if (today.getDay() === 5 /* viernes */) {
+    const sat = addDaysYmd(todayYmd, 1);
+    if (parseYmdLocal(sat)?.getDay() === 6 /* sábado */) return sat;
+  }
+
+  let candidate = addDaysYmd(todayYmd, 3);
+  for (let i = 0; i < 14; i++) {
+    if (!isSundayYmd(candidate)) return candidate;
+    candidate = addDaysYmd(candidate, 1);
+  }
+  return addDaysYmd(todayYmd, 3);
 }
 
 export function isSundayYmd(ymd: string) {
@@ -83,7 +101,7 @@ export function nextAllowedAgendaDateYmd(todayYmd = todayYmdCdmx()) {
 export function validateAgendaSlot(fecha: string, hora: string, todayYmd = todayYmdCdmx()) {
   if (!parseYmdLocal(fecha)) return "Fecha inválida.";
   if (fecha < earliestCotizacionDateYmd(todayYmd)) {
-    return "Los pedidos deben agendarse con al menos 2 días de anticipación.";
+    return "La fecha elegida no cumple la anticipación mínima. Usa la primera fecha disponible en el calendario.";
   }
   if (isSundayYmd(fecha)) return "No laboramos los domingos.";
 

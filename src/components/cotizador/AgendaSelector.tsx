@@ -129,11 +129,11 @@ export function AgendaSelector({
 
   return (
     <div className="space-y-5">
-      <h4 className="font-display text-lg font-semibold text-white tracking-wide">Datos y agenda</h4>
+      <h4 className="font-display text-lg font-semibold tracking-wide text-[var(--tepexi-logo-navy)]">Datos y agenda</h4>
 
       <div className="grid sm:grid-cols-2 gap-4">
         <div>
-          <label htmlFor="agenda-nombre" className="block text-sm font-medium text-[#ecf0f6] mb-2">
+          <label htmlFor="agenda-nombre" className="mb-2 block text-sm font-medium text-[var(--tepexi-text-body)]">
             Nombre <span className="text-[#c62828]" aria-hidden="true">*</span>
           </label>
           <input
@@ -141,18 +141,18 @@ export function AgendaSelector({
             value={nombre}
             onChange={(e) => setNombre(e.target.value)}
             aria-required="true"
-            className="w-full py-3 px-4 bg-[#0c0f14] border border-[#cfd8e4]/25 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#c62828]/60"
+            className="w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-[var(--tepexi-logo-navy)] outline-none transition focus:border-[#c62828] focus:ring-2 focus:ring-[#c62828]/20"
           />
         </div>
         <div>
-          <label htmlFor="agenda-empresa" className="block text-sm font-medium text-[#ecf0f6] mb-2">
+          <label htmlFor="agenda-empresa" className="mb-2 block text-sm font-medium text-[var(--tepexi-text-body)]">
             Empresa
           </label>
           <input
             id="agenda-empresa"
             value={empresa}
             onChange={(e) => setEmpresa(e.target.value)}
-            className="w-full py-3 px-4 bg-[#0c0f14] border border-[#cfd8e4]/25 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#c62828]/60"
+            className="w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-[var(--tepexi-logo-navy)] outline-none transition focus:border-[#c62828] focus:ring-2 focus:ring-[#c62828]/20"
             placeholder="Opcional"
           />
         </div>
@@ -160,7 +160,7 @@ export function AgendaSelector({
 
       <div className="grid sm:grid-cols-2 gap-4">
         <div>
-          <label htmlFor="agenda-telefono" className="block text-sm font-medium text-[#ecf0f6] mb-2">
+          <label htmlFor="agenda-telefono" className="mb-2 block text-sm font-medium text-[var(--tepexi-text-body)]">
             Teléfono <span className="text-[#c62828]" aria-hidden="true">*</span>
           </label>
           <input
@@ -171,19 +171,19 @@ export function AgendaSelector({
             value={telefono}
             onChange={(e) => setTelefono(e.target.value)}
             aria-required="true"
-            className="w-full py-3 px-4 bg-[#0c0f14] border border-[#cfd8e4]/25 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#c62828]/60"
+            className="w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-[var(--tepexi-logo-navy)] outline-none transition focus:border-[#c62828] focus:ring-2 focus:ring-[#c62828]/20"
             placeholder="10 dígitos"
           />
         </div>
         <div>
-          <label htmlFor="agenda-obra" className="block text-sm font-medium text-[#ecf0f6] mb-2">
+          <label htmlFor="agenda-obra" className="mb-2 block text-sm font-medium text-[var(--tepexi-text-body)]">
             Tipo de obra
           </label>
           <select
             id="agenda-obra"
             value={obra}
             onChange={(e) => setObra(e.target.value)}
-            className="w-full py-3 px-4 bg-[#0c0f14] border border-[#cfd8e4]/25 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#c62828]/60"
+            className="w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-[var(--tepexi-logo-navy)] outline-none transition focus:border-[#c62828] focus:ring-2 focus:ring-[#c62828]/20"
           >
             {OBRA_OPTIONS.map((o) => (
               <option key={o.value} value={o.value}>
@@ -196,7 +196,7 @@ export function AgendaSelector({
 
       <div className="grid sm:grid-cols-2 gap-4">
         <div>
-          <label htmlFor="agenda-fecha" className="block text-sm font-medium text-[#ecf0f6] mb-2">
+          <label htmlFor="agenda-fecha" className="mb-2 block text-sm font-medium text-[var(--tepexi-text-body)]">
             Fecha
           </label>
           <DateFieldCalendar
@@ -207,17 +207,16 @@ export function AgendaSelector({
             disabledDays={(date) => date.getDay() === 0}
             placeholder="Elegir fecha"
           />
-          <p className="mt-1 text-xs text-[#b0bcc9]">Agenda disponible desde 2 días de anticipación. Domingos cerrado.</p>
         </div>
         <div>
-          <label htmlFor="agenda-hora" className="block text-sm font-medium text-[#ecf0f6] mb-2">
+          <label htmlFor="agenda-hora" className="mb-2 block text-sm font-medium text-[var(--tepexi-text-body)]">
             Hora
           </label>
           <select
             id="agenda-hora"
             value={hora}
             onChange={(e) => setHora(e.target.value)}
-            className="w-full py-3 px-4 bg-[#0c0f14] border border-[#cfd8e4]/25 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#c62828]/60"
+            className="w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-base text-[var(--tepexi-logo-navy)] outline-none transition focus:border-[#c62828] focus:ring-2 focus:ring-[#c62828]/20"
           >
             {horasDisponibles.map((h) => (
               <option key={h} value={h}>
@@ -225,12 +224,11 @@ export function AgendaSelector({
               </option>
             ))}
           </select>
-          <p className="mt-1 text-xs text-[#b0bcc9]">L-V 06:00-16:00 h · Sáb 06:00-12:00 h.</p>
         </div>
       </div>
 
       <div>
-        <label htmlFor="agenda-volumen" className="block text-sm font-medium text-[#ecf0f6] mb-2">
+        <label htmlFor="agenda-volumen" className="mb-2 block text-sm font-medium text-[var(--tepexi-text-body)]">
           Volumen a reservar (m³)
         </label>
         <input
@@ -238,29 +236,29 @@ export function AgendaSelector({
           inputMode="decimal"
           value={volumen}
           onChange={(e) => setVolumen(e.target.value)}
-          className="w-full py-3 px-4 bg-[#0c0f14] border border-[#cfd8e4]/25 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#c62828]/60"
+          className="w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-[var(--tepexi-logo-navy)] outline-none transition focus:border-[#c62828] focus:ring-2 focus:ring-[#c62828]/20"
         />
       </div>
 
-      <div className="rounded-xl border border-[#78716c]/35 bg-[#0c0f14]/60 px-4 py-3 text-sm">
-        <p className="text-[#d8e3ee]">
-          Capacidad máxima por hora: <span className="text-white font-semibold">{capacidadMaximaHora} m³</span>
+      <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm">
+        <p className="text-slate-700">
+          Capacidad máxima por hora: <span className="font-semibold text-[var(--tepexi-logo-navy)]">{capacidadMaximaHora} m³</span>
         </p>
-        {disp.loading && <p className="text-[#d8e3ee] mt-2">Consultando disponibilidad…</p>}
+        {disp.loading && <p className="mt-2 text-slate-600">Consultando disponibilidad…</p>}
         {!disp.loading && !disp.error && (
-          <p className="text-[#ecf0f6] mt-2">
-            Ocupado en este horario: <span className="text-white">{disp.usadoM3.toFixed(2)} m³</span> · Libre:{" "}
-            <span className="text-[#86efac] font-semibold">{disp.disponibleM3.toFixed(2)} m³</span>
+          <p className="mt-2 text-[var(--tepexi-text-body)]">
+            Ocupado en este horario: <span className="font-medium text-[var(--tepexi-logo-navy)]">{disp.usadoM3.toFixed(2)} m³</span> · Libre:{" "}
+            <span className="font-semibold text-emerald-700">{disp.disponibleM3.toFixed(2)} m³</span>
           </p>
         )}
-        {disp.error && <p className="text-red-300 mt-2">{disp.error}</p>}
+        {disp.error && <p className="mt-2 text-red-700">{disp.error}</p>}
         {volNum > disp.disponibleM3 && !disp.loading && (
-          <p className="text-amber-200 mt-2">El volumen supera el cupo disponible en este horario.</p>
+          <p className="mt-2 text-amber-800">El volumen supera el cupo disponible en este horario.</p>
         )}
       </div>
 
       <div>
-        <label htmlFor="agenda-comentarios" className="block text-sm font-medium text-[#ecf0f6] mb-2">
+        <label htmlFor="agenda-comentarios" className="mb-2 block text-sm font-medium text-[var(--tepexi-text-body)]">
           Comentarios
         </label>
         <textarea
@@ -268,13 +266,13 @@ export function AgendaSelector({
           rows={3}
           value={comentarios}
           onChange={(e) => setComentarios(e.target.value)}
-          className="w-full py-3 px-4 bg-[#0c0f14] border border-[#cfd8e4]/25 rounded-lg text-white placeholder:text-[#b0bcc9] focus:outline-none focus:ring-2 focus:ring-[#c62828]/60 resize-none"
+          className="w-full resize-none rounded-lg border border-slate-300 bg-white px-4 py-3 text-[var(--tepexi-logo-navy)] placeholder:text-slate-400 outline-none transition focus:border-[#c62828] focus:ring-2 focus:ring-[#c62828]/20"
           placeholder="Acceso, bombeo, dudas…"
         />
       </div>
 
       {errorReserva && (
-        <p className="text-sm text-red-300 rounded-lg border border-red-500/40 bg-red-950/40 px-3 py-2">{errorReserva}</p>
+        <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800">{errorReserva}</p>
       )}
 
       <button

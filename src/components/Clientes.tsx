@@ -1,44 +1,28 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { useLayoutEffect, useRef } from "react";
+import { useLayoutEffect, useMemo, useRef } from "react";
 
-/** Imágenes de `public/Clientes` en el carrusel. */
-const clientAssetFiles = [
-  { file: "Arlus.png", alt: "Arlus" },
-  { file: "Marvic.png", alt: "Marvic" },
-  { file: "Peri.png", alt: "Peri" },
-  { file: "Tubos y Barras.png", alt: "Tubos y Barras" },
-  { file: "under terra.gif", alt: "Under Terra" },
-] as const;
-
-const logos = clientAssetFiles.map(({ file, alt }) => ({
-  src: `/Clientes/${encodeURIComponent(file)}`,
-  alt,
-}));
-
-const trackLogos = [...logos, ...logos];
-
-function LogoSlide({ logo, duplicate }: { logo: (typeof logos)[number]; duplicate: boolean }) {
-  return (
-    <div className="flex h-14 w-[8.5rem] shrink-0 items-center justify-center sm:h-[3.5rem] sm:w-36 md:h-16 md:w-40">
-      <img
-        src={logo.src}
-        alt={duplicate ? "" : logo.alt}
-        {...(duplicate ? { "aria-hidden": true as const } : {})}
-        className={`max-h-full w-auto max-w-full object-contain object-center transition-opacity duration-300 select-none ${
-          duplicate ? "opacity-90" : "opacity-95 hover:opacity-100"
-        }`}
-        loading="lazy"
-        decoding="async"
-        draggable={false}
-      />
-    </div>
-  );
+function fileNameToAlt(file: string): string {
+  const base = file.replace(/\.[^.]+$/, "");
+  return base.replace(/[-_]+/g, " ").replace(/\s+/g, " ").trim() || file;
 }
 
-export function Clientes() {
+type ClientesProps = { imageFiles: string[] };
+
+export function Clientes({ imageFiles }: ClientesProps) {
   const trackRef = useRef<HTMLDivElement>(null);
+
+  const logos = useMemo(
+    () =>
+      imageFiles.map((file) => ({
+        src: `/Clientes/${encodeURIComponent(file)}`,
+        alt: fileNameToAlt(file),
+      })),
+    [imageFiles],
+  );
+
+  const trackLogos = useMemo(() => [...logos, ...logos], [logos]);
 
   useLayoutEffect(() => {
     const node = trackRef.current;
@@ -63,12 +47,14 @@ export function Clientes() {
     });
 
     return () => ro.disconnect();
-  }, []);
+  }, [logos]);
+
+  if (logos.length === 0) return null;
 
   return (
     <section
       id="clientes"
-      className="py-10 md:py-14 bg-[#141922] border-t border-[#78716c]/25 relative overflow-hidden"
+      className="relative overflow-hidden border-t border-[var(--tepexi-logo-navy)]/20 bg-[var(--tepexi-logo-navy)] py-10 md:py-14"
     >
       <div
         className="absolute inset-0 opacity-[0.05] pointer-events-none"
@@ -86,7 +72,7 @@ export function Clientes() {
           <h2 className="font-display text-4xl md:text-5xl font-bold text-white mb-3 tracking-wide">
             Clientes
           </h2>
-          <p className="text-[#d8e3ee] max-w-2xl mx-auto text-pretty text-sm sm:text-base">
+          <p className="max-w-2xl mx-auto text-pretty text-sm text-white/90 sm:text-base leading-relaxed">
             Empresas y marcas que confían en nosotros: Concretos Tepexi.
           </p>
         </motion.div>
@@ -119,5 +105,23 @@ export function Clientes() {
         </div>
       </div>
     </section>
+  );
+}
+
+function LogoSlide({ logo, duplicate }: { logo: { src: string; alt: string }; duplicate: boolean }) {
+  return (
+    <div className="flex h-14 w-[8.5rem] shrink-0 items-center justify-center sm:h-[3.5rem] sm:w-36 md:h-16 md:w-40">
+      <img
+        src={logo.src}
+        alt={duplicate ? "" : logo.alt}
+        {...(duplicate ? { "aria-hidden": true as const } : {})}
+        className={`max-h-full w-auto max-w-full object-contain object-center transition-opacity duration-300 select-none ${
+          duplicate ? "opacity-90" : "opacity-95 hover:opacity-100"
+        }`}
+        loading="lazy"
+        decoding="async"
+        draggable={false}
+      />
+    </div>
   );
 }

@@ -1,8 +1,11 @@
 import { useEffect, useRef, useState } from "react";
+import { Info } from "lucide-react";
 import type { CotizacionPreciosConfig } from "@/types/sheets";
 import {
   TUBERIA_INCLUIDA_M,
-  TUBERIA_MAXIMA_AUTOMATICA_M,
+  MENSAJE_COTIZACION_ASESOR,
+  tuberiaMaximaCotizadorM,
+  volumenMaximoCotizadorM3,
   labelResistenciaKg,
   labelZona,
   resistenciasCotizacion,
@@ -49,6 +52,18 @@ type GoogleMapsWindow = Window & {
 
 const GOOGLE_MAPS_SCRIPT_ID = "google-maps-places-script";
 const GOOGLE_MAPS_API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+
+/** Catálogo MR solo informativo en la tarjeta (no afecta precios ni envíos). */
+const RESISTENCIA_MR_OPCIONES = [
+  "MR 35",
+  "MR 36",
+  "MR 38",
+  "MR 40",
+  "MR 42",
+  "MR 45",
+  "MR 48",
+  "MR 50",
+] as const;
 
 function getGoogleMapsWindow() {
   return window as GoogleMapsWindow;
@@ -177,8 +192,15 @@ export function Cotizador({
   const suggestionsRequestIdRef = useRef(0);
   const [destinoSuggestions, setDestinoSuggestions] = useState<PlaceAutocompleteSuggestion[]>([]);
   const [mostrarDestinoSuggestions, setMostrarDestinoSuggestions] = useState(false);
+  const [mrLeyendaAbierta, setMrLeyendaAbierta] = useState(false);
   const vol = parseFloat(volumen.replace(",", ".")) || 0;
   const avisoCargoVacio = vol > 0 && vol < VOLUMEN_MINIMO_OLLA_M3;
+  const tubMaxUi = tuberiaMaximaCotizadorM(cotizacion);
+  const volMaxUi = volumenMaximoCotizadorM3(cotizacion);
+  const metrosTuberiaN = parseFloat(metrosTuberia.replace(",", ".")) || 0;
+  const leyendaTuberiaExcedida =
+    !!cotizacion && tipoVaciado === "bombeo" && tipoBomba === "estacionaria" && metrosTuberiaN > tubMaxUi;
+  const leyendaVolumenExcedido = !!cotizacion && vol > volMaxUi;
   const precioM3 = cotizacionResultado.precioM3;
   const totalEstimado = cotizacionResultado.total;
   const resistenciasDisponibles = resistenciasCotizacion(cotizacion);
@@ -251,14 +273,16 @@ export function Cotizador({
 
   return (
     <div className="space-y-5">
-      <h4 className="font-display text-lg font-semibold text-white tracking-wide">Cotización en tiempo real</h4>
-      {loading && <p className="text-sm text-[#d8e3ee]">Cargando precios desde la tabla…</p>}
+      <h4 className="font-display text-lg font-semibold tracking-wide text-[var(--tepexi-logo-navy)]">
+        Cotización en tiempo real
+      </h4>
+      {loading && <p className="text-sm text-slate-600">Cargando precios desde la tabla…</p>}
       {error && (
-        <p className="text-sm text-red-300 rounded-lg border border-red-500/40 bg-red-950/40 px-3 py-2">{error}</p>
+        <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800">{error}</p>
       )}
 
       <div>
-        <label htmlFor="cotiz-destino" className="block text-sm font-medium text-[#ecf0f6] mb-2">
+        <label htmlFor="cotiz-destino" className="mb-2 block text-sm font-medium text-[var(--tepexi-text-body)]">
           Ubicación de la obra
         </label>
         <div className="flex flex-col gap-2 sm:flex-row">
@@ -273,11 +297,11 @@ export function Cotizador({
               onFocus={() => setMostrarDestinoSuggestions(true)}
               onBlur={() => window.setTimeout(() => setMostrarDestinoSuggestions(false), 120)}
               autoComplete="off"
-              className="w-full py-3 px-4 bg-[#0c0f14] border border-[#cfd8e4]/25 rounded-lg text-white placeholder:text-[#b0bcc9] focus:outline-none focus:ring-2 focus:ring-[#c62828]/60"
+              className="w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-[var(--tepexi-logo-navy)] placeholder:text-slate-400 outline-none transition focus:border-[#c62828] focus:ring-2 focus:ring-[#c62828]/20"
               placeholder="Ej. colonia, municipio o dirección de la obra"
             />
             {mostrarDestinoSuggestions && destinoSuggestions.length > 0 && (
-              <div className="absolute z-50 mt-2 max-h-64 w-full overflow-auto rounded-lg border border-[#cfd8e4]/25 bg-[#0c0f14] shadow-xl">
+              <div className="absolute z-50 mt-2 max-h-64 w-full overflow-auto rounded-lg border border-slate-200 bg-white shadow-lg">
                 {destinoSuggestions.map((suggestion, idx) => {
                   const label = getSuggestionText(suggestion);
                   if (!label) return null;
@@ -288,7 +312,7 @@ export function Cotizador({
                       type="button"
                       onMouseDown={(e) => e.preventDefault()}
                       onClick={() => void seleccionarDestinoSuggestion(suggestion)}
-                      className="block w-full px-4 py-3 text-left text-sm text-white transition-colors hover:bg-white/10"
+                      className="block w-full px-4 py-3 text-left text-sm text-[var(--tepexi-logo-navy)] transition-colors hover:bg-slate-50"
                     >
                       {label}
                     </button>
@@ -301,57 +325,102 @@ export function Cotizador({
             type="button"
             onClick={calcularDistanciaObra}
             disabled={calculandoDistancia || !destinoObra.trim()}
-            className="rounded-lg bg-white/10 px-4 py-3 text-sm font-semibold uppercase tracking-wide text-white transition-colors hover:bg-white/15 disabled:opacity-45"
+            className="rounded-lg bg-[var(--tepexi-logo-navy)] px-4 py-3 text-sm font-semibold uppercase tracking-wide text-white transition-opacity hover:opacity-90 disabled:opacity-45"
           >
             {calculandoDistancia ? "Calculando..." : "Calcular zona"}
           </button>
         </div>
         {distanciaObra && (
-          <div className="mt-3 rounded-lg border border-[#86efac]/35 bg-[#052e1a]/35 px-3 py-2 text-sm text-[#d8e3ee]">
+          <div className="mt-3 rounded-lg border border-emerald-200 bg-emerald-50/90 px-3 py-2 text-sm text-slate-700">
             <p>
-              Ruta: <span className="text-white">{distanciaObra.distanceText}</span>
+              Ruta: <span className="font-medium text-[var(--tepexi-logo-navy)]">{distanciaObra.distanceText}</span>
               {distanciaObra.durationText ? ` · ${distanciaObra.durationText}` : ""} ·{" "}
-              <span className="text-[#86efac]">{distanciaObra.zona ? distanciaObra.zonaLabel : labelZona(null)}</span>
+              <span className="font-semibold text-emerald-800">
+                {distanciaObra.zona ? distanciaObra.zonaLabel : labelZona(null)}
+              </span>
             </p>
-            <p className="mt-1 text-xs text-[#b0bcc9]">{distanciaObra.destino}</p>
+            <p className="mt-1 text-xs text-slate-500">{distanciaObra.destino}</p>
           </div>
         )}
         {errorDistancia && (
-          <p className="mt-2 text-sm text-red-300 rounded-lg border border-red-500/40 bg-red-950/40 px-3 py-2">
+          <p className="mt-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800">
             {errorDistancia}
           </p>
         )}
       </div>
 
-      <div>
-        <label htmlFor="cotiz-resistencia" className="block text-sm font-medium text-[#ecf0f6] mb-2">
-          Resistencia f&apos;c
-        </label>
-        <select
-          id="cotiz-resistencia"
-          value={resistenciaKg}
-          onChange={(e) => setResistenciaKg(Number(e.target.value) as ResistenciaKg)}
-          disabled={!cotizacion}
-          className="w-full py-3 px-4 bg-[#0c0f14] border border-[#cfd8e4]/25 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#c62828]/60"
-        >
-          {resistenciasDisponibles.map((kg) => (
-            <option key={kg} value={kg}>
-              {labelResistenciaKg(kg)}
-            </option>
-          ))}
-        </select>
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div>
+          <label htmlFor="cotiz-resistencia" className="mb-2 block text-sm font-medium text-[var(--tepexi-text-body)]">
+            Resistencia f&apos;c
+          </label>
+          <select
+            id="cotiz-resistencia"
+            value={resistenciaKg}
+            onChange={(e) => setResistenciaKg(Number(e.target.value) as ResistenciaKg)}
+            disabled={!cotizacion}
+            className="w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-[var(--tepexi-logo-navy)] outline-none transition focus:border-[#c62828] focus:ring-2 focus:ring-[#c62828]/20 disabled:opacity-50"
+          >
+            {resistenciasDisponibles.map((kg) => (
+              <option key={kg} value={kg}>
+                {labelResistenciaKg(kg)}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label
+            className="mb-2 block text-sm font-medium text-[var(--tepexi-text-body)] select-none text-transparent"
+            aria-hidden="true"
+          >
+            Resistencia f&apos;c
+          </label>
+          <div className="overflow-hidden rounded-lg border border-slate-300 bg-white shadow-none transition-[box-shadow] focus-within:ring-2 focus-within:ring-[#c62828]/20 focus-within:ring-offset-0">
+            <button
+              type="button"
+              id="cotiz-resistencia-mr"
+              aria-expanded={mrLeyendaAbierta ? "true" : "false"}
+              aria-controls="cotiz-resistencia-mr-panel"
+              onClick={() => setMrLeyendaAbierta((o) => !o)}
+              className="w-full border-0 bg-transparent px-4 py-3 text-left text-sm font-medium text-[var(--tepexi-logo-navy)] outline-none transition hover:bg-slate-50/80 focus-visible:bg-slate-50/80"
+            >
+              Resistencia MR
+            </button>
+            {mrLeyendaAbierta && (
+              <div
+                id="cotiz-resistencia-mr-panel"
+                className="flex gap-2 border-t border-amber-200/90 bg-amber-50/95 px-3 py-3"
+                role="region"
+                aria-label="Información resistencia MR"
+              >
+                <Info className="mt-0.5 h-4 w-4 shrink-0 text-[#c62828]" aria-hidden />
+                <div className="min-w-0 text-xs leading-relaxed text-amber-950/90">
+                  <p>
+                    <span className="font-semibold text-[var(--tepexi-logo-navy)]">
+                      {RESISTENCIA_MR_OPCIONES.join(", ")}
+                    </span>
+                    .
+                  </p>
+                  <p className="mt-1.5">
+                    Para cotizar este tipo de concreto comunícate con un asesor por Teléfono o por WhatsApp.
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-[#ecf0f6] mb-2">Tiro directo o bombeo</label>
+        <label className="mb-2 block text-sm font-medium text-[var(--tepexi-text-body)]">Tiro directo o bombeo</label>
         <div className="flex gap-3">
           <button
             type="button"
             onClick={() => setTipoVaciado("tiro_directo")}
             className={`flex-1 py-3 rounded-lg border text-sm font-semibold uppercase tracking-wide transition-colors ${
               tipoVaciado === "tiro_directo"
-                ? "border-[#c62828] bg-[#c62828]/20 text-white"
-                : "border-[#cfd8e4]/30 text-[#ecf0f6] hover:bg-white/5"
+                ? "border-2 border-[#c62828] bg-[#fef2f2] text-[var(--tepexi-logo-navy)]"
+                : "border border-slate-200 text-[var(--tepexi-logo-navy)] hover:bg-slate-50"
             }`}
           >
             {labelTipoSheet("tiro_directo")}
@@ -361,8 +430,8 @@ export function Cotizador({
             onClick={() => setTipoVaciado("bombeo")}
             className={`flex-1 py-3 rounded-lg border text-sm font-semibold uppercase tracking-wide transition-colors ${
               tipoVaciado === "bombeo"
-                ? "border-[#c62828] bg-[#c62828]/20 text-white"
-                : "border-[#cfd8e4]/30 text-[#ecf0f6] hover:bg-white/5"
+                ? "border-2 border-[#c62828] bg-[#fef2f2] text-[var(--tepexi-logo-navy)]"
+                : "border border-slate-200 text-[var(--tepexi-logo-navy)] hover:bg-slate-50"
             }`}
           >
             {labelTipoSheet("bombeo")}
@@ -370,15 +439,15 @@ export function Cotizador({
         </div>
         {tipoVaciado === "bombeo" && (
           <div className="mt-4 space-y-2">
-            <p className="text-sm font-medium text-[#ecf0f6]">Tipo de bombeo</p>
+            <p className="text-sm font-medium text-[var(--tepexi-text-body)]">Tipo de bombeo</p>
             <div className="flex flex-col gap-2 sm:flex-row sm:gap-3">
               <button
                 type="button"
                 onClick={() => setTipoBomba("estacionaria")}
                 className={`flex-1 py-2.5 rounded-lg border px-3 text-sm font-semibold transition-colors ${
                   tipoBomba === "estacionaria"
-                    ? "border-[#c62828] bg-[#c62828]/20 text-white"
-                    : "border-[#cfd8e4]/30 text-[#ecf0f6] hover:bg-white/5"
+                    ? "border-2 border-[#c62828] bg-[#fef2f2] text-[var(--tepexi-logo-navy)]"
+                    : "border border-slate-200 text-[var(--tepexi-logo-navy)] hover:bg-slate-50"
                 }`}
               >
                 Bomba Estacionaria
@@ -388,8 +457,8 @@ export function Cotizador({
                 onClick={() => setTipoBomba("pluma")}
                 className={`flex-1 py-2.5 rounded-lg border px-3 text-sm font-semibold transition-colors ${
                   tipoBomba === "pluma"
-                    ? "border-[#c62828] bg-[#c62828]/20 text-white"
-                    : "border-[#cfd8e4]/30 text-[#ecf0f6] hover:bg-white/5"
+                    ? "border-2 border-[#c62828] bg-[#fef2f2] text-[var(--tepexi-logo-navy)]"
+                    : "border border-slate-200 text-[var(--tepexi-logo-navy)] hover:bg-slate-50"
                 }`}
               >
                 Bomba Pluma
@@ -397,58 +466,71 @@ export function Cotizador({
             </div>
           </div>
         )}
-        <p className="text-xs text-[#b0bcc9] mt-2">
+        <p className="mt-2 text-xs text-slate-500">
           Los mínimos de bombeo se aplican automáticamente por zona de entrega.
         </p>
       </div>
 
       {tipoVaciado === "bombeo" && tipoBomba === "estacionaria" && (
         <div>
-          <label className="block text-sm font-medium text-[#ecf0f6] mb-2">
+          <label className="mb-2 block text-sm font-medium text-[var(--tepexi-text-body)]">
             Metros de tubería estacionaria
           </label>
           <input
             inputMode="decimal"
             value={metrosTuberia}
             onChange={(e) => setMetrosTuberia(e.target.value)}
-            className="w-full py-3 px-4 bg-[#0c0f14] border border-[#cfd8e4]/25 rounded-lg text-white placeholder:text-[#b0bcc9] focus:outline-none focus:ring-2 focus:ring-[#c62828]/60"
+            className="w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-[var(--tepexi-logo-navy)] placeholder:text-slate-400 outline-none transition focus:border-[#c62828] focus:ring-2 focus:ring-[#c62828]/20"
             placeholder="Ej. 30"
           />
-          <p className="mt-2 text-xs text-[#b0bcc9]">
-            Incluye {TUBERIA_INCLUIDA_M} m. Más de {TUBERIA_MAXIMA_AUTOMATICA_M} m requiere asesor.
+          <p className="mt-2 text-xs text-slate-500">
+            Incluye {TUBERIA_INCLUIDA_M} m. Límite en línea: {tubMaxUi} m; por encima, cotización con asesor.
           </p>
+          {leyendaTuberiaExcedida && (
+            <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2.5 text-sm text-amber-950">
+              <p className="leading-relaxed">{MENSAJE_COTIZACION_ASESOR}</p>
+            </div>
+          )}
         </div>
       )}
 
       <div>
-        <label className="block text-sm font-medium text-[#ecf0f6] mb-2">Volumen (m³)</label>
+        <label className="mb-2 block text-sm font-medium text-[var(--tepexi-text-body)]">Volumen (m³)</label>
+        {cotizacion && (
+          <p className="mb-2 text-xs text-slate-500">Límite en línea: {volMaxUi} m³; por encima, cotización con asesor.</p>
+        )}
         <input
           inputMode="decimal"
           value={volumen}
           onChange={(e) => setVolumen(e.target.value)}
-          className="w-full py-3 px-4 bg-[#0c0f14] border border-[#cfd8e4]/25 rounded-lg text-white placeholder:text-[#b0bcc9] focus:outline-none focus:ring-2 focus:ring-[#c62828]/60"
+          className="w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-[var(--tepexi-logo-navy)] placeholder:text-slate-400 outline-none transition focus:border-[#c62828] focus:ring-2 focus:ring-[#c62828]/20"
           placeholder="Ej. 12"
         />
         {avisoCargoVacio && (
-          <div className="mt-3 rounded-lg border border-amber-500/45 bg-amber-950/35 px-3 py-2.5 text-sm text-amber-50/95">
-            <p className="text-amber-50/95 leading-relaxed">
+          <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2.5 text-sm text-amber-950">
+            <p className="leading-relaxed">
               Si el pedido es menor a 5 m³, se cobrará un cargo por vacío de{" "}
-              <span className="text-amber-100 font-semibold tabular-nums">$600 MXN</span> por m³ faltante.
+              <span className="font-semibold tabular-nums text-amber-900">$600 MXN</span> por m³ faltante.
             </p>
+          </div>
+        )}
+        {leyendaVolumenExcedido && (
+          <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2.5 text-sm text-amber-950">
+            <p className="leading-relaxed">{MENSAJE_COTIZACION_ASESOR}</p>
           </div>
         )}
       </div>
 
       <div className="space-y-3">
-        <p className="text-sm font-medium text-[#ecf0f6]">Aditivos y resistencias rápidas</p>
+        <p className="text-sm font-medium text-[var(--tepexi-text-body)]">Aditivos y resistencias rápidas</p>
         <div className="grid gap-2 sm:grid-cols-2">
           <button
             type="button"
             onClick={() => toggleAditivo("fibra")}
             className={`rounded-lg border px-3 py-2.5 text-left text-sm transition-colors ${
               aditivos.fibra
-                ? "border-[#c62828] bg-[#c62828]/20 text-white"
-                : "border-[#cfd8e4]/30 text-[#ecf0f6] hover:bg-white/5"
+                ? "border-2 border-[#c62828] bg-[#fef2f2] text-[var(--tepexi-logo-navy)]"
+                : "border border-slate-200 text-[var(--tepexi-logo-navy)] hover:bg-slate-50"
             }`}
           >
             Fibra de polipropileno
@@ -458,8 +540,8 @@ export function Cotizador({
             onClick={() => toggleAditivo("impermeabilizante")}
             className={`rounded-lg border px-3 py-2.5 text-left text-sm transition-colors ${
               aditivos.impermeabilizante
-                ? "border-[#c62828] bg-[#c62828]/20 text-white"
-                : "border-[#cfd8e4]/30 text-[#ecf0f6] hover:bg-white/5"
+                ? "border-2 border-[#c62828] bg-[#fef2f2] text-[var(--tepexi-logo-navy)]"
+                : "border border-slate-200 text-[var(--tepexi-logo-navy)] hover:bg-slate-50"
             }`}
           >
             Impermeabilizante integral
@@ -477,7 +559,7 @@ export function Cotizador({
             const n = Number(raw);
             if (n === 3 || n === 7 || n === 14) setResistenciaRapidaDias(n);
           }}
-          className="w-full py-3 px-4 bg-[#0c0f14] border border-[#cfd8e4]/25 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#c62828]/60"
+          className="w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-[var(--tepexi-logo-navy)] outline-none transition focus:border-[#c62828] focus:ring-2 focus:ring-[#c62828]/20"
         >
           <option value="">Resistencia normal a 28 días</option>
           <option value={14}>Resistencia rápida a 14 días</option>
@@ -485,46 +567,48 @@ export function Cotizador({
           <option value={3}>Resistencia rápida a 3 días</option>
         </select>
         {resistenciaKg < 200 && resistenciaRapidaDesdeSeleccion(resistenciaRapidaDias) != null && (
-          <p className="text-xs text-red-300">Las resistencias rápidas solo aplican con f&apos;c ≥ 200 kg/cm².</p>
+          <p className="text-xs text-red-700">Las resistencias rápidas solo aplican con f&apos;c ≥ 200 kg/cm².</p>
         )}
       </div>
 
-      <div className="rounded-xl border border-[#78716c]/40 bg-[#0c0f14]/80 px-4 py-3 space-y-2">
-        <p className="text-xs uppercase tracking-wide text-[#d8e3ee] mb-1">Desglose</p>
+      <div className="space-y-2 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
+        <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-slate-500">Desglose</p>
         {cotizacion && precioM3 > 0 && vol > 0 && cotizacionResultado.lineas.length === 0 && (
-          <p className="text-sm text-[#ecf0f6]">Calculando conceptos...</p>
+          <p className="text-sm text-slate-600">Calculando conceptos...</p>
         )}
         {cotizacionResultado.lineas.map((linea) => (
           <div key={`${linea.concepto}-${linea.importe}`} className="flex items-start justify-between gap-3 text-sm">
             <div>
-              <p className="text-[#ecf0f6]">{linea.concepto}</p>
-              {linea.detalle && <p className="text-xs text-[#b0bcc9]">{linea.detalle}</p>}
+              <p className="text-[var(--tepexi-logo-navy)]">{linea.concepto}</p>
+              {linea.detalle && <p className="text-xs text-slate-500">{linea.detalle}</p>}
             </div>
-            <p className="shrink-0 text-white">${linea.importe.toLocaleString("es-MX", { minimumFractionDigits: 2 })}</p>
+            <p className="shrink-0 font-medium tabular-nums text-[var(--tepexi-logo-navy)]">
+              ${linea.importe.toLocaleString("es-MX", { minimumFractionDigits: 2 })}
+            </p>
           </div>
         ))}
         {tipoVaciado === "bombeo" && vol > 0 && (
-          <p className="text-sm text-[#d8e3ee]">
+          <p className="text-sm text-slate-600">
             Tipo de bombeo:{" "}
-            <span className="text-[#ecf0f6]">
+            <span className="font-medium text-[var(--tepexi-logo-navy)]">
               {tipoBomba === "pluma" ? "Bomba Pluma" : "Bomba Estacionaria"}
             </span>
           </p>
         )}
         {cotizacionResultado.motivosBloqueo.map((motivo) => (
-          <p key={motivo} className="text-sm text-red-300">
+          <p key={motivo} className="text-sm text-red-700">
             {motivo}
           </p>
         ))}
-        <div className="border-t border-[#78716c]/30 pt-2 mt-2">
-          <p className="text-xs uppercase tracking-wide text-[#d8e3ee] mb-1">Total estimado</p>
-          <p className="font-display text-2xl font-bold text-[#ffe8eb]">
+        <div className="mt-2 border-t border-slate-200 pt-2">
+          <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-slate-500">Total estimado</p>
+          <p className="font-display text-2xl font-bold text-[#c62828]">
             {Number.isFinite(totalEstimado) && totalEstimado > 0
               ? `$${totalEstimado.toLocaleString("es-MX", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
               : "—"}
           </p>
         </div>
-        <p className="text-xs text-[#b0bcc9]">Revisa y ajusta antes de continuar.</p>
+        <p className="text-xs text-slate-500">Revisa y ajusta antes de continuar.</p>
       </div>
     </div>
   );

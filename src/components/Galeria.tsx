@@ -8,11 +8,11 @@ const items = [
     imagen: "/1.jpg",
   },
   {
-    titulo: "Muro de contención en Autopista Méx- Qro.",
+    titulo: "Muro de contención en Autopista Méx-Qro.",
     imagen: "/2.jpg",
   },
   {
-    titulo: "Cimentación en Farmaceútica, Parque Industrial Tepeji del Río,Hgo.",
+    titulo: "Cimentación en Farmaceútica, Parque Industrial Tepeji del Río, Hgo.",
     imagen: "/3.jpg",
   },
   {
@@ -39,15 +39,42 @@ const items = [
     titulo: "Área institucional, Chilcuautla, Hgo.",
     imagen: "/9.JPG",
   },
+  {
+    titulo: "Logística y entrega programada en sitio, zona Tepeji.",
+    imagen: "/logistica.jpg",
+  },
+  {
+    titulo: "Desarrollo Polo Tepeji, Tepeji del Río, Hgo.",
+    imagen: "/Polo-Tepeji-7.jpg",
+  },
+  {
+    titulo: "Parque industrial, Tepeji del Río, Hgo.",
+    imagen: "/22MarParqueIndustrialNuevo-10.jpg",
+  },
+  {
+    titulo: "Vialidades y obra civil, parque industrial Tepeji del Río, Hgo.",
+    imagen: "/22MarParqueIndustrialNuevo-4.jpg",
+  },
+  {
+    titulo: "Colado y bombeo en proyecto de concreto, zona metropolitana.",
+    imagen: "/CT201825-4.jpg",
+  },
+  {
+    titulo: "Piso y acabado en planta, Tepeji del Río, Hgo.",
+    imagen: "/CT-PT-10.JPG",
+  },
 ];
 
 export function Galeria() {
   return (
-    <section id="galeria" className="py-20 md:py-28 bg-[#141922] relative overflow-hidden">
+    <section
+      id="proyectos"
+      className="relative overflow-hidden border-y border-[var(--tepexi-border-light)] bg-white py-20 md:py-28"
+    >
       <div
         className="absolute inset-0 opacity-[0.04] pointer-events-none"
         style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg width='64' height='64' viewBox='0 0 64 64' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M32 0v64M0 32h64' stroke='%23c62828' stroke-width='0.5' fill='none'/%3E%3C/svg%3E")`,
+          backgroundImage: `url("data:image/svg+xml,%3Csvg width='64' height='64' viewBox='0 0 64 64' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M32 0v64M0 32h64' stroke='%23132f4c' stroke-width='0.5' fill='none'/%3E%3C/svg%3E")`,
         }}
       />
 
@@ -58,10 +85,10 @@ export function Galeria() {
           viewport={{ once: true }}
           className="text-center mb-16"
         >
-          <h2 className="font-display text-4xl md:text-5xl font-bold text-white mb-4 tracking-wide">
-            Galería
+          <h2 className="font-display text-4xl md:text-5xl font-bold text-[var(--tepexi-logo-navy)] mb-4 tracking-wide">
+            Proyectos
           </h2>
-          <p className="text-[#d8e3ee] max-w-2xl mx-auto">
+          <p className="text-[var(--tepexi-text-muted)] max-w-2xl mx-auto leading-relaxed">
             Un vistazo a nuestra operación y al tipo de proyectos que acompañamos en la región.
           </p>
         </motion.div>
@@ -76,17 +103,17 @@ export function Galeria() {
               transition={{ delay: i * 0.12, type: "spring", stiffness: 320, damping: 26 }}
               whileHover={{ y: -4 }}
               whileTap={{ scale: 0.985 }}
-              className="group bg-[#0c0f14] rounded-2xl overflow-hidden border-2 border-[#78716c]/65 shadow-[inset_0_0_0_1px_rgba(120,113,108,0.18)] shadow-xl transition-[border-color,box-shadow,ring] duration-300 max-md:border-[#c62828]/45 max-md:shadow-[inset_0_0_0_1px_rgba(198,40,40,0.35),0_0_28px_-8px_rgba(198,40,40,0.4)] hover:border-[#ebe9e8] hover:shadow-[0_0_0_1px_rgba(250,250,249,0.5),0_0_36px_-4px_rgba(255,255,255,0.28)] hover:ring-2 hover:ring-white/65"
+              className="group rounded-2xl overflow-hidden border-2 border-[#c62828]/40 bg-white shadow-lg transition-[border-color,box-shadow,ring] duration-300 hover:border-[#c62828]/60 hover:shadow-xl hover:ring-2 hover:ring-[#c62828]/15"
             >
-              <div className="relative h-56 overflow-hidden shadow-[inset_0_0_0_2px_transparent] transition-[box-shadow] duration-300 max-md:shadow-[inset_0_0_0_1px_rgba(255,255,255,0.12)] group-hover:shadow-[inset_0_0_0_2px_rgba(255,255,255,0.65)]">
+              <div className="relative h-64 sm:h-72 overflow-hidden">
                 <img
                   src={item.imagen}
                   alt=""
                   className="w-full h-full object-cover object-center transition-transform duration-500 ease-out max-md:group-hover:scale-[1.03] group-hover:scale-105"
                 />
               </div>
-              <div className="p-5 pt-4">
-                <h3 className="font-display text-lg sm:text-xl font-semibold text-white tracking-wide leading-snug">
+              <div className="px-4 py-3 sm:py-3.5">
+                <h3 className="font-display text-base sm:text-lg font-semibold text-[var(--tepexi-logo-navy)] tracking-wide leading-snug">
                   {item.titulo}
                 </h3>
               </div>

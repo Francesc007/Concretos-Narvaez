@@ -12,7 +12,6 @@ const servicios = [
       "Mezclas diseñadas según normatividad y resistencia requerida. Ideal para losas, muros, columnas y cimentaciones.",
     imagen: "/concreto.jpg",
     icon: Truck,
-    destacado: true,
   },
   {
     titulo: "Bombeo y Colado",
@@ -20,7 +19,6 @@ const servicios = [
       "Coordinación de bombeo para llegar a alturas y zonas de difícil acceso, con enfoque en seguridad y continuidad del colado.",
     imagen: "/bombeo.jpg",
     icon: Cylinder,
-    destacado: true,
   },
   {
     titulo: "Asesoría en Obra",
@@ -28,7 +26,6 @@ const servicios = [
       "Acompañamiento para programar volúmenes, juntas y curado. Te ayudamos a optimizar tiempos y calidad del terminado.",
     imagen: "/asesoria.jpg",
     icon: HardHat,
-    destacado: false,
   },
   {
     titulo: "Entrega y Logística",
@@ -36,7 +33,6 @@ const servicios = [
       "Seguimiento de entregas acordadas con tu obra en Tepeji y zona. Comunicación clara desde el pedido hasta el camión en sitio.",
     imagen: "/logistica.jpg",
     icon: Gauge,
-    destacado: false,
   },
 ];
 
@@ -59,32 +55,23 @@ function ServicioCard({
       transition={{ type: "spring", stiffness: 300, damping: 26, delay: index * 0.08 }}
       whileHover={{ y: -4 }}
       whileTap={{ scale: 0.985 }}
-      className="group relative h-full min-h-[400px] overflow-hidden rounded-xl border-2 border-[#78716c]/65 bg-[#0c0f14] shadow-[inset_0_0_0_1px_rgba(120,113,108,0.18)] shadow-xl transition-[border-color,box-shadow,ring] duration-300 max-md:border-[#c62828]/45 max-md:shadow-[inset_0_0_0_1px_rgba(198,40,40,0.35),0_0_28px_-8px_rgba(198,40,40,0.4)] hover:border-[#ebe9e8] hover:shadow-[0_0_0_1px_rgba(250,250,249,0.5),0_0_36px_-4px_rgba(255,255,255,0.28)] hover:ring-2 hover:ring-white/65 cursor-default md:min-h-[440px]"
+      className="group relative h-full min-h-[400px] overflow-hidden rounded-xl border-2 border-[#c62828]/120 bg-white shadow-lg transition-[border-color,box-shadow,ring] duration-300 hover:border-[#c62828]/120 hover:shadow-md hover:ring-2 hover:ring-[#c62828]/15 cursor-default md:min-h-[440px]"
     >
-      <div className="absolute inset-0 overflow-hidden shadow-[inset_0_0_0_2px_transparent] transition-[box-shadow] duration-300 max-md:shadow-[inset_0_0_0_1px_rgba(255,255,255,0.12)] group-hover:shadow-[inset_0_0_0_2px_rgba(255,255,255,0.65)]">
+      <div className="absolute inset-0 overflow-hidden rounded-xl">
         <img
           src={item.imagen}
           alt={item.titulo}
           className="h-full w-full object-cover transition-transform duration-500 ease-out max-md:group-hover:scale-[1.03] group-hover:scale-[1.04]"
         />
         <div
-          className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#0c0f14] from-[10%] via-[#0c0f14]/70 via-[30%] to-transparent"
-          aria-hidden
-        />
-        <div
-          className="pointer-events-none absolute inset-0 bg-gradient-to-br from-black/25 via-transparent to-transparent"
+          className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_top,rgba(19,47,76,0.96)_0%,rgba(19,47,76,0.5)_20%,rgba(19,47,76,0.12)_50%,transparent_100%)]"
           aria-hidden
         />
       </div>
-      <div className="absolute top-3 left-3 z-10 flex items-center gap-2">
-        <span className="inline-flex h-10 w-10 items-center justify-center rounded-lg border-2 border-[#78716c]/90 bg-[#0c0f14]/85 text-[#eae9e9] shadow-sm backdrop-blur-[2px]">
+      <div className="absolute top-3 left-3 z-10">
+        <span className="inline-flex h-10 w-10 items-center justify-center rounded-lg border-2 border-white/40 bg-white/95 text-[var(--tepexi-logo-navy)] shadow-md backdrop-blur-[2px]">
           <Icon size={20} />
         </span>
-        {item.destacado && (
-          <span className="rounded border border-[#ffcdd2]/30 bg-[#c62828] px-2 py-1 text-xs font-semibold uppercase tracking-wide text-white shadow-sm">
-            Popular
-          </span>
-        )}
       </div>
       <div className="absolute inset-x-0 bottom-0 z-10 p-5 pb-6 sm:p-6">
         <h3 className="font-display text-xl font-semibold tracking-wide text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.85)]">
@@ -100,7 +87,10 @@ function ServicioCard({
 
 export function Servicios() {
   return (
-    <section id="servicios" className="py-20 md:py-28 bg-[#0c0f14]">
+    <section
+      id="servicios"
+      className="border-y border-[var(--tepexi-border-light)] bg-[var(--tepexi-section-gray)] py-20 md:py-28"
+    >
       <div className="mx-auto w-full min-w-0 max-w-7xl px-3 sm:px-4">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -108,10 +98,10 @@ export function Servicios() {
           viewport={{ once: true }}
           className="text-center mb-16"
         >
-          <h2 className="font-display text-4xl md:text-5xl font-bold text-white mb-4 tracking-wide">
+          <h2 className="font-display text-4xl md:text-5xl font-bold text-[var(--tepexi-logo-navy)] mb-4 tracking-wide">
             Servicios para tu proyecto
           </h2>
-          <p className="text-[#d8e3ee] max-w-2xl mx-auto">
+          <p className="text-[var(--tepexi-text-muted)] max-w-2xl mx-auto leading-relaxed">
             Cubrimos desde la mezcla hasta la puesta en obra, con el respaldo de un equipo enfocado
             en resultados duraderos.
           </p>

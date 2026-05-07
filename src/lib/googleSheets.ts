@@ -552,6 +552,7 @@ export async function fetchPreciosConcretoConfig(): Promise<CotizacionPreciosCon
   const adicionalesPdf = parseAdicionales(sheet);
   const tuberiaExtraFromServicios = await applyServiciosBombasSheet(doc.sheetsByTitle["Servicios Bombas"], zonas);
   const adicionalesGlobal = await parseAdicionalesGlobalSheet(doc.sheetsByTitle["Adicionales Global"]);
+  const sistemaExtras = await fetchConfigSistemaCotizacionExtras(doc);
   for (const zonaConfig of Object.values(zonas)) {
     if (zonaConfig && zonaConfig.cargoVacioM3 <= 0) zonaConfig.cargoVacioM3 = adicionalesGlobal.cargoVacioM3;
   }
@@ -572,6 +573,8 @@ export async function fetchPreciosConcretoConfig(): Promise<CotizacionPreciosCon
       ...adicionalesGlobal.resistenciasRapidas,
     },
     tuberiaExtraTramo10mM3: tuberiaExtraFromServicios || adicionalesPdf.tuberiaExtraTramo10mM3,
+    tuberiaMaximaAutomaticaM: sistemaExtras.tuberiaMaximaAutomaticaM,
+    volumenMaximoCotizadorM3: sistemaExtras.volumenMaximoCotizadorM3,
     fuente: "Precios Concreto",
   };
 }
@@ -664,6 +667,58 @@ export async function fetchCapacidadMaximaHora(): Promise<number> {
   return b1 > 0 ? b1 : 50;
 }
 
+/** Valores por fila A:B en «Config Sistema» (o «Config»). */
+const DEFAULT_TUBERIA_MAX_M = 60;
+const DEFAULT_VOLUMEN_MAX_COTIZADOR_M3 = 100;
+
+/**
+ * Lee límites del cotizador en línea desde «Config Sistema» (columna A = concepto, B = valor).
+ * - Tubería máxima automática: fila cuyo texto normalizado incluya «tuberia» y «max»/«maxima»/«limite»/«automatica»,
+ *   excluyendo tramo/precio/extra (para no confundir con precio por tramo de 10 m).
+ * - Volumen máximo cotizador: fila con «volumen» y «max»/«limite»/«cotizador»/«online», sin «min».
+ */
+export async function fetchConfigSistemaCotizacionExtras(
+  docArg?: GoogleSpreadsheet,
+): Promise<{ tuberiaMaximaAutomaticaM: number; volumenMaximoCotizadorM3: number }> {
+  let tuberia = DEFAULT_TUBERIA_MAX_M;
+  let volumen = DEFAULT_VOLUMEN_MAX_COTIZADOR_M3;
+
+  const doc = docArg ?? (await getSpreadsheetDoc());
+  const sheet = doc.sheetsByTitle["Config Sistema"] ?? doc.sheetsByTitle["Config"];
+  if (!sheet) {
+    return { tuberiaMaximaAutomaticaM: tuberia, volumenMaximoCotizadorM3: volumen };
+  }
+
+  await sheet.loadCells("A1:B40");
+  const maxRow = Math.min(sheet.rowCount || 40, 40);
+  for (let r = 0; r < maxRow; r++) {
+    const key = normTexto(sheet.getCell(r, 0)?.value ?? "");
+    const value = valorCeldaANum(sheet.getCell(r, 1)?.value ?? "");
+    if (!key || value <= 0) continue;
+
+    const tuberiaMatch =
+      key.includes("tuberia") &&
+      (key.includes("max") || key.includes("limite") || key.includes("automatica") || key.includes("automatico")) &&
+      !key.includes("tramo") &&
+      !key.includes("precio") &&
+      !key.includes("extra");
+
+    const volumenMatch =
+      key.includes("volumen") &&
+      (key.includes("max") || key.includes("limite") || key.includes("cotizador") || key.includes("online")) &&
+      !key.includes("min") &&
+      !key.includes("minimo");
+
+    if (tuberiaMatch) tuberia = value;
+    if (volumenMatch) volumen = value;
+  }
+
+  return {
+    tuberiaMaximaAutomaticaM: tuberia > 0 ? tuberia : DEFAULT_TUBERIA_MAX_M,
+    volumenMaximoCotizadorM3: volumen > 0 ? volumen : DEFAULT_VOLUMEN_MAX_COTIZADOR_M3,
+  };
+}
+
 export function normalizeHora(hora: string): string {
   const p = hora.trim().split(":");
   const h = parseInt(p[0] ?? "0", 10);
@@ -692,9 +747,6 @@ export function semanaIsoDesdeFecha(fecha: string): number {
   return Math.ceil(((date.getTime() - yearStart.getTime()) / 86400000 + 1) / 7);
 }
 
-/** Ventana de reserva sin confirmar pago (2 h). */
-export const RESERVA_HOLD_MS = 2 * 60 * 60 * 1000;
-
 /**
  * Formato de columna Timestamp_Reserva: dd/mm/aaaa, hh:mm:ss (hora CDMX).
  * America/Mexico_City no usa DST; el offset fijo UTC−6 es suficiente para el valor almacenado.
@@ -718,95 +770,22 @@ export function formatTimestampReservaCDMX(date: Date = new Date()): string {
 }
 
 /**
- * Interpreta Timestamp_Reserva (ISO legado o dd/mm/aaaa, hh:mm:ss en CDMX) como instante UTC.
+ * Estados en Agenda (hoja): la app escribe "Agendado". El asistente ajusta manualmente
+ * Pagado, Cancelado, Disponible y Reservado.
+ *
+ * Ocupan cupo del cotizador: Agendado, Reservado, Pagado (y legado "confirmado").
+ * No ocupan: Cancelado, Disponible.
  */
-export function parseTimestampReserva(raw: string): Date | null {
-  const s = raw.trim();
-  if (!s) return null;
-  if (/^\d{4}-\d{2}-\d{2}/.test(s) || s.includes("T")) {
-    const d = new Date(s);
-    return Number.isNaN(d.getTime()) ? null : d;
-  }
-  /** dd/mm/aaaa, hh:mm:ss (emitido por la app) o dd/mm/aaaa hh:mm:ss (locale de Sheets). */
-  const m =
-    s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4}),\s*(\d{1,2}):(\d{1,2}):(\d{1,2})$/) ??
-    s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})\s+(\d{1,2}):(\d{1,2}):(\d{1,2})$/);
-  if (!m) return null;
-  const day = parseInt(m[1], 10);
-  const month = parseInt(m[2], 10);
-  const year = parseInt(m[3], 10);
-  const hour = parseInt(m[4], 10);
-  const minute = parseInt(m[5], 10);
-  const second = parseInt(m[6], 10);
-  // CDMX (UTC−6): instante = UTC ms con +6 h respecto a hora local civil
-  const ms = Date.UTC(year, month - 1, day, hour + 6, minute, second);
-  const d = new Date(ms);
-  return Number.isNaN(d.getTime()) ? null : d;
-}
-
-function esReservaExpirada(timestampStr: string, ahora: Date): boolean {
-  const t = parseTimestampReserva(timestampStr);
-  if (!t) return false;
-  return ahora.getTime() - t.getTime() >= RESERVA_HOLD_MS;
-}
-
-export interface LiberarReservasExpiradasResult {
-  revisadas: number;
-  liberadas: number;
-}
-
-async function liberarReservasExpiradasEnRows(
-  rows: GoogleSpreadsheetRow[],
-  ahora: Date,
-): Promise<LiberarReservasExpiradasResult> {
-  let revisadas = 0;
-  let liberadas = 0;
-
-  for (const row of rows) {
-    const estado = String(row.get("Estado") ?? "").trim().toLowerCase();
-    if (estado !== "reservado") continue;
-
-    revisadas += 1;
-    const tsStr = String(row.get("Timestamp_Reserva") ?? "").trim();
-    if (!tsStr || !esReservaExpirada(tsStr, ahora)) continue;
-
-    row.set("Estado", "Disponible");
-    await row.save();
-    liberadas += 1;
-  }
-
-  return { revisadas, liberadas };
-}
-
-/** Libera todas las filas de Agenda que siguen en Reservado después de 2 h. */
-export async function liberarReservasExpiradasAgenda(
-  ahora: Date = new Date(),
-): Promise<LiberarReservasExpiradasResult> {
-  const doc = await getSpreadsheetDoc();
-  const sheet = doc.sheetsByTitle["Agenda"];
-  if (!sheet) throw new Error('No existe la hoja "Agenda"');
-
-  const rows = await sheet.getRows();
-  return liberarReservasExpiradasEnRows(rows, ahora);
-}
-
-/**
- * Estados: Disponible, Reservado, Pagado (solo manual), Cancelado.
- * Pagado y Reservado vigente ocupan cupo; Cancelado / Disponible / Reservado vencido no.
- * "confirmado" se trata como legado de pagado.
- */
-export function ocupaCupoEnAgenda(estadoRaw: string, timestampReserva: string, ahora: Date): boolean {
+export function ocupaCupoEnAgenda(estadoRaw: string): boolean {
   const estado = estadoRaw.trim().toLowerCase();
   if (estado === "cancelado" || estado === "disponible") return false;
   if (estado === "pagado" || estado === "confirmado") return true;
-  if (estado === "reservado") {
-    if (!timestampReserva.trim()) return true;
-    return !esReservaExpirada(timestampReserva, ahora);
-  }
+  if (estado === "agendado") return true;
+  if (estado === "reservado") return true;
   return false;
 }
 
-/** Suma volúmenes en Agenda para fecha+hora; primero libera Reservados vencidos (→ Disponible). */
+/** Suma volúmenes en Agenda para fecha+hora. */
 export async function sumarVolumenAgendado(fecha: string, hora: string): Promise<number> {
   const doc = await getSpreadsheetDoc();
   const sheet = doc.sheetsByTitle["Agenda"];
@@ -814,21 +793,18 @@ export async function sumarVolumenAgendado(fecha: string, hora: string): Promise
   const rows = await sheet.getRows();
   const f = normalizeFecha(fecha);
   const h = normalizeHora(hora);
-  const ahora = new Date();
   let sum = 0;
-
-  await liberarReservasExpiradasEnRows(rows, ahora);
 
   for (const row of rows) {
     const estadoRaw = String(row.get("Estado") ?? "").trim();
-    const tsStr = String(row.get("Timestamp_Reserva") ?? "").trim();
 
-    if (!ocupaCupoEnAgenda(estadoRaw, tsStr, ahora)) continue;
+    if (!ocupaCupoEnAgenda(estadoRaw)) continue;
 
     const rf = normalizeFecha(String(row.get("Fecha") ?? ""));
     const rh = normalizeHora(String(row.get("Hora") ?? "0:0"));
     if (rf === f && rh === h) {
-      sum += parseFloat(String(row.get("Volumen") ?? "0")) || 0;
+      const volCell = row.get("Volumén") ?? row.get("Volumen") ?? "0";
+      sum += parseFloat(String(volCell)) || 0;
     }
   }
   return sum;
@@ -841,10 +817,11 @@ export interface ReservaPayload {
   Obra: string;
   Fecha: string;
   Hora: string;
+  /** Volumen cotizado (m³) — se escribe en la columna «Volumén» de Agenda (K si el encabezado está en ese orden). */
   Volumen: number;
   /** "Tiro Directo" | "Bombeo" — columna Vaciado en Agenda */
   Vaciado: string;
-  /** kg/cm² admitidos (catálogo cotizador / columna Agenda "Resistencia f'c") */
+  /** kg/cm² en API; en Agenda se guarda como texto «{kg} N 20 14» para coincidir con la validación de datos. */
   "Resistencia f'c": number;
   /** Total estimado de la cotización (MXN) — columna Cotización */
   Cotización: number;
@@ -863,6 +840,12 @@ export interface ReservaPayload {
   ResistenciaRapida?: string;
   PrecioM3?: number;
   Desglose?: string;
+}
+
+/** Valor de celda en Agenda para «Resistencia f'c» (validación tipo «100 N 20 14» … «350 N 20 14»). */
+function resistenciaAgendaSheetDesdeKg(kg: number): string {
+  if (!Number.isFinite(kg) || kg <= 0) return String(kg);
+  return `${Math.round(kg)} N 20 14`;
 }
 
 export interface VisitaAgendadaSheetPayload {
@@ -922,6 +905,10 @@ export async function appendReservaAgenda(payload: ReservaPayload): Promise<void
   if (!sheet) throw new Error('No existe la hoja "Agenda"');
   await assertAgendaHeaders(sheet);
 
+  const volumenColumnKey: "Volumén" | "Volumen" = sheet.headerValues.includes("Volumén")
+    ? "Volumén"
+    : "Volumen";
+
   const row: Record<string, string | number> = {
     Nombre: payload.Nombre,
     Teléfono: payload.Teléfono,
@@ -929,9 +916,9 @@ export async function appendReservaAgenda(payload: ReservaPayload): Promise<void
     Obra: payload.Obra,
     Fecha: normalizeFecha(payload.Fecha),
     Hora: normalizeHora(payload.Hora),
-    Volumen: payload.Volumen,
+    [volumenColumnKey]: payload.Volumen,
     Vaciado: payload.Vaciado,
-    "Resistencia f'c": payload["Resistencia f'c"],
+    "Resistencia f'c": resistenciaAgendaSheetDesdeKg(payload["Resistencia f'c"]),
     Cotización: payload.Cotización,
     Estado: payload.Estado,
     Timestamp_Reserva: payload.Timestamp_Reserva,
@@ -1003,7 +990,7 @@ const AGENDA_HEADERS = [
   "Vaciado",
   "Fecha",
   "Hora",
-  "Volumen",
+  "Volumén",
   "Resistencia f'c",
   "Estado",
   "Timestamp_Reserva",
@@ -1014,7 +1001,13 @@ const AGENDA_HEADERS = [
 
 async function assertAgendaHeaders(sheet: GoogleSpreadsheetWorksheet): Promise<void> {
   await sheet.loadHeaderRow();
-  const missing = AGENDA_HEADERS.filter((header) => !sheet.headerValues.includes(header));
+  const headers = sheet.headerValues;
+  const missing = AGENDA_HEADERS.filter((header) => {
+    if (header === "Volumén") {
+      return !headers.includes("Volumén") && !headers.includes("Volumen");
+    }
+    return !headers.includes(header);
+  });
   if (missing.length > 0) {
     throw new Error(`Faltan encabezados en "Agenda": ${missing.join(", ")}`);
   }

@@ -1,30 +1,24 @@
 "use client";
 
-import { useState, useEffect, type CSSProperties } from "react";
+import { useState, useEffect, useLayoutEffect, type CSSProperties } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { FileText, Menu, X } from "lucide-react";
+import { Calendar, FileText, Menu, X } from "lucide-react";
 
 const navLinks = [
   { href: "#inicio", label: "Inicio" },
   { href: "#servicios", label: "Servicios" },
-  { href: "#galeria", label: "Galería" },
+  { href: "#proyectos", label: "Proyectos" },
   { href: "#calculadora-volumen", label: "Calculadora" },
   { href: "#ubicacion", label: "Ubicación" },
 ];
 
 interface NavbarProps {
   onCotizadorClick: () => void;
+  onAgendaVisitaClick: () => void;
 }
 
-export function Navbar({ onCotizadorClick }: NavbarProps) {
-  const [isScrolled, setIsScrolled] = useState(false);
+export function Navbar({ onCotizadorClick, onAgendaVisitaClick }: NavbarProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-
-  useEffect(() => {
-    const handleScroll = () => setIsScrolled(window.scrollY > 20);
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
 
   useEffect(() => {
     const onResize = () => {
@@ -45,11 +39,50 @@ export function Navbar({ onCotizadorClick }: NavbarProps) {
     };
   }, [mobileMenuOpen]);
 
+  const [activeHref, setActiveHref] = useState("#inicio");
+
+  useLayoutEffect(() => {
+    const headerReserve = 110;
+
+    const pickActive = () => {
+      let current = navLinks[0].href;
+      const y = window.scrollY + headerReserve;
+      const doc = document.documentElement;
+      const maxScroll = Math.max(0, doc.scrollHeight - window.innerHeight);
+
+      for (const { href } of navLinks) {
+        const id = href.slice(1);
+        const el = document.getElementById(id);
+        if (!el) continue;
+        const top = el.getBoundingClientRect().top + window.scrollY;
+        if (y >= top - 4) current = href;
+      }
+
+      /* Si el pie es más bajo que la ventana, al hacer scroll al máximo nunca cumple y >= top del footer */
+      if (maxScroll > 0 && window.scrollY >= maxScroll - 16) {
+        current = navLinks[navLinks.length - 1]!.href;
+      }
+
+      setActiveHref(current);
+    };
+
+    pickActive();
+    window.addEventListener("scroll", pickActive, { passive: true });
+    window.addEventListener("resize", pickActive);
+    window.addEventListener("hashchange", pickActive);
+
+    return () => {
+      window.removeEventListener("scroll", pickActive);
+      window.removeEventListener("resize", pickActive);
+      window.removeEventListener("hashchange", pickActive);
+    };
+  }, []);
+
   const navBarClass =
     "fixed top-0 left-0 right-0 z-[90] w-full min-w-0 border-b border-white/25 bg-transparent backdrop-blur-sm transition-all duration-300";
 
   const texturaFondo: CSSProperties = {
-    backgroundColor: isScrolled ? "#a8a5a0" : "#a8a5a0",
+    backgroundColor: "#a8a5a0",
     backgroundImage: "url(/concrete-texture.svg)",
     backgroundSize: "88px 88px",
     backgroundRepeat: "repeat",
@@ -75,41 +108,59 @@ export function Navbar({ onCotizadorClick }: NavbarProps) {
             className="inline-flex items-center gap-2 sm:gap-3 shrink-0 min-w-0"
             onClick={() => setMobileMenuOpen(false)}
           >
-            <div className="flex h-[4rem] w-[4rem] sm:h-[4rem] sm:w-[4rem] md:h-[4.7em] md:w-[4.7rem] shrink-0 items-center justify-center rounded-full border border-white bg-white p-px shadow-sm">
+            <div className="flex h-[4rem] w-[4rem] shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-[var(--tepexi-logo-navy)] bg-white p-2 shadow-sm sm:h-[4rem] sm:w-[4rem] md:h-[4.7rem] md:w-[4.7rem] md:p-1.5">
               <img
-                src="/Logo.jpg"
+                src="/Tepexi%20A-R.jpeg"
                 alt="Concretos Tepexi"
-                className="h-full w-full rounded-full object-contain"
+                className="max-h-full max-w-full object-contain object-center"
               />
             </div>
-            <span className="font-display text-base sm:text-xl md:text-2xl font-semibold text-white tracking-wide hidden sm:inline truncate max-w-[40vw] sm:max-w-none drop-shadow-sm">
+            <span className="font-display hidden max-w-[40vw] truncate text-base font-semibold tracking-wide text-[var(--tepexi-logo-navy)] sm:inline sm:text-xl md:max-w-none md:text-2xl drop-shadow-sm">
               CONCRETOS TEPEXI
             </span>
           </a>
 
-          <div className="hidden lg:flex items-center gap-8 flex-1 justify-center">
-            {navLinks.map((link) => (
-              <a
-                key={link.href}
-                href={link.href}
-                className="text-white hover:text-[#c62828] transition-colors font-medium text-sm uppercase tracking-wide"
-              >
-                {link.label}
-              </a>
-            ))}
+          <div className="hidden lg:flex flex-1 items-center justify-center gap-8">
+            {navLinks.map((link) => {
+              const active = activeHref === link.href;
+              return (
+                <a
+                  key={link.href}
+                  href={link.href}
+                  className={`font-display text-base font-semibold uppercase tracking-wide transition-colors ${
+                    active
+                      ? "text-[#c62828]"
+                      : "text-[var(--tepexi-logo-navy)] hover:text-[#c62828]"
+                  }`}
+                >
+                  {link.label}
+                </a>
+              );
+            })}
           </div>
 
-          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
             <button
               type="button"
               onClick={() => {
                 onCotizadorClick();
                 setMobileMenuOpen(false);
               }}
-              className="font-display flex items-center gap-1.5 sm:gap-2 rounded-xl bg-gradient-to-b from-[#e53935] to-[#c62828] px-3 py-2.5 sm:px-5 sm:py-2.5 text-white shadow-lg shadow-red-900/35 ring-2 ring-white/25 transition-all hover:scale-[1.03] hover:shadow-xl hover:shadow-red-900/40 active:scale-[0.98] uppercase text-[11px] font-bold tracking-wide sm:text-sm"
+              className="font-display flex items-center gap-1.5 sm:gap-2 rounded-xl border-2 border-transparent bg-gradient-to-b from-[#e53935] to-[#c62828] px-3 py-2.5 text-white shadow-md shadow-red-900/25 ring-1 ring-white/30 transition-all hover:scale-[1.02] hover:shadow-lg active:scale-[0.98] uppercase text-[11px] font-bold tracking-wide sm:px-5 sm:text-sm"
             >
-              <FileText size={17} className="shrink-0 sm:w-[18px] sm:h-[18px]" />
+              <FileText size={17} className="shrink-0 sm:h-[18px] sm:w-[18px]" aria-hidden />
               <span>Cotizar</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                onAgendaVisitaClick();
+                setMobileMenuOpen(false);
+              }}
+              className="font-display flex items-center gap-1.5 sm:gap-2 rounded-xl border-2 border-white/90 bg-white/95 px-3 py-2.5 text-[var(--tepexi-logo-navy)] shadow-sm backdrop-blur-[2px] transition-all hover:border-[#c62828]/50 hover:bg-white hover:text-[#c62828] hover:shadow-md active:scale-[0.98] uppercase text-[11px] font-bold tracking-wide sm:border-[var(--tepexi-logo-navy)]/25 sm:px-5 sm:text-sm"
+            >
+              <Calendar size={17} className="shrink-0 text-[#c62828] sm:h-[18px] sm:w-[18px]" aria-hidden />
+              <span>Agenda</span>
             </button>
 
             <button
@@ -155,16 +206,23 @@ export function Navbar({ onCotizadorClick }: NavbarProps) {
                 aria-hidden
               />
               <nav className="relative z-10 flex flex-col gap-0.5 px-1" aria-label="Móvil">
-                {navLinks.map((link) => (
-                  <a
-                    key={link.href}
-                    href={link.href}
-                    className="rounded-lg px-4 py-3 text-left text-sm font-semibold uppercase tracking-wide text-white transition-colors hover:bg-white/15 hover:text-white"
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
-                    {link.label}
-                  </a>
-                ))}
+                {navLinks.map((link) => {
+                  const active = activeHref === link.href;
+                  return (
+                    <a
+                      key={link.href}
+                      href={link.href}
+                      className={`rounded-lg px-4 py-3 text-left font-display text-base font-semibold uppercase tracking-wide transition-colors ${
+                        active
+                          ? "bg-white/10 text-[#c62828]"
+                          : "text-[var(--tepexi-logo-navy)] hover:bg-white/15 hover:text-[#c62828]"
+                      }`}
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      {link.label}
+                    </a>
+                  );
+                })}
               </nav>
             </motion.div>
           </>
