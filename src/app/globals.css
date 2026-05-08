@@ -93,6 +93,22 @@ body {
   -webkit-backface-visibility: hidden;
 }
 
+/**
+ * Capa de vídeo a pantalla completa: promoción a compositor para menos repintado al hacer scroll.
+ */
+.tepexi-hero-video {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+/** Barra fija: fondo opaco en lugar de backdrop-filter (blur repinta encima de todo el viewport). */
+.tepexi-nav-shell {
+  transform: translateZ(0);
+  contain: layout style;
+  isolation: isolate;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .tepexi-clientes-marquee {
     animation: none !important;

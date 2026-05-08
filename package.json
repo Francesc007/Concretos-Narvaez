@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "generate-favicon": "node scripts/generate-favicon.mjs"
+    "generate-favicon": "node scripts/generate-favicon.mjs",
+    "generate-image-blurs": "node scripts/generate-image-blurs.mjs"
   },
   "dependencies": {
     "date-fns": "^4.1.0",

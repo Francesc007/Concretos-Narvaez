@@ -1,6 +1,9 @@
 "use client";
 
+import { memo } from "react";
+import Image from "next/image";
 import { motion } from "framer-motion";
+import { GALERIA_BLUR_DATA_URL } from "@/lib/image-blur-placeholders";
 
 const items = [
   {
@@ -63,7 +66,58 @@ const items = [
     titulo: "Piso y acabado en planta, Tepeji del Río, Hgo.",
     imagen: "/CT-PT-10.JPG",
   },
-];
+] as const;
+
+const listVariants = {
+  hidden: {},
+  show: {
+    transition: { staggerChildren: 0.06, delayChildren: 0.04 },
+  },
+} as const;
+
+const cardVariants = {
+  hidden: { opacity: 0, y: 28 },
+  show: {
+    opacity: 1,
+    y: 0,
+    transition: { type: "tween" as const, duration: 0.42, ease: [0.22, 1, 0.36, 1] },
+  },
+} as const;
+
+type Proyecto = (typeof items)[number];
+
+const ProyectoCardContent = memo(function ProyectoCardContent({
+  item,
+  index,
+}: {
+  item: Proyecto;
+  index: number;
+}) {
+  const blurDataURL = GALERIA_BLUR_DATA_URL[item.imagen];
+
+  return (
+    <>
+      <div className="relative h-64 overflow-hidden sm:h-72">
+        <Image
+          src={item.imagen}
+          alt={item.titulo}
+          fill
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+          placeholder="blur"
+          blurDataURL={blurDataURL}
+          className="object-cover object-center transition-transform duration-500 ease-out max-md:group-hover:scale-[1.03] group-hover:scale-105"
+          loading={index < 3 ? "eager" : "lazy"}
+          priority={index < 2}
+        />
+      </div>
+      <div className="px-4 py-3 sm:py-3.5">
+        <h3 className="font-display text-base font-semibold tracking-wide leading-snug text-[var(--tepexi-logo-navy)] sm:text-lg">
+          {item.titulo}
+        </h3>
+      </div>
+    </>
+  );
+});
 
 export function Galeria() {
   return (
@@ -93,33 +147,25 @@ export function Galeria() {
           </p>
         </motion.div>
 
-        <div className="grid md:grid-cols-3 gap-8 lg:gap-10">
+        <motion.div
+          className="grid md:grid-cols-3 gap-8 lg:gap-10"
+          variants={listVariants}
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: true, amount: 0.08, margin: "0px 0px -10% 0px" }}
+        >
           {items.map((item, i) => (
-            <motion.div
+            <motion.article
               key={`${item.titulo}-${i}`}
-              initial={{ opacity: 0, y: 36, scale: 0.97 }}
-              whileInView={{ opacity: 1, y: 0, scale: 1 }}
-              viewport={{ once: true, amount: 0.2, margin: "0px 0px -8% 0px" }}
-              transition={{ delay: i * 0.12, type: "spring", stiffness: 320, damping: 26 }}
+              variants={cardVariants}
               whileHover={{ y: -4 }}
               whileTap={{ scale: 0.985 }}
-              className="group rounded-2xl overflow-hidden border-2 border-[#c62828]/40 bg-white shadow-lg transition-[border-color,box-shadow,ring] duration-300 hover:border-[#c62828]/60 hover:shadow-xl hover:ring-2 hover:ring-[#c62828]/15"
+              className="group rounded-2xl overflow-hidden border-2 border-[#c62828]/40 bg-white shadow-lg transition-[border-color,box-shadow,ring] duration-300 hover:border-[#c62828]/60 hover:shadow-xl hover:ring-2 hover:ring-[#c62828]/15 transform-gpu"
             >
-              <div className="relative h-64 sm:h-72 overflow-hidden">
-                <img
-                  src={item.imagen}
-                  alt=""
-                  className="w-full h-full object-cover object-center transition-transform duration-500 ease-out max-md:group-hover:scale-[1.03] group-hover:scale-105"
-                />
-              </div>
-              <div className="px-4 py-3 sm:py-3.5">
-                <h3 className="font-display text-base sm:text-lg font-semibold text-[var(--tepexi-logo-navy)] tracking-wide leading-snug">
-                  {item.titulo}
-                </h3>
-              </div>
-            </motion.div>
+              <ProyectoCardContent item={item} index={i} />
+            </motion.article>
           ))}
-        </div>
+        </motion.div>
       </div>
     </section>
   );

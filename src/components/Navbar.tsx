@@ -1,8 +1,10 @@
 "use client";
 
-import { useState, useEffect, useLayoutEffect, type CSSProperties } from "react";
+import { useState, useEffect, useLayoutEffect, useRef, type CSSProperties } from "react";
+import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { Calendar, FileText, Menu, X } from "lucide-react";
+import { LOGO_BLUR_DATA_URL } from "@/lib/image-blur-placeholders";
 
 const navLinks = [
   { href: "#inicio", label: "Inicio" },
@@ -40,11 +42,14 @@ export function Navbar({ onCotizadorClick, onAgendaVisitaClick }: NavbarProps) {
   }, [mobileMenuOpen]);
 
   const [activeHref, setActiveHref] = useState("#inicio");
+  const activeHrefRef = useRef(activeHref);
+  activeHrefRef.current = activeHref;
 
   useLayoutEffect(() => {
     const headerReserve = 110;
+    let raf = 0;
 
-    const pickActive = () => {
+    const computeActive = () => {
       let current = navLinks[0].href;
       const y = window.scrollY + headerReserve;
       const doc = document.documentElement;
@@ -58,28 +63,39 @@ export function Navbar({ onCotizadorClick, onAgendaVisitaClick }: NavbarProps) {
         if (y >= top - 4) current = href;
       }
 
-      /* Si el pie es más bajo que la ventana, al hacer scroll al máximo nunca cumple y >= top del footer */
       if (maxScroll > 0 && window.scrollY >= maxScroll - 16) {
         current = navLinks[navLinks.length - 1]!.href;
       }
 
-      setActiveHref(current);
+      return current;
     };
 
-    pickActive();
-    window.addEventListener("scroll", pickActive, { passive: true });
-    window.addEventListener("resize", pickActive);
-    window.addEventListener("hashchange", pickActive);
+    const flush = () => {
+      raf = 0;
+      const next = computeActive();
+      if (next !== activeHrefRef.current) setActiveHref(next);
+    };
+
+    const schedule = () => {
+      if (raf !== 0) return;
+      raf = requestAnimationFrame(flush);
+    };
+
+    flush();
+    window.addEventListener("scroll", schedule, { passive: true });
+    window.addEventListener("resize", schedule);
+    window.addEventListener("hashchange", flush);
 
     return () => {
-      window.removeEventListener("scroll", pickActive);
-      window.removeEventListener("resize", pickActive);
-      window.removeEventListener("hashchange", pickActive);
+      if (raf !== 0) cancelAnimationFrame(raf);
+      window.removeEventListener("scroll", schedule);
+      window.removeEventListener("resize", schedule);
+      window.removeEventListener("hashchange", flush);
     };
   }, []);
 
   const navBarClass =
-    "fixed top-0 left-0 right-0 z-[90] w-full min-w-0 border-b border-white/25 bg-transparent backdrop-blur-sm transition-all duration-300";
+    "tepexi-nav-shell fixed top-0 left-0 right-0 z-[90] w-full min-w-0 border-b border-[var(--tepexi-logo-navy)]/15 bg-[#a8a5a0]/94 transition-colors duration-300";
 
   const texturaFondo: CSSProperties = {
     backgroundColor: "#a8a5a0",
@@ -108,10 +124,16 @@ export function Navbar({ onCotizadorClick, onAgendaVisitaClick }: NavbarProps) {
             className="inline-flex items-center gap-2 sm:gap-3 shrink-0 min-w-0"
             onClick={() => setMobileMenuOpen(false)}
           >
-            <div className="flex h-[4rem] w-[4rem] shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-[var(--tepexi-logo-navy)] bg-white p-2 shadow-sm sm:h-[4rem] sm:w-[4rem] md:h-[4.7rem] md:w-[4.7rem] md:p-1.5">
-              <img
+            <div className="relative flex h-[4rem] w-[4rem] shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-[var(--tepexi-logo-navy)] bg-white p-2 shadow-sm sm:h-[4rem] sm:w-[4rem] md:h-[4.7rem] md:w-[4.7rem] md:p-1.5">
+              <Image
                 src="/Tepexi%20A-R.jpeg"
                 alt="Concretos Tepexi"
+                width={188}
+                height={188}
+                priority
+                placeholder="blur"
+                blurDataURL={LOGO_BLUR_DATA_URL}
+                sizes="(max-width: 768px) 4rem, 4.7rem"
                 className="max-h-full max-w-full object-contain object-center"
               />
             </div>
@@ -157,7 +179,7 @@ export function Navbar({ onCotizadorClick, onAgendaVisitaClick }: NavbarProps) {
                 onAgendaVisitaClick();
                 setMobileMenuOpen(false);
               }}
-              className="font-display flex items-center gap-1.5 sm:gap-2 rounded-xl border-2 border-white/90 bg-white/95 px-3 py-2.5 text-[var(--tepexi-logo-navy)] shadow-sm backdrop-blur-[2px] transition-all hover:border-[#c62828]/50 hover:bg-white hover:text-[#c62828] hover:shadow-md active:scale-[0.98] uppercase text-[11px] font-bold tracking-wide sm:border-[var(--tepexi-logo-navy)]/25 sm:px-5 sm:text-sm"
+              className="font-display flex items-center gap-1.5 sm:gap-2 rounded-xl border-2 border-white/90 bg-white px-3 py-2.5 text-[var(--tepexi-logo-navy)] shadow-sm transition-all hover:border-[#c62828]/50 hover:bg-white hover:text-[#c62828] hover:shadow-md active:scale-[0.98] uppercase text-[11px] font-bold tracking-wide sm:border-[var(--tepexi-logo-navy)]/25 sm:px-5 sm:text-sm"
             >
               <Calendar size={17} className="shrink-0 text-[#c62828] sm:h-[18px] sm:w-[18px]" aria-hidden />
               <span>Agenda</span>

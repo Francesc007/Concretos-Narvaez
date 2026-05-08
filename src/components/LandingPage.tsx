@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { Navbar } from "@/components/Navbar";
 import { Hero } from "@/components/Hero";
 import { Servicios } from "@/components/Servicios";
@@ -20,36 +20,41 @@ export function LandingPage({ clientesImageFiles }: LandingPageProps) {
   const [volumenCotizadorInicial, setVolumenCotizadorInicial] = useState<number | null>(null);
   const [agendaVisitaOpen, setAgendaVisitaOpen] = useState(false);
 
+  const openCotizador = useCallback(() => setCotizadorOpen(true), []);
+  const openAgendaVisita = useCallback(() => setAgendaVisitaOpen(true), []);
+  const closeCotizador = useCallback(() => {
+    setCotizadorOpen(false);
+    setVolumenCotizadorInicial(null);
+  }, []);
+  const closeAgendaVisita = useCallback(() => setAgendaVisitaOpen(false), []);
+
+  const onCotizarVolumenM3 = useCallback((m3: number) => {
+    setVolumenCotizadorInicial(m3);
+    setCotizadorOpen(true);
+  }, []);
+
   return (
     <>
       <Navbar
-        onCotizadorClick={() => setCotizadorOpen(true)}
-        onAgendaVisitaClick={() => setAgendaVisitaOpen(true)}
+        onCotizadorClick={openCotizador}
+        onAgendaVisitaClick={openAgendaVisita}
       />
       <Hero />
       <Servicios />
       <Galeria />
-      <CalculadoraVolumenConcreto
-        onCotizarVolumenM3={(m3) => {
-          setVolumenCotizadorInicial(m3);
-          setCotizadorOpen(true);
-        }}
-      />
+      <CalculadoraVolumenConcreto onCotizarVolumenM3={onCotizarVolumenM3} />
       <Cotizacion
-        onCotizadorClick={() => setCotizadorOpen(true)}
-        onAgendaVisitaClick={() => setAgendaVisitaOpen(true)}
+        onCotizadorClick={openCotizador}
+        onAgendaVisitaClick={openAgendaVisita}
       />
       <Clientes imageFiles={clientesImageFiles} />
       <Footer />
       <CotizadorReservaModal
         isOpen={cotizadorOpen}
-        onClose={() => {
-          setCotizadorOpen(false);
-          setVolumenCotizadorInicial(null);
-        }}
+        onClose={closeCotizador}
         volumenInicialM3={volumenCotizadorInicial}
       />
-      <AgendaVisitaModal isOpen={agendaVisitaOpen} onClose={() => setAgendaVisitaOpen(false)} />
+      <AgendaVisitaModal isOpen={agendaVisitaOpen} onClose={closeAgendaVisita} />
       <WhatsAppButton />
     </>
   );

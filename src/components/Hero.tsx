@@ -1,19 +1,32 @@
 "use client";
 
 import { motion } from "framer-motion";
-
-/** Misma ruta: `public/Hero.mp4`. Sube el número si cambias el archivo y ves el video antiguo por caché. */
-const HERO_VIDEO_VERSION = 2;
+import { useLayoutEffect, useRef } from "react";
+import { HERO_VIDEO_POSTER, heroVideoSrc } from "@/config";
 
 export function Hero() {
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+
+  useLayoutEffect(() => {
+    videoRef.current?.setAttribute("fetchpriority", "high");
+  }, []);
+
   return (
     <section
       id="inicio"
-      className="relative flex min-h-screen min-h-[100dvh] w-full max-w-full items-center justify-center overflow-x-hidden"
+      className="relative flex min-h-screen min-h-[100dvh] w-full max-w-full items-center justify-center overflow-x-hidden bg-[#1a3050]"
     >
+      {/* Capa base + poster del video: evita gris “en bruto” antes de decodificar. */}
+      <div
+        className="pointer-events-none absolute inset-0 bg-cover bg-center bg-no-repeat opacity-95"
+        style={{ backgroundImage: `url(${HERO_VIDEO_POSTER})` }}
+        aria-hidden
+      />
       <video
-        className="pointer-events-none absolute inset-0 h-full w-full object-cover"
-        src={`/Hero.mp4?v=${HERO_VIDEO_VERSION}`}
+        ref={videoRef}
+        className="tepexi-hero-video pointer-events-none absolute inset-0 h-full w-full object-cover"
+        src={heroVideoSrc()}
+        poster={HERO_VIDEO_POSTER}
         autoPlay
         muted
         loop
@@ -23,7 +36,7 @@ export function Hero() {
       />
       <div className="absolute inset-0 bg-gradient-to-b from-[#132f4c]/55 via-[#132f4c]/32 to-black/45" />
 
-      <div className="relative z-10 mx-auto w-full min-w-0 max-w-5xl px-3 sm:px-4 text-center pt-28 pb-16 sm:pt-32">
+      <div className="relative z-10 mx-auto w-full min-w-0 max-w-5xl px-3 pt-28 pb-16 text-center sm:px-4 sm:pt-32">
         <motion.p
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -36,7 +49,7 @@ export function Hero() {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.15 }}
-          className="font-display text-4xl [text-wrap:balance] sm:text-5xl md:text-6xl lg:text-7xl font-bold leading-tight text-white mb-6"
+          className="font-display mb-6 text-4xl font-bold leading-tight text-white [text-wrap:balance] sm:text-5xl md:text-6xl lg:text-7xl"
         >
           Solidez y confianza para cada metro de tu obra
         </motion.h1>
@@ -46,8 +59,8 @@ export function Hero() {
           transition={{ duration: 0.8, delay: 0.3 }}
           className="mx-auto mb-12 max-w-2xl text-pretty text-lg text-white/95 sm:text-xl drop-shadow-[0_1px_4px_rgba(0,0,0,0.45)]"
         >
-          En Concretos Tepexi entregamos mezclas certificadas, asesoría técnica y puntualidad en
-          planta y obra. Utiliza nuestra herramienta para cotizar y recibe acompañamiento de principio a fin.
+          En Concretos Tepexi entregamos mezclas certificadas, asesoría técnica y puntualidad en planta y
+          obra. Utiliza nuestra herramienta para cotizar y recibe acompañamiento de principio a fin.
         </motion.p>
         <motion.div
           initial={{ opacity: 0, y: 30 }}

@@ -69,7 +69,7 @@ function ServicioCard({
         />
       </div>
       <div className="absolute top-3 left-3 z-10">
-        <span className="inline-flex h-10 w-10 items-center justify-center rounded-lg border-2 border-white/40 bg-white/95 text-[var(--tepexi-logo-navy)] shadow-md backdrop-blur-[2px]">
+        <span className="inline-flex h-10 w-10 items-center justify-center rounded-lg border-2 border-white/40 bg-white text-[var(--tepexi-logo-navy)] shadow-md">
           <Icon size={20} />
         </span>
       </div>

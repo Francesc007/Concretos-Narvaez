@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 export default function PoliticaCalidadPage() {
   return (
     <div className="min-h-full flex flex-col bg-[var(--tepexi-page)] text-[var(--tepexi-text-body)] antialiased">
-      <header className="sticky top-0 z-20 border-b border-[var(--tepexi-border-light)] bg-white/95 backdrop-blur-sm shadow-sm">
+      <header className="sticky top-0 z-20 border-b border-[var(--tepexi-border-light)] bg-white shadow-sm">
         <div className="mx-auto flex h-14 sm:h-16 max-w-3xl items-center justify-between gap-4 px-4 sm:px-6">
           <Link
             href="/"
