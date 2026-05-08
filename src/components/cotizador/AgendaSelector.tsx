@@ -1,12 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { format } from "date-fns";
 import { apiUrl, fetchApiJson } from "@/lib/api";
-import { DateFieldCalendar, todayYmdLocal } from "@/components/ui/DateFieldCalendar";
+import { DateFieldCalendar } from "@/components/ui/DateFieldCalendar";
 import {
   buildAgendaHoursForDate,
   isAgendaDateAllowed,
   nextAllowedAgendaDateYmd,
+  todayYmdCdmx,
   validateAgendaSlot,
 } from "@/lib/agendaRules";
 
@@ -67,7 +69,7 @@ export function AgendaSelector({
     loading: boolean;
     error: string | null;
   }>({ usadoM3: 0, disponibleM3: 0, loading: true, error: null });
-  const minAgendaDate = nextAllowedAgendaDateYmd();
+  const minAgendaDate = nextAllowedAgendaDateYmd() || todayYmdCdmx();
   const horasDisponibles = buildAgendaHoursForDate(fecha);
   const horarioError = validateAgendaSlot(fecha, hora);
 
@@ -203,8 +205,8 @@ export function AgendaSelector({
             id="agenda-fecha"
             value={fecha}
             onChange={setFecha}
-            minDate={minAgendaDate || todayYmdLocal()}
-            disabledDays={(date) => date.getDay() === 0}
+            minDate={minAgendaDate}
+            disabledDays={(date) => !isAgendaDateAllowed(format(date, "yyyy-MM-dd"))}
             placeholder="Elegir fecha"
           />
         </div>

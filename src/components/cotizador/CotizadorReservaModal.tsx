@@ -61,7 +61,6 @@ export function CotizadorReservaModal({ isOpen, onClose, volumenInicialM3 = null
   const [distanciaObra, setDistanciaObra] = useState<MapsDistanceInfo | null>(null);
   const [calculandoDistancia, setCalculandoDistancia] = useState(false);
   const [errorDistancia, setErrorDistancia] = useState<string | null>(null);
-  const [metrosTuberia, setMetrosTuberia] = useState("30");
   const [aditivos, setAditivos] = useState<Record<AditivoCotizacion, boolean>>({
     fibra: false,
     impermeabilizante: false,
@@ -134,7 +133,6 @@ export function CotizadorReservaModal({ isOpen, onClose, volumenInicialM3 = null
 
   const volumenNumerico = useMemo(() => parseFloat(volumen.replace(",", ".")) || 0, [volumen]);
   const diasRapidosElegidos = resistenciaRapidaDesdeSeleccion(resistenciaRapidaDias);
-  const metrosTuberiaNumerico = useMemo(() => parseFloat(metrosTuberia.replace(",", ".")) || 0, [metrosTuberia]);
 
   useEffect(() => {
     if (resistenciaRapidaDias !== "" && resistenciaRapidaDesdeSeleccion(resistenciaRapidaDias) == null) {
@@ -154,7 +152,6 @@ export function CotizadorReservaModal({ isOpen, onClose, volumenInicialM3 = null
         tipoVaciado,
         tipoBomba,
         zona: distanciaObra?.zona ?? null,
-        metrosTuberia: metrosTuberiaNumerico,
         aditivos: aditivosSeleccionados,
         resistenciaRapidaDias: diasRapidosElegidos,
       }),
@@ -163,7 +160,6 @@ export function CotizadorReservaModal({ isOpen, onClose, volumenInicialM3 = null
       cotizacion,
       diasRapidosElegidos,
       distanciaObra?.zona,
-      metrosTuberiaNumerico,
       resistenciaKg,
       tipoBomba,
       tipoVaciado,
@@ -192,7 +188,6 @@ export function CotizadorReservaModal({ isOpen, onClose, volumenInicialM3 = null
     setDestinoObra("");
     setDistanciaObra(null);
     setErrorDistancia(null);
-    setMetrosTuberia("30");
     setAditivos({ fibra: false, impermeabilizante: false });
     setResistenciaRapidaDias("");
     setResistenciaKg(250);
@@ -244,8 +239,11 @@ export function CotizadorReservaModal({ isOpen, onClose, volumenInicialM3 = null
     const rutaMaps = distanciaObra
       ? `${distanciaObra.distanceText}${distanciaObra.durationText ? `, ${distanciaObra.durationText}` : ""} · ${distanciaObra.zonaLabel}`
       : null;
-    const desglose = cotizacionResultado.lineas
-      .map((linea) => `${linea.concepto}: $${linea.importe.toFixed(2)}`)
+    const desglose = [
+      ...cotizacionResultado.lineas.map((linea) => `${linea.concepto}: $${linea.importe.toFixed(2)}`),
+      tipoVaciado === "bombeo" ? "Bombeo: a cotizar con asesor" : null,
+    ]
+      .filter(Boolean)
       .join(" | ");
     const aditivosLabel = aditivosSeleccionados
       .map((aditivo) => (aditivo === "fibra" ? "Fibra de polipropileno" : "Impermeabilizante integral"))
@@ -262,11 +260,10 @@ export function CotizadorReservaModal({ isOpen, onClose, volumenInicialM3 = null
       `Volumen: ${extra.vol} m³`,
       `Resistencia: ${extra.resistencia}`,
       `Vaciado: ${extra.vaciado}`,
-      tipoVaciado === "bombeo" && tipoBomba === "estacionaria" ? `Tubería estacionaria: ${metrosTuberia} m` : null,
       aditivosLabel ? `Aditivos: ${aditivosLabel}` : null,
       diasRapidosElegidos ? `Resistencia rápida: ${diasRapidosElegidos} días` : null,
       desglose ? `Desglose: ${desglose}` : null,
-      `Total estimado: $${extra.total.toLocaleString("es-MX", { minimumFractionDigits: 2 })}`,
+      `Total estimado: $${extra.total.toLocaleString("es-MX", { minimumFractionDigits: 2 })}${tipoVaciado === "bombeo" ? " (solo concreto; bombeo a cotizar)" : ""}`,
       `Estado en agenda: Agendado`,
       comentarios.trim() ? `Comentarios: ${comentarios.trim()}` : null,
     ].filter(Boolean) as string[];
@@ -300,8 +297,11 @@ export function CotizadorReservaModal({ isOpen, onClose, volumenInicialM3 = null
       const rutaMaps = distanciaObra
         ? `${distanciaObra.distanceText}${distanciaObra.durationText ? `, ${distanciaObra.durationText}` : ""} · ${distanciaObra.zonaLabel}`
         : "";
-      const desgloseCotizacion = cotizacionResultado.lineas
-        .map((linea) => `${linea.concepto} $${linea.importe.toFixed(2)}`)
+      const desgloseCotizacion = [
+        ...cotizacionResultado.lineas.map((linea) => `${linea.concepto} $${linea.importe.toFixed(2)}`),
+        tipoVaciado === "bombeo" ? "Bombeo a cotizar con asesor" : null,
+      ]
+        .filter(Boolean)
         .join(" | ");
       const aditivosLabel = aditivosSeleccionados
         .map((aditivo) => (aditivo === "fibra" ? "Fibra de polipropileno" : "Impermeabilizante integral"))
@@ -328,7 +328,6 @@ export function CotizadorReservaModal({ isOpen, onClose, volumenInicialM3 = null
           distancia: distanciaObra?.distanceText ?? "",
           duracion: distanciaObra?.durationText ?? "",
           tipoBomba: tipoVaciado === "bombeo" ? labelVaciadoCliente(tipoVaciado, tipoBomba) : "",
-          metrosTuberia: tipoVaciado === "bombeo" && tipoBomba === "estacionaria" ? metrosTuberiaNumerico : undefined,
           aditivos: aditivosLabel,
           resistenciaRapida: diasRapidosElegidos ? `${diasRapidosElegidos} días` : "",
           precioM3: cotizacionResultado.precioM3,
@@ -441,8 +440,6 @@ export function CotizadorReservaModal({ isOpen, onClose, volumenInicialM3 = null
                   calcularDistanciaObra={calcularDistanciaObra}
                   calculandoDistancia={calculandoDistancia}
                   errorDistancia={errorDistancia}
-                  metrosTuberia={metrosTuberia}
-                  setMetrosTuberia={setMetrosTuberia}
                   aditivos={aditivos}
                   setAditivos={setAditivos}
                   resistenciaRapidaDias={resistenciaRapidaDias}

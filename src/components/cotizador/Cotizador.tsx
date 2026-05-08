@@ -2,9 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import { Info } from "lucide-react";
 import type { CotizacionPreciosConfig } from "@/types/sheets";
 import {
-  TUBERIA_INCLUIDA_M,
   MENSAJE_COTIZACION_ASESOR,
-  tuberiaMaximaCotizadorM,
+  MENSAJE_INFORMATIVO_BOMBEO_PENDIENTE,
   volumenMaximoCotizadorM3,
   labelResistenciaKg,
   labelZona,
@@ -143,8 +142,6 @@ export interface CotizadorProps {
   calcularDistanciaObra: () => void;
   calculandoDistancia: boolean;
   errorDistancia: string | null;
-  metrosTuberia: string;
-  setMetrosTuberia: (v: string) => void;
   aditivos: Record<AditivoCotizacion, boolean>;
   setAditivos: (v: Record<AditivoCotizacion, boolean>) => void;
   resistenciaRapidaDias: "" | ResistenciaRapidaDias;
@@ -179,8 +176,6 @@ export function Cotizador({
   calcularDistanciaObra,
   calculandoDistancia,
   errorDistancia,
-  metrosTuberia,
-  setMetrosTuberia,
   aditivos,
   setAditivos,
   resistenciaRapidaDias,
@@ -195,14 +190,13 @@ export function Cotizador({
   const [mrLeyendaAbierta, setMrLeyendaAbierta] = useState(false);
   const vol = parseFloat(volumen.replace(",", ".")) || 0;
   const avisoCargoVacio = vol > 0 && vol < VOLUMEN_MINIMO_OLLA_M3;
-  const tubMaxUi = tuberiaMaximaCotizadorM(cotizacion);
   const volMaxUi = volumenMaximoCotizadorM3(cotizacion);
-  const metrosTuberiaN = parseFloat(metrosTuberia.replace(",", ".")) || 0;
-  const leyendaTuberiaExcedida =
-    !!cotizacion && tipoVaciado === "bombeo" && tipoBomba === "estacionaria" && metrosTuberiaN > tubMaxUi;
   const leyendaVolumenExcedido = !!cotizacion && vol > volMaxUi;
   const precioM3 = cotizacionResultado.precioM3;
   const totalEstimado = cotizacionResultado.total;
+  const totalExcluyeBombeo = cotizacionResultado.totalExcluyeBombeo;
+  const fmtTotal = (n: number) =>
+    `$${n.toLocaleString("es-MX", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   const resistenciasDisponibles = resistenciasCotizacion(cotizacion);
 
   useEffect(() => {
@@ -467,30 +461,18 @@ export function Cotizador({
           </div>
         )}
         <p className="mt-2 text-xs text-slate-500">
-          Los mínimos de bombeo se aplican automáticamente por zona de entrega.
+          {tipoVaciado === "bombeo"
+            ? "El subtotal muestra solo concreto a precio de tiro directo; el bombeo lo integrará un asesor."
+            : "Precio estimado para tiro directo según zona y resistencia."}
         </p>
       </div>
 
-      {tipoVaciado === "bombeo" && tipoBomba === "estacionaria" && (
-        <div>
-          <label className="mb-2 block text-sm font-medium text-[var(--tepexi-text-body)]">
-            Metros de tubería estacionaria
-          </label>
-          <input
-            inputMode="decimal"
-            value={metrosTuberia}
-            onChange={(e) => setMetrosTuberia(e.target.value)}
-            className="w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-[var(--tepexi-logo-navy)] placeholder:text-slate-400 outline-none transition focus:border-[#c62828] focus:ring-2 focus:ring-[#c62828]/20"
-            placeholder="Ej. 30"
-          />
-          <p className="mt-2 text-xs text-slate-500">
-            Incluye {TUBERIA_INCLUIDA_M} m. Límite en línea: {tubMaxUi} m; por encima, cotización con asesor.
-          </p>
-          {leyendaTuberiaExcedida && (
-            <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2.5 text-sm text-amber-950">
-              <p className="leading-relaxed">{MENSAJE_COTIZACION_ASESOR}</p>
-            </div>
-          )}
+      {tipoVaciado === "bombeo" && (
+        <div className="rounded-lg border border-sky-200 bg-sky-50/95 px-3 py-3 text-sm text-slate-800 shadow-sm">
+          <div className="flex gap-2.5">
+            <Info className="mt-0.5 h-4 w-4 shrink-0 text-[#0c4a6e]" aria-hidden />
+            <p className="min-w-0 leading-relaxed">{MENSAJE_INFORMATIVO_BOMBEO_PENDIENTE}</p>
+          </div>
         </div>
       )}
 
@@ -602,11 +584,17 @@ export function Cotizador({
         ))}
         <div className="mt-2 border-t border-slate-200 pt-2">
           <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-slate-500">Total estimado</p>
-          <p className="font-display text-2xl font-bold text-[#c62828]">
-            {Number.isFinite(totalEstimado) && totalEstimado > 0
-              ? `$${totalEstimado.toLocaleString("es-MX", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
-              : "—"}
-          </p>
+          {totalExcluyeBombeo && Number.isFinite(totalEstimado) && totalEstimado > 0 ? (
+            <p className="font-display text-lg font-bold leading-snug text-[#c62828] sm:text-xl md:text-2xl">
+              {fmtTotal(totalEstimado)}{" "}
+              <span className="font-semibold text-slate-700">(Solo concreto)</span>{" "}
+              <span className="font-bold text-[#c62828]">+ Bombeo a cotizar</span>
+            </p>
+          ) : (
+            <p className="font-display text-2xl font-bold text-[#c62828]">
+              {Number.isFinite(totalEstimado) && totalEstimado > 0 ? fmtTotal(totalEstimado) : "—"}
+            </p>
+          )}
         </div>
         <p className="text-xs text-slate-500">Revisa y ajusta antes de continuar.</p>
       </div>

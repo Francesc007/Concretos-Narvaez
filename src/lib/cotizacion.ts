@@ -41,19 +41,15 @@ export const DISTANCIA_MAXIMA_COTIZACION_KM = 50;
 export const VOLUMEN_MINIMO_OLLA_M3 = 5;
 /** Cargo por m³ faltante hasta el mínimo de olla (LDP julio 2025 / nota en PDF). Fallback si la hoja no define el valor. */
 export const CARGO_VACIO_REFERENCIA_MXN = 600;
-export const TUBERIA_INCLUIDA_M = 30;
-/** Si «Config Sistema» no define máximo de tubería, se usa este valor (m). */
-export const TUBERIA_MAXIMA_AUTOMATICA_M = 60;
 /** Si «Config Sistema» no define máximo de volumen en cotizador, se usa este valor (m³). */
 export const VOLUMEN_MAXIMO_COTIZADOR_M3 = 100;
 
 export const MENSAJE_COTIZACION_ASESOR =
   "Por favor, contacta a un asesor para una cotización personalizada.";
 
-export function tuberiaMaximaCotizadorM(config: CotizacionPreciosConfig | null): number {
-  const n = config?.tuberiaMaximaAutomaticaM;
-  return typeof n === "number" && Number.isFinite(n) && n > 0 ? n : TUBERIA_MAXIMA_AUTOMATICA_M;
-}
+/** Mensaje cuando el cliente elige bombeo: el importe de bombeo no se suma en línea. */
+export const MENSAJE_INFORMATIVO_BOMBEO_PENDIENTE =
+  "Para garantizar la tarifa más competitiva según las necesidades técnicas de tu obra, un asesor integrará el costo de bombeo a tu cotización y te contactará en breve con una propuesta preferencial.";
 
 export function volumenMaximoCotizadorM3(config: CotizacionPreciosConfig | null): number {
   const n = config?.volumenMaximoCotizadorM3;
@@ -257,7 +253,6 @@ export interface CotizacionDinamicaInput {
   tipoVaciado: "tiro_directo" | "bombeo";
   tipoBomba: TipoBombaCotizador;
   zona: ZonaCotizacion | null;
-  metrosTuberia: number;
   aditivos: AditivoCotizacion[];
   resistenciaRapidaDias: ResistenciaRapidaDias | null;
 }
@@ -275,6 +270,8 @@ export interface CotizacionDinamicaResultado {
   lineas: CotizacionDetalleLinea[];
   bloqueado: boolean;
   motivosBloqueo: string[];
+  /** Total refleja solo concreto a precio tiro directo; bombeo lo cotiza un asesor. */
+  totalExcluyeBombeo: boolean;
 }
 
 function importeUnitario(config: CotizacionPreciosConfig | null, key: AditivoCotizacion): number {
@@ -293,13 +290,10 @@ export function calcularCotizacionDinamica(
   const motivosBloqueo: string[] = [];
   const volumen = Number.isFinite(input.volumen) && input.volumen > 0 ? input.volumen : 0;
   const diasRapidos = resistenciaRapidaDesdeSeleccion(input.resistenciaRapidaDias);
-  const tubMax = tuberiaMaximaCotizadorM(config);
   const volMax = volumenMaximoCotizadorM3(config);
+  const esBombeo = input.tipoVaciado === "bombeo";
 
   let requiereAsesorCotizacion = false;
-  if (input.tipoVaciado === "bombeo" && input.tipoBomba === "estacionaria" && input.metrosTuberia > tubMax) {
-    requiereAsesorCotizacion = true;
-  }
   if (volumen > volMax) {
     requiereAsesorCotizacion = true;
   }
@@ -316,10 +310,17 @@ export function calcularCotizacionDinamica(
 
   const resistenciaRapidaInvalida = diasRapidos != null && input.resistenciaKg < 200;
 
-  const servicio = servicioConcretoDesdeSeleccion(input.tipoVaciado, input.tipoBomba);
-  const precioM3 = precioM3ZonaServicio(config, input.resistenciaKg, input.zona, servicio);
+  /** Con bombeo, el subtotal mostrado usa precio de tiro directo (sin rubros automáticos de bombeo). */
+  const servicioParaPrecioM3: ServicioConcreto = esBombeo
+    ? "tiro_directo"
+    : servicioConcretoDesdeSeleccion(input.tipoVaciado, input.tipoBomba);
+  const precioM3 = precioM3ZonaServicio(config, input.resistenciaKg, input.zona, servicioParaPrecioM3);
   if (volumen > 0 && precioM3 <= 0) {
-    motivosBloqueo.push("No hay precio configurado para la resistencia, zona y servicio seleccionados.");
+    motivosBloqueo.push(
+      esBombeo
+        ? "No hay precio de concreto (tiro directo) configurado para esta resistencia y zona; necesario para mostrar el subtotal sin bombeo."
+        : "No hay precio configurado para la resistencia, zona y servicio seleccionados.",
+    );
   }
 
   const subtotalConcreto = volumen * precioM3;
@@ -327,11 +328,12 @@ export function calcularCotizacionDinamica(
     lineas.push({
       concepto: "Concreto",
       importe: subtotalConcreto,
-      detalle: `${volumen.toLocaleString("es-MX", { maximumFractionDigits: 2 })} m³ × $${precioM3.toLocaleString("es-MX", { minimumFractionDigits: 2 })}/m³`,
+      detalle: esBombeo
+        ? `${volumen.toLocaleString("es-MX", { maximumFractionDigits: 2 })} m³ × $${precioM3.toLocaleString("es-MX", { minimumFractionDigits: 2 })}/m³ (tiro directo; bombeo cotizado aparte por asesor)`
+        : `${volumen.toLocaleString("es-MX", { maximumFractionDigits: 2 })} m³ × $${precioM3.toLocaleString("es-MX", { minimumFractionDigits: 2 })}/m³`,
     });
   }
 
-  const zonaConfig = input.zona ? config?.zonas?.[input.zona] : undefined;
   const cargoVacioUnitario = cargoVacioUnitarioMxn(config, input.zona ?? undefined);
   if (volumen > 0 && volumen < VOLUMEN_MINIMO_OLLA_M3 && subtotalConcreto > 0 && cargoVacioUnitario > 0) {
     const faltante = VOLUMEN_MINIMO_OLLA_M3 - volumen;
@@ -340,41 +342,6 @@ export function calcularCotizacionDinamica(
       importe: faltante * cargoVacioUnitario,
       detalle: `${faltante.toLocaleString("es-MX", { maximumFractionDigits: 2 })} m³ faltantes × $${cargoVacioUnitario.toLocaleString("es-MX", { minimumFractionDigits: 2 })} MXN/m³ (mín. olla ${VOLUMEN_MINIMO_OLLA_M3} m³)`,
     });
-  }
-
-  if (input.tipoVaciado === "bombeo" && volumen > 0 && zonaConfig) {
-    const tipo = input.tipoBomba;
-    const minimoM3 = zonaConfig.serviciosMinimosM3[tipo] || 0;
-    const importeMinimo = zonaConfig.servicioMinimoImporte[tipo] || 0;
-    const minimoCalculado = minimoM3 > 0 && precioM3 > 0 ? minimoM3 * precioM3 : 0;
-    const minimoServicio = Math.max(importeMinimo, minimoCalculado);
-    const subtotalActual = volumen * precioM3;
-    if (minimoServicio > subtotalActual) {
-      lineas.push({
-        concepto: "Ajuste servicio mínimo de bombeo",
-        importe: minimoServicio - subtotalActual,
-        detalle: `${labelVaciadoCliente(input.tipoVaciado, input.tipoBomba)} mínimo ${minimoM3 || "—"} m³`,
-      });
-    }
-  }
-
-  if (
-    input.tipoVaciado === "bombeo" &&
-    input.tipoBomba === "estacionaria" &&
-    input.metrosTuberia > TUBERIA_INCLUIDA_M &&
-    input.metrosTuberia <= tubMax
-  ) {
-    const precioTramo = config?.tuberiaExtraTramo10mM3 ?? 0;
-    if (precioTramo > 0 && volumen > 0) {
-      const tramosExtra = Math.ceil((input.metrosTuberia - TUBERIA_INCLUIDA_M) / 10);
-      lineas.push({
-        concepto: "Tubería extra",
-        importe: tramosExtra * precioTramo * volumen,
-        detalle: `${tramosExtra} tramo(s) de 10 m × $${precioTramo.toLocaleString("es-MX", { minimumFractionDigits: 2 })} × ${volumen.toLocaleString("es-MX", { maximumFractionDigits: 2 })} m³`,
-      });
-    } else {
-      motivosBloqueo.push("Falta configurar el precio de tubería extra en la hoja de precios.");
-    }
   }
 
   for (const aditivo of input.aditivos) {
@@ -411,5 +378,6 @@ export function calcularCotizacionDinamica(
     lineas,
     bloqueado: motivosBloqueo.length > 0 || resistenciaRapidaInvalida,
     motivosBloqueo,
+    totalExcluyeBombeo: esBombeo,
   };
 }

@@ -41,8 +41,6 @@ export interface CotizacionPreciosConfig {
   resistenciasRapidas?: Partial<Record<ResistenciaRapidaDias, number>>;
   tuberiaExtraTramo10mM3?: number;
   fuente?: "Precios Concreto" | "Precios";
-  /** Máx. metros tubería estacionaria cotizable en línea (hoja «Config Sistema»). */
-  tuberiaMaximaAutomaticaM?: number;
   /** Máx. m³ cotizables en línea sin asesor (hoja «Config Sistema»). */
   volumenMaximoCotizadorM3?: number;
 }

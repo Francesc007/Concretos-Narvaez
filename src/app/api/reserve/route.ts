@@ -30,7 +30,6 @@ interface Body {
   distancia?: string;
   duracion?: string;
   tipoBomba?: string;
-  metrosTuberia?: number;
   aditivos?: string;
   resistenciaRapida?: string;
   precioM3?: number;
@@ -144,7 +143,6 @@ export async function POST(request: Request) {
       Distancia: String(body.distancia ?? "").trim(),
       Duracion: String(body.duracion ?? "").trim(),
       TipoBomba: String(body.tipoBomba ?? "").trim(),
-      MetrosTuberia: Number.isFinite(Number(body.metrosTuberia)) ? Number(body.metrosTuberia) : undefined,
       Aditivos: String(body.aditivos ?? "").trim(),
       ResistenciaRapida: String(body.resistenciaRapida ?? "").trim(),
       PrecioM3: Number.isFinite(Number(body.precioM3)) ? Number(body.precioM3) : undefined,

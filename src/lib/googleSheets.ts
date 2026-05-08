@@ -573,7 +573,6 @@ export async function fetchPreciosConcretoConfig(): Promise<CotizacionPreciosCon
       ...adicionalesGlobal.resistenciasRapidas,
     },
     tuberiaExtraTramo10mM3: tuberiaExtraFromServicios || adicionalesPdf.tuberiaExtraTramo10mM3,
-    tuberiaMaximaAutomaticaM: sistemaExtras.tuberiaMaximaAutomaticaM,
     volumenMaximoCotizadorM3: sistemaExtras.volumenMaximoCotizadorM3,
     fuente: "Precios Concreto",
   };
@@ -668,25 +667,21 @@ export async function fetchCapacidadMaximaHora(): Promise<number> {
 }
 
 /** Valores por fila A:B en «Config Sistema» (o «Config»). */
-const DEFAULT_TUBERIA_MAX_M = 60;
 const DEFAULT_VOLUMEN_MAX_COTIZADOR_M3 = 100;
 
 /**
- * Lee límites del cotizador en línea desde «Config Sistema» (columna A = concepto, B = valor).
- * - Tubería máxima automática: fila cuyo texto normalizado incluya «tuberia» y «max»/«maxima»/«limite»/«automatica»,
- *   excluyendo tramo/precio/extra (para no confundir con precio por tramo de 10 m).
+ * Lee límite de volumen del cotizador en línea desde «Config Sistema» (columna A = concepto, B = valor).
  * - Volumen máximo cotizador: fila con «volumen» y «max»/«limite»/«cotizador»/«online», sin «min».
  */
 export async function fetchConfigSistemaCotizacionExtras(
   docArg?: GoogleSpreadsheet,
-): Promise<{ tuberiaMaximaAutomaticaM: number; volumenMaximoCotizadorM3: number }> {
-  let tuberia = DEFAULT_TUBERIA_MAX_M;
+): Promise<{ volumenMaximoCotizadorM3: number }> {
   let volumen = DEFAULT_VOLUMEN_MAX_COTIZADOR_M3;
 
   const doc = docArg ?? (await getSpreadsheetDoc());
   const sheet = doc.sheetsByTitle["Config Sistema"] ?? doc.sheetsByTitle["Config"];
   if (!sheet) {
-    return { tuberiaMaximaAutomaticaM: tuberia, volumenMaximoCotizadorM3: volumen };
+    return { volumenMaximoCotizadorM3: volumen };
   }
 
   await sheet.loadCells("A1:B40");
@@ -696,25 +691,16 @@ export async function fetchConfigSistemaCotizacionExtras(
     const value = valorCeldaANum(sheet.getCell(r, 1)?.value ?? "");
     if (!key || value <= 0) continue;
 
-    const tuberiaMatch =
-      key.includes("tuberia") &&
-      (key.includes("max") || key.includes("limite") || key.includes("automatica") || key.includes("automatico")) &&
-      !key.includes("tramo") &&
-      !key.includes("precio") &&
-      !key.includes("extra");
-
     const volumenMatch =
       key.includes("volumen") &&
       (key.includes("max") || key.includes("limite") || key.includes("cotizador") || key.includes("online")) &&
       !key.includes("min") &&
       !key.includes("minimo");
 
-    if (tuberiaMatch) tuberia = value;
     if (volumenMatch) volumen = value;
   }
 
   return {
-    tuberiaMaximaAutomaticaM: tuberia > 0 ? tuberia : DEFAULT_TUBERIA_MAX_M,
     volumenMaximoCotizadorM3: volumen > 0 ? volumen : DEFAULT_VOLUMEN_MAX_COTIZADOR_M3,
   };
 }
@@ -835,7 +821,6 @@ export interface ReservaPayload {
   Distancia?: string;
   Duracion?: string;
   TipoBomba?: string;
-  MetrosTuberia?: number;
   Aditivos?: string;
   ResistenciaRapida?: string;
   PrecioM3?: number;
@@ -933,7 +918,6 @@ export async function appendReservaAgenda(payload: ReservaPayload): Promise<void
     ["Distancia", payload.Distancia],
     ["Duración", payload.Duracion],
     ["Tipo bomba", payload.TipoBomba],
-    ["Metros tubería", payload.MetrosTuberia],
     ["Aditivos", payload.Aditivos],
     ["Resistencia rápida", payload.ResistenciaRapida],
     ["Precio m3", payload.PrecioM3],
