@@ -5,9 +5,6 @@ export function heroVideoSrc(): string {
   return `/Hero.mp4?v=${HERO_VIDEO_VERSION}`;
 }
 
-/** Marco representativo hasta el primer frame de video (evita destellos grises). */
-export const HERO_VIDEO_POSTER = "/concreto.jpg";
-
 export const CONFIG = {
   /**
    * WhatsApp (solo dígitos, sin + ni espacios).

@@ -2,39 +2,37 @@
 
 import { motion } from "framer-motion";
 import { useLayoutEffect, useRef } from "react";
-import { HERO_VIDEO_POSTER, heroVideoSrc } from "@/config";
+import { heroVideoSrc } from "@/config";
 
 export function Hero() {
   const videoRef = useRef<HTMLVideoElement | null>(null);
 
   useLayoutEffect(() => {
-    videoRef.current?.setAttribute("fetchpriority", "high");
+    const el = videoRef.current;
+    if (!el) return;
+    el.setAttribute("fetchpriority", "high");
+    el.play().catch(() => {});
   }, []);
 
   return (
     <section
       id="inicio"
-      className="relative flex min-h-screen min-h-[100dvh] w-full max-w-full items-center justify-center overflow-x-hidden bg-[#1a3050]"
+      className="relative flex min-h-screen min-h-[100dvh] w-full max-w-full items-center justify-center overflow-x-hidden bg-black"
     >
-      {/* Capa base + poster del video: evita gris “en bruto” antes de decodificar. */}
-      <div
-        className="pointer-events-none absolute inset-0 bg-cover bg-center bg-no-repeat opacity-95"
-        style={{ backgroundImage: `url(${HERO_VIDEO_POSTER})` }}
-        aria-hidden
-      />
       <video
         ref={videoRef}
-        className="tepexi-hero-video pointer-events-none absolute inset-0 h-full w-full object-cover"
+        className="tepexi-hero-video pointer-events-none absolute inset-0 z-0 h-full w-full object-cover object-center"
         src={heroVideoSrc()}
-        poster={HERO_VIDEO_POSTER}
         autoPlay
         muted
         loop
         playsInline
         preload="auto"
+        width={1920}
+        height={1080}
         aria-hidden
       />
-      <div className="absolute inset-0 bg-gradient-to-b from-[#132f4c]/55 via-[#132f4c]/32 to-black/45" />
+      <div className="pointer-events-none absolute inset-0 z-[1] bg-gradient-to-b from-[#132f4c]/55 via-[#132f4c]/32 to-black/45" />
 
       <div className="relative z-10 mx-auto w-full min-w-0 max-w-5xl px-3 pt-28 pb-16 text-center sm:px-4 sm:pt-32">
         <motion.p

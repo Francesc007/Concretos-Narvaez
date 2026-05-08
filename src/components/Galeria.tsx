@@ -160,7 +160,7 @@ export function Galeria() {
               variants={cardVariants}
               whileHover={{ y: -4 }}
               whileTap={{ scale: 0.985 }}
-              className="group rounded-2xl overflow-hidden border-2 border-[#c62828]/40 bg-white shadow-lg transition-[border-color,box-shadow,ring] duration-300 hover:border-[#c62828]/60 hover:shadow-xl hover:ring-2 hover:ring-[#c62828]/15 transform-gpu"
+              className="group rounded-2xl overflow-hidden border-2 border-[#c62828]/120 bg-white shadow-lg transition-[border-color,box-shadow,ring] duration-300 hover:border-[#c62828]/120 hover:shadow-md hover:ring-2 hover:ring-[#c62828]/15 transform-gpu"
             >
               <ProyectoCardContent item={item} index={i} />
             </motion.article>
