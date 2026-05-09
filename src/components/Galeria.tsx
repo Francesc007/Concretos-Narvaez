@@ -47,7 +47,7 @@ const items = [
     imagenes: PROYECTO_IMAGENES[4],
   },
   {
-    titulo: "Parque QUMA, Huehuetoca, Edo. Méx.",
+    titulo: "Terminal Tepeji del Río, Hgo.",
     imagenes: PROYECTO_IMAGENES[5],
   },
   {
@@ -59,15 +59,15 @@ const items = [
     imagenes: PROYECTO_IMAGENES[7],
   },
   {
-    titulo: "Área institucional, Chilcuautla, Hgo.",
+    titulo: "Parque Industrial Tepeji del Río, Hgo.",
     imagenes: PROYECTO_IMAGENES[8],
   },
   {
-    titulo: "Logística y entrega programada en sitio, zona Tepeji.",
+    titulo: "Puente en Taxhido, Hgo.",
     imagenes: PROYECTO_IMAGENES[9],
   },
   {
-    titulo: "Desarrollo Polo Tepeji, Tepeji del Río, Hgo.",
+    titulo: "Avenida Principal, Tepeji del Río, Hgo.",
     imagenes: PROYECTO_IMAGENES[10],
   },
   {
@@ -75,7 +75,7 @@ const items = [
     imagenes: PROYECTO_IMAGENES[11],
   },
   {
-    titulo: "Vialidades y obra civil, parque industrial Tepeji del Río, Hgo.",
+    titulo: "Estacionamiento,  Tepeji del Río, Hgo.",
     imagenes: PROYECTO_IMAGENES[12],
   },
   {
@@ -83,7 +83,7 @@ const items = [
     imagenes: PROYECTO_IMAGENES[13],
   },
   {
-    titulo: "Piso y acabado en planta, Tepeji del Río, Hgo.",
+    titulo: "Pavimentación en Calles de Santa María, Hgo.",
     imagenes: PROYECTO_IMAGENES[14],
   },
 ] as const;

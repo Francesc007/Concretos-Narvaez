@@ -1,13 +1,15 @@
 import {
   appendReservaAgenda,
-  fetchCapacidadMaximaHora,
+  fetchConfigSistemaCotizacionExtras,
   formatTimestampReservaCDMX,
   normalizeHora,
   semanaIsoDesdeFecha,
-  sumarVolumenAgendado,
 } from "@/lib/googleSheets";
 import { emptyWithCors, jsonWithCors } from "@/lib/api-cors";
 import { validateAgendaSlot } from "@/lib/agendaRules";
+import { loadDayCapacityContext } from "@/lib/agendaAvailability";
+import { canScheduleVolume, findNextSuggestedHour } from "@/lib/agendaCapacity";
+import { MENSAJE_COTIZACION_ASESOR, VOLUMEN_MAXIMO_COTIZADOR_M3 } from "@/lib/cotizacion";
 
 const METHODS = "POST, OPTIONS";
 
@@ -98,23 +100,35 @@ export async function POST(request: Request) {
   if (!Number.isFinite(cotizacionTotal) || cotizacionTotal < 0) {
     return jsonWithCors({ error: "Cotización total inválida" }, 400, METHODS);
   }
+
+  let volumenMaximoReserva = VOLUMEN_MAXIMO_COTIZADOR_M3;
+  try {
+    const cfg = await fetchConfigSistemaCotizacionExtras();
+    volumenMaximoReserva = cfg.volumenMaximoCotizadorM3;
+  } catch {
+    /* fallback VOLUMEN_MAXIMO_COTIZADOR_M3 */
+  }
+  if (volumen > volumenMaximoReserva) {
+    return jsonWithCors({ error: MENSAJE_COTIZACION_ASESOR }, 400, METHODS);
+  }
+
   const horarioError = validateAgendaSlot(fecha, hora);
   if (horarioError) {
     return jsonWithCors({ error: horarioError }, 400, METHODS);
   }
 
   try {
-    const [capacidad, usado] = await Promise.all([
-      fetchCapacidadMaximaHora().catch(() => 50),
-      sumarVolumenAgendado(fecha, hora),
-    ]);
-    if (usado + volumen > capacidad) {
+    const { hours, caps, used, baseCap } = await loadDayCapacityContext(fecha);
+    if (!canScheduleVolume(used, caps, hours, hora, volumen)) {
+      const sugerenciaHora = findNextSuggestedHour(used, caps, hours, volumen);
       return jsonWithCors(
         {
-          error: "No hay capacidad suficiente en ese horario",
-          capacidadMaximaHora: capacidad,
-          usadoM3: usado,
+          error: sugerenciaHora
+            ? `No hay flujo continuo de capacidad desde ese horario para ${volumen} m³. Prueba ${sugerenciaHora} h.`
+            : `No hay capacidad suficiente ese día para ${volumen} m³ con los pedidos y bloqueos actuales.`,
+          capacidadMaximaHora: baseCap,
           solicitadoM3: volumen,
+          sugerenciaHora,
         },
         409,
         METHODS,

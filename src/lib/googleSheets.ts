@@ -18,6 +18,7 @@ import type {
   ZonaCotizacion,
   ZonaPreciosConcreto,
 } from "@/types/sheets";
+import type { IntervalMinutes } from "@/lib/agendaCapacity";
 
 const SCOPES = [
   "https://www.googleapis.com/auth/spreadsheets",
@@ -794,6 +795,241 @@ export async function sumarVolumenAgendado(fecha: string, hora: string): Promise
     }
   }
   return sum;
+}
+
+/** Día civil yyyy-MM-dd en zona CDMX (solo fecha); coherente con Agenda/cotizador. */
+function fechaCeldaMexicoAYmdDesdeDate(cell: Date): string | null {
+  if (Number.isNaN(cell.getTime())) return null;
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "America/Mexico_City",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(cell);
+  const y = parts.find((p) => p.type === "year")?.value;
+  const m = parts.find((p) => p.type === "month")?.value;
+  const d = parts.find((p) => p.type === "day")?.value;
+  if (!y || !m || !d) return null;
+  return `${y}-${m}-${d}`;
+}
+
+/** Parte entera serial Excel/Sheets (solo fecha) → yyyy-MM-dd en CDMX. */
+function fechaCeldaMexicoAYmdDesdeSerial(serial: number): string | null {
+  if (!Number.isFinite(serial) || serial <= 0) return null;
+  const whole = Math.floor(serial);
+  const excelEpochUtcMs = Date.UTC(1899, 11, 30);
+  const ms = excelEpochUtcMs + whole * 86400000;
+  return fechaCeldaMexicoAYmdDesdeDate(new Date(ms));
+}
+
+/**
+ * yyyy-MM-dd desde celda (texto **d/m/y** típico MX, ISO, Date o serial Excel).
+ * `12/5/2026` → **2026-05-12** (12 de mayo). Para evitar ambigüedad usa ISO en Sheets si hace falta.
+ */
+export function fechaCeldaAgendaAYmd(cell: unknown): string | null {
+  if (cell instanceof Date && !Number.isNaN(cell.getTime())) {
+    return fechaCeldaMexicoAYmdDesdeDate(cell);
+  }
+  if (typeof cell === "number" && Number.isFinite(cell)) {
+    if (cell > 20000 && cell < 120000) {
+      const fromSerial = fechaCeldaMexicoAYmdDesdeSerial(cell);
+      if (fromSerial) return fromSerial;
+    }
+  }
+  const s = String(cell ?? "").trim();
+  if (!s) return null;
+  const iso = /^(\d{4})-(\d{2})-(\d{2})/.exec(s);
+  if (iso) return `${iso[1]}-${iso[2]}-${iso[3]}`;
+  const dmY = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(s);
+  if (dmY) {
+    const dd = dmY[1]!.padStart(2, "0");
+    const mm = dmY[2]!.padStart(2, "0");
+    return `${dmY[3]}-${mm}-${dd}`;
+  }
+  return null;
+}
+
+/** HH:mm 24 h desde Date interpretado en CDMX. */
+function horaDesdeDateMexico(cell: Date): string | null {
+  if (Number.isNaN(cell.getTime())) return null;
+  const parts = new Intl.DateTimeFormat("en-GB", {
+    timeZone: "America/Mexico_City",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).formatToParts(cell);
+  const hh = parts.find((p) => p.type === "hour")?.value;
+  const mm = parts.find((p) => p.type === "minute")?.value;
+  if (!hh || !mm) return null;
+  return `${hh}:${mm}`;
+}
+
+/**
+ * Minutos desde medianoche: 24 h, fracción día (Sheets), `8:00:00 a.m.`, `2:30 pm`, etc.
+ */
+export function horaCeldaAMinutos(cell: unknown): number | null {
+  if (cell instanceof Date && !Number.isNaN(cell.getTime())) {
+    const hm = horaDesdeDateMexico(cell);
+    if (!hm) return null;
+    const [h, m] = hm.split(":").map((x) => parseInt(x, 10));
+    if (!Number.isFinite(h) || !Number.isFinite(m)) return null;
+    return h * 60 + m;
+  }
+
+  if (typeof cell === "number" && Number.isFinite(cell)) {
+    const frac = cell >= 1 ? cell % 1 : cell;
+    if (frac >= 0 && frac < 1) {
+      const total = Math.round(frac * 24 * 60);
+      if (total < 0 || total > 24 * 60) return null;
+      return Math.min(total, 23 * 60 + 59);
+    }
+    return null;
+  }
+
+  let s = String(cell ?? "").trim();
+  if (!s) return null;
+  s = s.replace(/\u202f|\u00a0/g, " ").replace(/\s+/g, " ").trim();
+
+  let meridiem: "am" | "pm" | null = null;
+  let core = s;
+  if (/\bp\.?\s*m\.?\s*$/i.test(s)) {
+    meridiem = "pm";
+    core = s.replace(/\s*p\.?\s*m\.?\s*$/i, "").trim();
+  } else if (/\ba\.?\s*m\.?\s*$/i.test(s)) {
+    meridiem = "am";
+    core = s.replace(/\s*a\.?\s*m\.?\s*$/i, "").trim();
+  }
+
+  const m24 = /^(\d{1,2}):(\d{2})(?::(\d{2}))?$/.exec(core);
+  if (!m24) return null;
+
+  let hh = parseInt(m24[1]!, 10);
+  const mm = parseInt(m24[2]!, 10);
+  if (!Number.isFinite(hh) || !Number.isFinite(mm) || mm < 0 || mm > 59) return null;
+
+  if (meridiem === "pm") {
+    if (hh !== 12) hh += 12;
+  } else if (meridiem === "am") {
+    if (hh === 12) hh = 0;
+  } else if (hh >= 24 || hh < 0) {
+    return null;
+  }
+
+  return hh * 60 + mm;
+}
+
+/**
+ * Todos los pedidos que ocupan cupo en Agenda para un día (incl. filas manuales del asistente).
+ * Cada fila aporta hora de inicio + volumen total del pedido (la cascada se calcula en {@link agendaCapacity}).
+ */
+export async function fetchPedidosAgendaOcupanCupoParaDia(fecha: string): Promise<{ hora: string; volumen: number }[]> {
+  const doc = await getSpreadsheetDoc();
+  const sheet = doc.sheetsByTitle["Agenda"];
+  if (!sheet) throw new Error('No existe la hoja "Agenda"');
+  const rows = await sheet.getRows();
+  const f = normalizeFecha(fecha);
+  const out: { hora: string; volumen: number }[] = [];
+
+  for (const row of rows) {
+    const estadoRaw = String(row.get("Estado") ?? "").trim();
+    if (!ocupaCupoEnAgenda(estadoRaw)) continue;
+
+    const rf = normalizeFecha(String(row.get("Fecha") ?? ""));
+    if (rf !== f) continue;
+
+    const rh = normalizeHora(String(row.get("Hora") ?? "0:0"));
+    const volCell = row.get("Volumén") ?? row.get("Volumen") ?? "0";
+    const volumen = parseFloat(String(volCell)) || 0;
+    if (volumen <= 0) continue;
+
+    out.push({ hora: rh, volumen });
+  }
+
+  return out;
+}
+
+function bloqueosSheetDesdeDoc(doc: GoogleSpreadsheet): GoogleSpreadsheetWorksheet | undefined {
+  return (
+    doc.sheetsByTitle["Bloqueos_Logistica"] ??
+    doc.sheetsByTitle["Bloqueos Logistica"] ??
+    doc.sheetsByTitle["bloqueos_logistica"]
+  );
+}
+
+/**
+ * Intervalos [inicio, fin) en minutos del día para bloqueos que aplican a la fecha indicada (yyyy-MM-dd).
+ * Pestaña esperada: Bloqueos_Logistica — columnas Fecha (DD/MM/AAAA), Hora_Inicio (HH:mm), Hora_Fin (HH:mm), Motivo.
+ * Si la hoja no existe, devuelve [].
+ */
+export async function fetchBloqueosLogisticaIntervalsForDay(fechaYmd: string): Promise<IntervalMinutes[]> {
+  const target = normalizeFecha(fechaYmd);
+  const doc = await getSpreadsheetDoc();
+  const sheet = bloqueosSheetDesdeDoc(doc);
+  if (!sheet) {
+    console.log(
+      "[Bloqueos_Logistica]",
+      JSON.stringify({ fechaConsulta: target, intervalosCount: 0, filasHoja: 0, error: "hoja_no_encontrada" }),
+    );
+    return [];
+  }
+
+  await sheet.loadHeaderRow();
+  const rows = await sheet.getRows();
+  const intervals: IntervalMinutes[] = [];
+
+  for (const row of rows) {
+    const obj = row.toObject() as Record<string, unknown>;
+    let fechaVal: unknown;
+    let iniVal: unknown;
+    let finVal: unknown;
+
+    for (const [k, v] of Object.entries(obj)) {
+      const kn = normHeader(k);
+      if (kn === "fecha") fechaVal = fechaVal ?? v;
+      else if (kn.includes("hora") && kn.includes("inicio")) iniVal = iniVal ?? v;
+      else if (kn.includes("hora") && (kn.includes("fin") || kn.includes("final"))) finVal = finVal ?? v;
+    }
+
+    fechaVal = fechaVal ?? row.get("Fecha" as never);
+    iniVal =
+      iniVal ??
+      row.get("Hora_Inicio" as never) ??
+      row.get("Hora Inicio" as never);
+    finVal =
+      finVal ??
+      row.get("Hora_Fin" as never) ??
+      row.get("Hora Fin" as never);
+
+    const fy = fechaCeldaAgendaAYmd(fechaVal);
+    if (!fy || fy !== target) continue;
+
+    const start = horaCeldaAMinutos(iniVal);
+    const endRaw = horaCeldaAMinutos(finVal);
+    if (start == null || endRaw == null) continue;
+
+    let end = endRaw;
+    if (end <= start) end += 24 * 60;
+
+    intervals.push({ start, end });
+  }
+
+  const mmToHm = (mins: number) =>
+    `${String(Math.floor(mins / 60)).padStart(2, "0")}:${String(mins % 60).padStart(2, "0")}`;
+  console.log(
+    "[Bloqueos_Logistica]",
+    JSON.stringify({
+      fechaConsulta: target,
+      intervalosCount: intervals.length,
+      filasHoja: rows.length,
+      intervalos: intervals.map((iv) => ({
+        inicio: mmToHm(iv.start),
+        fin: mmToHm(iv.end),
+        minutos: iv,
+      })),
+    }),
+  );
+
+  return intervals;
 }
 
 export interface ReservaPayload {

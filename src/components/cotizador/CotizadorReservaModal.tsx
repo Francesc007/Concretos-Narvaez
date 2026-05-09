@@ -13,6 +13,7 @@ import {
   resistenciasCotizacion,
   vaciadoApiDesdeSeleccion,
   resistenciaRapidaDesdeSeleccion,
+  volumenMaximoCotizadorM3,
   type CotizacionDinamicaResultado,
   type ResistenciaKg,
   type TipoBombaCotizador,
@@ -327,7 +328,12 @@ export function CotizadorReservaModal({ isOpen, onClose, volumenInicialM3 = null
           zona: distanciaObra?.zonaLabel ?? "",
           distancia: distanciaObra?.distanceText ?? "",
           duracion: distanciaObra?.durationText ?? "",
-          tipoBomba: tipoVaciado === "bombeo" ? labelVaciadoCliente(tipoVaciado, tipoBomba) : "",
+          tipoBomba:
+            tipoVaciado === "bombeo"
+              ? tipoBomba === "pluma"
+                ? "Bomba Pluma"
+                : "Bomba Estacionaria"
+              : "",
           aditivos: aditivosLabel,
           resistenciaRapida: diasRapidosElegidos ? `${diasRapidosElegidos} días` : "",
           precioM3: cotizacionResultado.precioM3,
@@ -488,6 +494,7 @@ export function CotizadorReservaModal({ isOpen, onClose, volumenInicialM3 = null
                   comentarios={comentarios}
                   setComentarios={setComentarios}
                   capacidadMaximaHora={capacidadMaximaHora}
+                  volumenMaximoCotizadorM3={volumenMaximoCotizadorM3(cotizacion)}
                   onSubmitReserva={handleReservar}
                   reservando={reservando}
                   errorReserva={errorReserva}

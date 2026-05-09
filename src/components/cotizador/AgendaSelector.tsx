@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { format } from "date-fns";
 import { apiUrl, fetchApiJson } from "@/lib/api";
 import { DateFieldCalendar } from "@/components/ui/DateFieldCalendar";
@@ -11,6 +11,7 @@ import {
   todayYmdCdmx,
   validateAgendaSlot,
 } from "@/lib/agendaRules";
+import { MENSAJE_COTIZACION_ASESOR } from "@/lib/cotizacion";
 
 const OBRA_OPTIONS = [
   { value: "residencial", label: "Particular" },
@@ -36,6 +37,7 @@ export interface AgendaSelectorProps {
   comentarios: string;
   setComentarios: (v: string) => void;
   capacidadMaximaHora: number;
+  volumenMaximoCotizadorM3: number;
   onSubmitReserva: () => void;
   reservando: boolean;
   errorReserva: string | null;
@@ -59,6 +61,7 @@ export function AgendaSelector({
   comentarios,
   setComentarios,
   capacidadMaximaHora,
+  volumenMaximoCotizadorM3,
   onSubmitReserva,
   reservando,
   errorReserva,
@@ -66,12 +69,54 @@ export function AgendaSelector({
   const [disp, setDisp] = useState<{
     usadoM3: number;
     disponibleM3: number;
+    horasBloqueadasLogistica: string[];
+    puedeAgendar?: boolean;
+    sugerenciaHora: string | null;
+    mensajeCapacidad: string | null;
     loading: boolean;
     error: string | null;
-  }>({ usadoM3: 0, disponibleM3: 0, loading: true, error: null });
+  }>({
+    usadoM3: 0,
+    disponibleM3: 0,
+    horasBloqueadasLogistica: [],
+    sugerenciaHora: null,
+    mensajeCapacidad: null,
+    loading: true,
+    error: null,
+  });
   const minAgendaDate = nextAllowedAgendaDateYmd() || todayYmdCdmx();
   const horasDisponibles = buildAgendaHoursForDate(fecha);
   const horarioError = validateAgendaSlot(fecha, hora);
+  const volNum = parseFloat(volumen.replace(",", ".")) || 0;
+  const excedeLimiteReserva = volNum > volumenMaximoCotizadorM3;
+
+  const [bloqueosPrioridad, setBloqueosPrioridad] = useState<string[]>([]);
+
+  const horasBloqueadasUi = useMemo(() => {
+    const set = new Set<string>([...bloqueosPrioridad, ...disp.horasBloqueadasLogistica]);
+    return [...set].sort();
+  }, [bloqueosPrioridad, disp.horasBloqueadasLogistica]);
+
+  useEffect(() => {
+    if (!fecha || !isAgendaDateAllowed(fecha)) {
+      setBloqueosPrioridad([]);
+      return;
+    }
+    let cancelled = false;
+    (async () => {
+      try {
+        const data = await fetchApiJson<{ horasBloqueadasLogistica?: string[] }>(
+          `${apiUrl("/api/agenda-logistics-blocks")}?${new URLSearchParams({ fecha })}`,
+        );
+        if (!cancelled) setBloqueosPrioridad(data.horasBloqueadasLogistica ?? []);
+      } catch {
+        if (!cancelled) setBloqueosPrioridad([]);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [fecha]);
 
   useEffect(() => {
     const nextDate = nextAllowedAgendaDateYmd();
@@ -89,7 +134,15 @@ export function AgendaSelector({
   useEffect(() => {
     if (!fecha || !hora) return;
     if (horarioError) {
-      setDisp({ usadoM3: 0, disponibleM3: 0, loading: false, error: horarioError });
+      setDisp({
+        usadoM3: 0,
+        disponibleM3: 0,
+        horasBloqueadasLogistica: [],
+        sugerenciaHora: null,
+        mensajeCapacidad: null,
+        loading: false,
+        error: horarioError,
+      });
       return;
     }
 
@@ -98,14 +151,23 @@ export function AgendaSelector({
       setDisp((d) => ({ ...d, loading: true, error: null }));
       try {
         const q = new URLSearchParams({ fecha, hora });
+        if (volNum > 0) q.set("volumen", String(volNum));
         const data = await fetchApiJson<{
           usadoM3: number;
           disponibleM3: number;
+          horasBloqueadasLogistica?: string[];
+          puedeAgendar?: boolean;
+          sugerenciaHora?: string | null;
+          mensajeCapacidad?: string | null;
         }>(`${apiUrl("/api/availability")}?${q}`);
         if (!cancelled) {
           setDisp({
             usadoM3: data.usadoM3,
             disponibleM3: data.disponibleM3,
+            horasBloqueadasLogistica: data.horasBloqueadasLogistica ?? [],
+            puedeAgendar: data.puedeAgendar,
+            sugerenciaHora: data.sugerenciaHora ?? null,
+            mensajeCapacidad: data.mensajeCapacidad ?? null,
             loading: false,
             error: null,
           });
@@ -124,10 +186,26 @@ export function AgendaSelector({
       cancelled = true;
       clearTimeout(t);
     };
-  }, [fecha, hora, horarioError]);
+  }, [fecha, hora, horarioError, volNum]);
 
-  const volNum = parseFloat(volumen.replace(",", ".")) || 0;
-  const cupoOk = volNum > 0 && volNum <= disp.disponibleM3 && !disp.loading && !disp.error && !horarioError;
+  useEffect(() => {
+    if (!fecha || !isAgendaDateAllowed(fecha)) return;
+    if (horasBloqueadasUi.length === 0) return;
+    const horas = buildAgendaHoursForDate(fecha);
+    if (!horasBloqueadasUi.includes(hora)) return;
+    const next = horas.find((h) => !horasBloqueadasUi.includes(h));
+    if (next && next !== hora) setHora(next);
+  }, [fecha, hora, horasBloqueadasUi, setHora]);
+
+  const capacidadFlujoOk =
+    volNum > 0 &&
+    !disp.loading &&
+    !disp.error &&
+    !horarioError &&
+    !excedeLimiteReserva &&
+    !horasBloqueadasUi.includes(hora) &&
+    disp.puedeAgendar === true;
+  const cupoOk = capacidadFlujoOk;
 
   return (
     <div className="space-y-5">
@@ -221,7 +299,7 @@ export function AgendaSelector({
             className="w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-base text-[var(--tepexi-logo-navy)] outline-none transition focus:border-[#c62828] focus:ring-2 focus:ring-[#c62828]/20"
           >
             {horasDisponibles.map((h) => (
-              <option key={h} value={h}>
+              <option key={h} value={h} disabled={horasBloqueadasUi.includes(h)}>
                 {h}
               </option>
             ))}
@@ -248,15 +326,27 @@ export function AgendaSelector({
         </p>
         {disp.loading && <p className="mt-2 text-slate-600">Consultando disponibilidad…</p>}
         {!disp.loading && !disp.error && (
+          <p className="mt-2 text-xs text-slate-600">
+            Los m³ mostrados consideran el flujo del día: pedidos grandes pueden ocupar varias horas seguidas.
+          </p>
+        )}
+        {!disp.loading && !disp.error && (
           <p className="mt-2 text-[var(--tepexi-text-body)]">
             Ocupado en este horario: <span className="font-medium text-[var(--tepexi-logo-navy)]">{disp.usadoM3.toFixed(2)} m³</span> · Libre:{" "}
             <span className="font-semibold text-emerald-700">{disp.disponibleM3.toFixed(2)} m³</span>
           </p>
         )}
         {disp.error && <p className="mt-2 text-red-700">{disp.error}</p>}
-        {volNum > disp.disponibleM3 && !disp.loading && (
-          <p className="mt-2 text-amber-800">El volumen supera el cupo disponible en este horario.</p>
+        {excedeLimiteReserva && volNum > 0 && (
+          <p className="mt-2 text-amber-800">{MENSAJE_COTIZACION_ASESOR}</p>
         )}
+        {volNum > 0 &&
+          !disp.loading &&
+          !disp.error &&
+          disp.puedeAgendar === false &&
+          disp.mensajeCapacidad && (
+            <p className="mt-2 text-amber-800">{disp.mensajeCapacidad}</p>
+          )}
       </div>
 
       <div>

@@ -1,11 +1,8 @@
 import { NextRequest } from "next/server";
-import {
-  fetchCapacidadMaximaHora,
-  normalizeHora,
-  sumarVolumenAgendado,
-} from "@/lib/googleSheets";
+import { normalizeHora } from "@/lib/googleSheets";
 import { emptyWithCors, jsonWithCors } from "@/lib/api-cors";
 import { validateAgendaSlot } from "@/lib/agendaRules";
+import { computeAgendaAvailability } from "@/lib/agendaAvailability";
 
 const METHODS = "GET, OPTIONS";
 
@@ -16,6 +13,8 @@ export async function OPTIONS() {
 export async function GET(request: NextRequest) {
   const fecha = request.nextUrl.searchParams.get("fecha") ?? "";
   const horaRaw = request.nextUrl.searchParams.get("hora") ?? "";
+  const volumenRaw = request.nextUrl.searchParams.get("volumen");
+
   if (!fecha || !horaRaw) {
     return jsonWithCors(
       { error: "Parámetros fecha y hora requeridos" },
@@ -23,6 +22,12 @@ export async function GET(request: NextRequest) {
       METHODS,
     );
   }
+
+  const volumenParsed =
+    volumenRaw != null && volumenRaw !== "" ? Number.parseFloat(volumenRaw.replace(",", ".")) : Number.NaN;
+  const volumen =
+    Number.isFinite(volumenParsed) && volumenParsed > 0 ? volumenParsed : undefined;
+
   try {
     const hora = normalizeHora(horaRaw);
     const horarioError = validateAgendaSlot(fecha, hora);
@@ -35,24 +40,29 @@ export async function GET(request: NextRequest) {
           capacidadMaximaHora: 0,
           usadoM3: 0,
           disponibleM3: 0,
+          horasBloqueadasLogistica: [],
+          puedeAgendar: false,
+          sugerenciaHora: null,
+          mensajeCapacidad: horarioError,
         },
         400,
         METHODS,
       );
     }
 
-    const [capacidadMaximaHora, usadoM3] = await Promise.all([
-      fetchCapacidadMaximaHora(),
-      sumarVolumenAgendado(fecha, hora),
-    ]);
-    const disponibleM3 = Math.max(0, capacidadMaximaHora - usadoM3);
+    const snap = await computeAgendaAvailability({ fecha, hora, volumen });
+
     return jsonWithCors(
       {
-        fecha,
-        hora,
-        capacidadMaximaHora,
-        usadoM3,
-        disponibleM3,
+        fecha: snap.fecha,
+        hora: snap.hora,
+        capacidadMaximaHora: snap.capacidadMaximaHora,
+        usadoM3: snap.usadoM3,
+        disponibleM3: snap.disponibleM3,
+        horasBloqueadasLogistica: snap.horasBloqueadasLogistica,
+        puedeAgendar: snap.puedeAgendar,
+        sugerenciaHora: snap.sugerenciaHora,
+        mensajeCapacidad: snap.mensajeCapacidad,
       },
       200,
       METHODS,
