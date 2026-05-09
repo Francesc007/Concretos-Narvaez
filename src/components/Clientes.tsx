@@ -73,7 +73,7 @@ export function Clientes({ imageFiles }: ClientesProps) {
             Clientes
           </h2>
           <p className="max-w-2xl mx-auto text-pretty text-sm text-white/90 sm:text-base leading-relaxed">
-            Empresas y marcas que confían en nosotros: Concretos Tepexi.
+            Empresas y marcas nacionales e internacionales que confían en nosotros: Concretos Tepexi.
           </p>
         </motion.div>
       </div>
