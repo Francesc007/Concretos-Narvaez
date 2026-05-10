@@ -31,6 +31,36 @@ export type AgendaAvailabilityResult = {
   mensajeCapacidad: string | null;
 };
 
+/**
+ * Combina pedidos de Agenda con pedidos en cascada provenientes de Bloqueos_Logistica
+ * deduplicando por `(hora normalizada | volumen)` para no doblar el conteo cuando una
+ * reserva web genera fila tanto en Agenda como en Bloqueos_Logistica.
+ */
+function mergeOrdersConDedup(
+  pedidosAgenda: readonly { hora: string; volumen: number }[],
+  cascadeOrders: readonly { hora: string; volumen: number }[],
+): { hora: string; volumen: number }[] {
+  const key = (h: string, v: number) => `${normalizeHoraSlot(h)}|${v}`;
+  const counts = new Map<string, number>();
+  for (const c of cascadeOrders) {
+    const k = key(c.hora, c.volumen);
+    counts.set(k, (counts.get(k) ?? 0) + 1);
+  }
+
+  const extra: { hora: string; volumen: number }[] = [];
+  for (const p of pedidosAgenda) {
+    const k = key(p.hora, p.volumen);
+    const left = counts.get(k) ?? 0;
+    if (left > 0) {
+      counts.set(k, left - 1);
+    } else {
+      extra.push(p);
+    }
+  }
+
+  return [...cascadeOrders, ...extra];
+}
+
 export async function computeAgendaAvailability(opts: {
   fecha: string;
   hora: string;
@@ -45,14 +75,17 @@ export async function computeAgendaAvailability(opts: {
     fetchBloqueosLogisticaIntervalsForDay(opts.fecha),
   ]);
 
-  const caps = buildCapPerHour(hours, baseCap, bloqueos);
-  const used = accumulateExistingOrders(hours, caps, pedidos);
+  const caps = buildCapPerHour(hours, baseCap, bloqueos.intervals);
+  const ordenes = mergeOrdersConDedup(pedidos, bloqueos.cascadeOrders);
+  const used = accumulateExistingOrders(hours, caps, ordenes);
 
   const hSlot = normalizeHoraSlot(hora);
   const usadoM3 = used[hSlot] ?? 0;
   const disponibleM3 = Math.max(0, (caps[hSlot] ?? 0) - usadoM3);
 
-  const horasBloqueadasLogistica = hours.filter((hx) => hourSlotTouchesBlock(hx, bloqueos));
+  const horasBloqueadasLogistica = hours.filter(
+    (hx) => hourSlotTouchesBlock(hx, bloqueos.intervals) || (caps[hx] ?? 0) - (used[hx] ?? 0) <= 0,
+  );
 
   const vol =
     opts.volumen != null && Number.isFinite(opts.volumen) && opts.volumen > 0 ? opts.volumen : undefined;
@@ -84,12 +117,21 @@ export async function computeAgendaAvailability(opts: {
   };
 }
 
-/** Solo horas tocadas por Bloqueos_Logistica (sin leer Agenda ni cascada). Para UI prioritaria. */
+/**
+ * Horas que la UI debe mostrar como bloqueadas considerando solo Bloqueos_Logistica
+ * (intervalos rígidos + cascada por `Volumen_m3` registrada en esa misma pestaña).
+ * No lee Agenda — se usa como hint rápido antes de la consulta completa de disponibilidad.
+ */
 export async function computeHorasBloqueadasLogistica(fechaYmd: string): Promise<string[]> {
   const hours = buildAgendaHoursForDate(fechaYmd);
   if (hours.length === 0) return [];
   const bloqueos = await fetchBloqueosLogisticaIntervalsForDay(fechaYmd);
-  return hours.filter((hx) => hourSlotTouchesBlock(hx, bloqueos));
+  const baseCap = await fetchCapacidadMaximaHora().catch(() => 50);
+  const caps = buildCapPerHour(hours, baseCap, bloqueos.intervals);
+  const used = accumulateExistingOrders(hours, caps, bloqueos.cascadeOrders);
+  return hours.filter(
+    (hx) => hourSlotTouchesBlock(hx, bloqueos.intervals) || (caps[hx] ?? 0) - (used[hx] ?? 0) <= 0,
+  );
 }
 
 /** Expuesto para pruebas / validación en reserva sin duplicar lecturas. */
@@ -106,7 +148,8 @@ export async function loadDayCapacityContext(fecha: string): Promise<{
     fetchPedidosAgendaOcupanCupoParaDia(fecha),
     fetchBloqueosLogisticaIntervalsForDay(fecha),
   ]);
-  const caps = buildCapPerHour(hours, baseCap, bloqueos);
-  const used = accumulateExistingOrders(hours, caps, pedidos);
-  return { hours, baseCap, caps, used, bloqueos };
+  const caps = buildCapPerHour(hours, baseCap, bloqueos.intervals);
+  const ordenes = mergeOrdersConDedup(pedidos, bloqueos.cascadeOrders);
+  const used = accumulateExistingOrders(hours, caps, ordenes);
+  return { hours, baseCap, caps, used, bloqueos: bloqueos.intervals };
 }

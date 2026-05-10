@@ -178,7 +178,7 @@ export function Footer() {
               Aviso de privacidad
             </Link>
             <span className="text-slate-400/90 select-none" aria-hidden>
-              ·
+              |
             </span>
             <Link
               href="/politica-calidad"

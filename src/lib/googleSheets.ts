@@ -58,6 +58,13 @@ export async function getSpreadsheetDoc(): Promise<GoogleSpreadsheet> {
   return doc;
 }
 
+/** Recarga metadatos del spreadsheet (pestañas nuevas o renombradas). Útil antes de escribir en Bloqueos_Logistica. */
+export async function reloadSpreadsheetDocInfo(): Promise<GoogleSpreadsheet> {
+  const doc = await getSpreadsheetDoc();
+  await doc.loadInfo();
+  return doc;
+}
+
 export interface PrecioRow {
   Resistencia: string;
   Precio_m3: number;
@@ -952,84 +959,269 @@ function bloqueosSheetDesdeDoc(doc: GoogleSpreadsheet): GoogleSpreadsheetWorkshe
   return (
     doc.sheetsByTitle["Bloqueos_Logistica"] ??
     doc.sheetsByTitle["Bloqueos Logistica"] ??
-    doc.sheetsByTitle["bloqueos_logistica"]
+    doc.sheetsByTitle["Bloqueos_Logisticos"] ??
+    doc.sheetsByTitle["Bloqueos Logisticos"] ??
+    doc.sheetsByTitle["bloqueos_logistica"] ??
+    doc.sheetsByTitle["bloqueos_logisticos"]
   );
 }
 
+function pickBloqueosColumnKey(headers: readonly string[], predicate: (norm: string) => boolean): string | null {
+  for (const raw of headers) {
+    const s = String(raw ?? "").trim();
+    if (!s) continue;
+    if (predicate(normHeader(s))) return s;
+  }
+  return null;
+}
+
+async function ensureBloqueosLogisticaVolumenM3Column(sheet: GoogleSpreadsheetWorksheet): Promise<void> {
+  const headers = sheet.headerValues;
+  const hasVol = pickBloqueosColumnKey(
+    headers,
+    (n) =>
+      (n.includes("volumen") && (n.includes("m3") || n.includes("m³"))) ||
+      n.replace(/\s/g, "_") === "volumen_m3",
+  );
+  if (hasVol) return;
+
+  const colIndex = Math.max(0, headers.length);
+  const needCols = colIndex + 1;
+  if ((sheet.columnCount || 0) <= colIndex) {
+    await sheet.resize({
+      rowCount: Math.max(sheet.rowCount || 100, 100),
+      columnCount: Math.max(needCols + 2, 8),
+    });
+  }
+  const a1 = `${columnToA1(colIndex)}1`;
+  await sheet.loadCells(a1);
+  sheet.getCell(0, colIndex).value = "Volumen_m3";
+  await sheet.saveUpdatedCells();
+  await sheet.loadHeaderRow();
+}
+
+/** Capacidad por defecto (m³/hora) cuando no hay configuración en «Config Sistema». */
+export const CAPACIDAD_BASE_M3_HORA = 50;
+
+/** Encabezados canónicos de la hoja Bloqueos_Logistica. */
+const BLOQUEOS_LOGISTICA_HEADERS = ["Fecha", "Hora_Inicio", "Hora_Fin", "Motivo", "Volumen_m3"] as const;
+
 /**
- * Intervalos [inicio, fin) en minutos del día para bloqueos que aplican a la fecha indicada (yyyy-MM-dd).
- * Pestaña esperada: Bloqueos_Logistica — columnas Fecha (DD/MM/AAAA), Hora_Inicio (HH:mm), Hora_Fin (HH:mm), Motivo.
- * Si la hoja no existe, devuelve [].
+ * Resultado de leer Bloqueos_Logistica para un día.
+ * - `intervals`: bloqueos rígidos (filas sin Volumen_m3) → la hora tocada queda con capacidad 0.
+ * - `cascadeOrders`: filas con Volumen_m3 > 0 → consumen capacidad en cascada (igual que un pedido en Agenda).
  */
-export async function fetchBloqueosLogisticaIntervalsForDay(fechaYmd: string): Promise<IntervalMinutes[]> {
+export interface BloqueosLogisticaDia {
+  intervals: IntervalMinutes[];
+  cascadeOrders: { hora: string; volumen: number }[];
+}
+
+function mmToHm(mins: number): string {
+  return `${String(Math.floor(mins / 60)).padStart(2, "0")}:${String(mins % 60).padStart(2, "0")}`;
+}
+
+/**
+ * Lee Bloqueos_Logistica para un día (yyyy-MM-dd).
+ * Pestaña esperada: Bloqueos_Logistica — columnas Fecha (DD/MM/AAAA), Hora_Inicio (HH:mm), Hora_Fin (HH:mm), Motivo, Volumen_m3.
+ *
+ * Comportamiento:
+ * - Si la fila tiene Volumen_m3 > 0 se trata como pedido en cascada (Hora_Inicio + volumen → consume capacidad por hora).
+ * - Si no, se trata como bloqueo rígido [Hora_Inicio, Hora_Fin) que pone la capacidad a 0 en las horas tocadas.
+ *
+ * Si la hoja no existe, devuelve listas vacías.
+ */
+export async function fetchBloqueosLogisticaIntervalsForDay(fechaYmd: string): Promise<BloqueosLogisticaDia> {
   const target = normalizeFecha(fechaYmd);
   const doc = await getSpreadsheetDoc();
   const sheet = bloqueosSheetDesdeDoc(doc);
   if (!sheet) {
     console.log(
       "[Bloqueos_Logistica]",
-      JSON.stringify({ fechaConsulta: target, intervalosCount: 0, filasHoja: 0, error: "hoja_no_encontrada" }),
+      JSON.stringify({
+        fechaConsulta: target,
+        intervalosCount: 0,
+        cascadaCount: 0,
+        filasHoja: 0,
+        error: "hoja_no_encontrada",
+      }),
     );
-    return [];
+    return { intervals: [], cascadeOrders: [] };
   }
 
   await sheet.loadHeaderRow();
   const rows = await sheet.getRows();
   const intervals: IntervalMinutes[] = [];
+  const cascadeOrders: { hora: string; volumen: number }[] = [];
 
   for (const row of rows) {
     const obj = row.toObject() as Record<string, unknown>;
     let fechaVal: unknown;
     let iniVal: unknown;
     let finVal: unknown;
+    let volVal: unknown;
 
     for (const [k, v] of Object.entries(obj)) {
       const kn = normHeader(k);
       if (kn === "fecha") fechaVal = fechaVal ?? v;
       else if (kn.includes("hora") && kn.includes("inicio")) iniVal = iniVal ?? v;
       else if (kn.includes("hora") && (kn.includes("fin") || kn.includes("final"))) finVal = finVal ?? v;
+      else if (kn.includes("volumen") || /\bvol\b/.test(kn)) volVal = volVal ?? v;
     }
 
     fechaVal = fechaVal ?? row.get("Fecha" as never);
-    iniVal =
-      iniVal ??
-      row.get("Hora_Inicio" as never) ??
-      row.get("Hora Inicio" as never);
-    finVal =
-      finVal ??
-      row.get("Hora_Fin" as never) ??
-      row.get("Hora Fin" as never);
+    iniVal = iniVal ?? row.get("Hora_Inicio" as never) ?? row.get("Hora Inicio" as never);
+    finVal = finVal ?? row.get("Hora_Fin" as never) ?? row.get("Hora Fin" as never);
+    volVal = volVal ?? row.get("Volumen_m3" as never) ?? row.get("Volumen m3" as never) ?? row.get("Volumen" as never);
 
     const fy = fechaCeldaAgendaAYmd(fechaVal);
     if (!fy || fy !== target) continue;
 
     const start = horaCeldaAMinutos(iniVal);
-    const endRaw = horaCeldaAMinutos(finVal);
-    if (start == null || endRaw == null) continue;
+    if (start == null) continue;
 
+    const volumen = valorCeldaANum(volVal);
+
+    if (volumen > 0) {
+      cascadeOrders.push({ hora: mmToHm(start), volumen });
+      continue;
+    }
+
+    const endRaw = horaCeldaAMinutos(finVal);
+    if (endRaw == null) continue;
     let end = endRaw;
     if (end <= start) end += 24 * 60;
-
     intervals.push({ start, end });
   }
 
-  const mmToHm = (mins: number) =>
-    `${String(Math.floor(mins / 60)).padStart(2, "0")}:${String(mins % 60).padStart(2, "0")}`;
   console.log(
     "[Bloqueos_Logistica]",
     JSON.stringify({
       fechaConsulta: target,
       intervalosCount: intervals.length,
+      cascadaCount: cascadeOrders.length,
       filasHoja: rows.length,
       intervalos: intervals.map((iv) => ({
         inicio: mmToHm(iv.start),
         fin: mmToHm(iv.end),
         minutos: iv,
       })),
+      cascada: cascadeOrders,
     }),
   );
 
-  return intervals;
+  return { intervals, cascadeOrders };
+}
+
+/**
+ * Inserta una fila en Bloqueos_Logistica representando la ocupación de la planta por una reserva web.
+ * Calcula `Hora_Fin` = `Hora_Inicio` + ceil(volumen / capacidadM3PorHora × 60) minutos.
+ * Devuelve la fila creada para poder revertirla si falla el guardado en Agenda.
+ */
+export async function appendBloqueoLogisticaOcupacion(input: {
+  /** yyyy-MM-dd */
+  fecha: string;
+  /** HH:mm 24h */
+  horaInicio: string;
+  /** Volumen del pedido en m³ (debe ser > 0). */
+  volumenM3: number;
+  /** m³/hora que produce la planta (típicamente 50). */
+  capacidadM3PorHora: number;
+  /** Texto opcional para columna Motivo (por defecto «Ocupado»). */
+  motivo?: string;
+}): Promise<{
+  horaFin: string;
+  duracionMinutos: number;
+  bloqueoRow: GoogleSpreadsheetRow;
+}> {
+  if (!Number.isFinite(input.volumenM3) || input.volumenM3 <= 0) {
+    throw new Error("appendBloqueoLogisticaOcupacion: volumenM3 debe ser > 0");
+  }
+  if (!Number.isFinite(input.capacidadM3PorHora) || input.capacidadM3PorHora <= 0) {
+    throw new Error("appendBloqueoLogisticaOcupacion: capacidadM3PorHora debe ser > 0");
+  }
+
+  const fechaYmd = normalizeFecha(input.fecha);
+  const horaInicio = normalizeHora(input.horaInicio);
+  const startMins = horaCeldaAMinutos(horaInicio);
+  if (startMins == null) {
+    throw new Error(`appendBloqueoLogisticaOcupacion: horaInicio inválida (${input.horaInicio})`);
+  }
+
+  const duracionMinutos = Math.max(1, Math.ceil((input.volumenM3 * 60) / input.capacidadM3PorHora));
+  const endMinsRaw = startMins + duracionMinutos;
+  const endMins = endMinsRaw % (24 * 60);
+  const horaFin = mmToHm(endMins);
+
+  await reloadSpreadsheetDocInfo();
+  const doc = await getSpreadsheetDoc();
+  const sheet = bloqueosSheetDesdeDoc(doc);
+  if (!sheet) {
+    throw new Error(
+      'No existe la hoja de bloqueos. Añade una pestaña «Bloqueos_Logistica» (o «Bloqueos_Logisticos») con: Fecha, Hora_Inicio, Hora_Fin, Motivo, Volumen_m3.',
+    );
+  }
+
+  await sheet.loadHeaderRow();
+  const headersEmpty =
+    sheet.headerValues.length === 0 || sheet.headerValues.every((h) => !String(h ?? "").trim());
+  if (headersEmpty) {
+    await sheet.setHeaderRow([...BLOQUEOS_LOGISTICA_HEADERS]);
+    await sheet.loadHeaderRow();
+  }
+
+  await ensureBloqueosLogisticaVolumenM3Column(sheet);
+
+  const h = sheet.headerValues;
+  const kFecha = pickBloqueosColumnKey(h, (n) => n === "fecha");
+  const kIni = pickBloqueosColumnKey(h, (n) => n.includes("hora") && n.includes("inicio"));
+  const kFin = pickBloqueosColumnKey(h, (n) => n.includes("hora") && (n.includes("fin") || n.includes("final")));
+  const kMotivo = pickBloqueosColumnKey(h, (n) => n === "motivo");
+  const kVol = pickBloqueosColumnKey(
+    h,
+    (n) =>
+      (n.includes("volumen") && (n.includes("m3") || n.includes("m³"))) ||
+      n.replace(/\s/g, "_") === "volumen_m3",
+  );
+
+  if (!kFecha || !kIni || !kFin || !kMotivo || !kVol) {
+    throw new Error(
+      `Bloqueos_Logistica: no se pudieron mapear columnas. Encabezados actuales: «${h.join("», «")}». Se necesitan Fecha, Hora de inicio, Hora de fin, Motivo y Volumen (m³).`,
+    );
+  }
+
+  const fechaCelda = fechaYmdADdMmYyyy(fechaYmd);
+  const motivo = (input.motivo ?? "Ocupado").trim() || "Ocupado";
+
+  const row: Record<string, string | number> = {
+    [kFecha]: fechaCelda,
+    [kIni]: horaInicio,
+    [kFin]: horaFin,
+    [kMotivo]: motivo,
+    [kVol]: input.volumenM3,
+  };
+
+  const bloqueoRow = await sheet.addRow(row, { insert: true });
+
+  console.log(
+    "[Bloqueos_Logistica:append]",
+    JSON.stringify({
+      fecha: fechaYmd,
+      horaInicio,
+      horaFin,
+      duracionMinutos,
+      volumenM3: input.volumenM3,
+      capacidadM3PorHora: input.capacidadM3PorHora,
+      motivo,
+    }),
+  );
+
+  return { horaFin, duracionMinutos, bloqueoRow };
+}
+
+function fechaYmdADdMmYyyy(ymd: string): string {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(ymd.trim());
+  if (!m) return ymd;
+  return `${m[3]}/${m[2]}/${m[1]}`;
 }
 
 export interface ReservaPayload {
@@ -1041,7 +1233,7 @@ export interface ReservaPayload {
   Hora: string;
   /** Volumen cotizado (m³) — se escribe en la columna «Volumén» de Agenda (K si el encabezado está en ese orden). */
   Volumen: number;
-  /** "Tiro Directo" | "Bombeo" — columna Vaciado en Agenda */
+  /** "Tiro Directo" | "Bombeo - Pluma" | "Bombeo - Estacionaria" — columna Vaciado en Agenda */
   Vaciado: string;
   /** kg/cm² en API; en Agenda se guarda como texto «{kg} N 20 14» para coincidir con la validación de datos. */
   "Resistencia f'c": number;

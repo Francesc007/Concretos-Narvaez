@@ -1,4 +1,5 @@
 import {
+  appendBloqueoLogisticaOcupacion,
   appendReservaAgenda,
   fetchConfigSistemaCotizacionExtras,
   formatTimestampReservaCDMX,
@@ -46,9 +47,10 @@ function labelVaciadoAgenda(v: string): string | null {
     .replace(/\u0300/g, "")
     .replace(/[\s_]+/g, "_");
   if (t === "tiro_directo" || t === "tirodirecto") return "Tiro Directo";
-  if (t === "bombeo_pluma" || t === "bombeo-pluma") return "Bombeo · Bomba Pluma";
-  if (t === "bombeo_estacionaria" || t === "bombeoestacionaria") return "Bombeo · Bomba Estacionaria";
-  if (t === "bombeo") return "Bombeo";
+  // Texto idéntico a las opciones de validación de datos en la columna Vaciado de Agenda.
+  if (t === "bombeo_pluma" || t === "bombeo-pluma") return "Bombeo - Pluma";
+  if (t === "bombeo_estacionaria" || t === "bombeoestacionaria") return "Bombeo - Estacionaria";
+  if (t === "bombeo") return "Bombeo - Estacionaria";
   return null;
 }
 
@@ -136,32 +138,53 @@ export async function POST(request: Request) {
     }
 
     const ts = formatTimestampReservaCDMX(new Date());
-    await appendReservaAgenda({
-      Nombre: nombre,
-      Teléfono: telefono,
-      Empresa: empresa,
-      Obra: obra || "—",
-      Fecha: fecha,
-      Hora: hora,
-      Volumen: volumen,
-      Vaciado: vaciadoLabel,
-      "Resistencia f'c": resistenciaNum,
-      Cotización: cotizacionTotal,
-      Estado: "Agendado",
-      Timestamp_Reserva: ts,
-      Comentarios: comentarios,
-      Semana: semanaIsoDesdeFecha(fecha),
-      UbicacionObra: String(body.ubicacionObra ?? "").trim(),
-      RutaMaps: String(body.rutaMaps ?? "").trim(),
-      Zona: String(body.zona ?? "").trim(),
-      Distancia: String(body.distancia ?? "").trim(),
-      Duracion: String(body.duracion ?? "").trim(),
-      TipoBomba: String(body.tipoBomba ?? "").trim(),
-      Aditivos: String(body.aditivos ?? "").trim(),
-      ResistenciaRapida: String(body.resistenciaRapida ?? "").trim(),
-      PrecioM3: Number.isFinite(Number(body.precioM3)) ? Number(body.precioM3) : undefined,
-      Desglose: String(body.desglose ?? "").trim(),
+
+    const { horaFin: horaFinBloqueo, duracionMinutos, bloqueoRow } = await appendBloqueoLogisticaOcupacion({
+      fecha,
+      horaInicio: hora,
+      volumenM3: volumen,
+      capacidadM3PorHora: baseCap,
     });
+
+    try {
+      await appendReservaAgenda({
+        Nombre: nombre,
+        Teléfono: telefono,
+        Empresa: empresa,
+        Obra: obra || "—",
+        Fecha: fecha,
+        Hora: hora,
+        Volumen: volumen,
+        Vaciado: vaciadoLabel,
+        "Resistencia f'c": resistenciaNum,
+        Cotización: cotizacionTotal,
+        Estado: "Agendado",
+        Timestamp_Reserva: ts,
+        Comentarios: comentarios,
+        Semana: semanaIsoDesdeFecha(fecha),
+        UbicacionObra: String(body.ubicacionObra ?? "").trim(),
+        RutaMaps: String(body.rutaMaps ?? "").trim(),
+        Zona: String(body.zona ?? "").trim(),
+        Distancia: String(body.distancia ?? "").trim(),
+        Duracion: String(body.duracion ?? "").trim(),
+        TipoBomba: String(body.tipoBomba ?? "").trim(),
+        Aditivos: String(body.aditivos ?? "").trim(),
+        ResistenciaRapida: String(body.resistenciaRapida ?? "").trim(),
+        PrecioM3: Number.isFinite(Number(body.precioM3)) ? Number(body.precioM3) : undefined,
+        Desglose: String(body.desglose ?? "").trim(),
+      });
+    } catch (agendaErr) {
+      console.error(
+        "[reserve] Falló el guardado en Agenda tras registrar Bloqueos_Logistica; revirtiendo fila de bloqueo",
+        agendaErr,
+      );
+      try {
+        await bloqueoRow.delete();
+      } catch (delErr) {
+        console.error("[reserve] No se pudo eliminar la fila huérfana en Bloqueos_Logistica", delErr);
+      }
+      throw agendaErr;
+    }
 
     return jsonWithCors(
       {
@@ -170,6 +193,7 @@ export async function POST(request: Request) {
         fecha,
         hora,
         volumen,
+        bloqueoLogistica: { horaFin: horaFinBloqueo, duracionMinutos },
       },
       201,
       METHODS,

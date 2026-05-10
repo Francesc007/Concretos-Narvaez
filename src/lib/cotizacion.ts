@@ -217,13 +217,13 @@ export function vaciadoApiDesdeSeleccion(
   return tipoBomba === "pluma" ? "bombeo_pluma" : "bombeo_estacionaria";
 }
 
-/** Texto corto para UI / WhatsApp. */
+/** Texto alineado con las opciones de la columna Vaciado en Agenda (lista desplegable). */
 export function labelVaciadoCliente(
   tipoVaciado: "tiro_directo" | "bombeo",
   tipoBomba: TipoBombaCotizador | undefined,
 ): string {
-  if (tipoVaciado !== "bombeo") return "Tiro directo";
-  return tipoBomba === "pluma" ? "Bombeo — Bomba Pluma" : "Bombeo — Bomba Estacionaria";
+  if (tipoVaciado !== "bombeo") return "Tiro Directo";
+  return tipoBomba === "pluma" ? "Bombeo - Pluma" : "Bombeo - Estacionaria";
 }
 
 export function servicioConcretoDesdeSeleccion(
