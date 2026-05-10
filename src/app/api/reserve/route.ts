@@ -138,12 +138,14 @@ export async function POST(request: Request) {
     }
 
     const ts = formatTimestampReservaCDMX(new Date());
+    const ubicacionObra = String(body.ubicacionObra ?? "").trim();
 
     const { horaFin: horaFinBloqueo, duracionMinutos, bloqueoRow } = await appendBloqueoLogisticaOcupacion({
       fecha,
       horaInicio: hora,
       volumenM3: volumen,
       capacidadM3PorHora: baseCap,
+      ubicacion: ubicacionObra || undefined,
     });
 
     try {
@@ -162,7 +164,7 @@ export async function POST(request: Request) {
         Timestamp_Reserva: ts,
         Comentarios: comentarios,
         Semana: semanaIsoDesdeFecha(fecha),
-        UbicacionObra: String(body.ubicacionObra ?? "").trim(),
+        UbicacionObra: ubicacionObra,
         RutaMaps: String(body.rutaMaps ?? "").trim(),
         Zona: String(body.zona ?? "").trim(),
         Distancia: String(body.distancia ?? "").trim(),

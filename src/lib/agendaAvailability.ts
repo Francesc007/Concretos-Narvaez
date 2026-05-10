@@ -9,10 +9,12 @@ import {
   normalizeHoraSlot,
 } from "@/lib/agendaCapacity";
 import {
+  ensureAgendaPedidosEspejadosEnBloqueosLogistica,
   fetchBloqueosLogisticaIntervalsForDay,
   fetchCapacidadMaximaHora,
   fetchPedidosAgendaOcupanCupoParaDia,
   normalizeHora,
+  syncAgendaCanceladosMotivoEnBloqueosLogistica,
 } from "@/lib/googleSheets";
 
 export type AgendaAvailabilityResult = {
@@ -32,9 +34,10 @@ export type AgendaAvailabilityResult = {
 };
 
 /**
- * Combina pedidos de Agenda con pedidos en cascada provenientes de Bloqueos_Logistica
- * deduplicando por `(hora normalizada | volumen)` para no doblar el conteo cuando una
- * reserva web genera fila tanto en Agenda como en Bloqueos_Logistica.
+ * Combina pedidos activos de Agenda con la cascada activa de Bloqueos_Logistica.
+ * `pedidosAgenda`: solo filas cuyo Estado ocupa cupo (excluye «Cancelado» y «Disponible») — ver lectura Agenda.
+ * `cascadeOrders`: solo filas con Motivo distinto de «Cancelado» — ver lectura Bloqueos_Logistica.
+ * Dedup por (hora normalizada | volumen) para no doblar conteo cuando reserva web existe en ambas pestañas.
  */
 function mergeOrdersConDedup(
   pedidosAgenda: readonly { hora: string; volumen: number }[],
@@ -68,6 +71,10 @@ export async function computeAgendaAvailability(opts: {
 }): Promise<AgendaAvailabilityResult> {
   const hora = normalizeHora(opts.hora);
   const hours = buildAgendaHoursForDate(opts.fecha);
+
+  await syncAgendaCanceladosMotivoEnBloqueosLogistica(opts.fecha);
+  await ensureAgendaPedidosEspejadosEnBloqueosLogistica(opts.fecha);
+
   const baseCap = await fetchCapacidadMaximaHora().catch(() => 50);
 
   const [pedidos, bloqueos] = await Promise.all([
@@ -118,11 +125,12 @@ export async function computeAgendaAvailability(opts: {
 }
 
 /**
- * Horas que la UI debe mostrar como bloqueadas considerando solo Bloqueos_Logistica
- * (intervalos rígidos + cascada por `Volumen_m3` registrada en esa misma pestaña).
- * No lee Agenda — se usa como hint rápido antes de la consulta completa de disponibilidad.
+ * Horas que la UI puede mostrar como bloqueadas a partir de Bloqueos_Logistica.
+ * Antes se ejecuta el espejo Agenda → Bloqueos para pedidos manuales sin fila en logística.
  */
 export async function computeHorasBloqueadasLogistica(fechaYmd: string): Promise<string[]> {
+  await syncAgendaCanceladosMotivoEnBloqueosLogistica(fechaYmd);
+  await ensureAgendaPedidosEspejadosEnBloqueosLogistica(fechaYmd);
   const hours = buildAgendaHoursForDate(fechaYmd);
   if (hours.length === 0) return [];
   const bloqueos = await fetchBloqueosLogisticaIntervalsForDay(fechaYmd);
@@ -143,6 +151,8 @@ export async function loadDayCapacityContext(fecha: string): Promise<{
   bloqueos: IntervalMinutes[];
 }> {
   const hours = buildAgendaHoursForDate(fecha);
+  await syncAgendaCanceladosMotivoEnBloqueosLogistica(fecha);
+  await ensureAgendaPedidosEspejadosEnBloqueosLogistica(fecha);
   const baseCap = await fetchCapacidadMaximaHora().catch(() => 50);
   const [pedidos, bloqueos] = await Promise.all([
     fetchPedidosAgendaOcupanCupoParaDia(fecha),

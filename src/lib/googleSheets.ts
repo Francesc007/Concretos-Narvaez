@@ -18,7 +18,7 @@ import type {
   ZonaCotizacion,
   ZonaPreciosConcreto,
 } from "@/types/sheets";
-import type { IntervalMinutes } from "@/lib/agendaCapacity";
+import { normalizeHoraSlot, type IntervalMinutes } from "@/lib/agendaCapacity";
 
 const SCOPES = [
   "https://www.googleapis.com/auth/spreadsheets",
@@ -1025,6 +1025,7 @@ function mmToHm(mins: number): string {
  * Pestaña esperada: Bloqueos_Logistica — columnas Fecha (DD/MM/AAAA), Hora_Inicio (HH:mm), Hora_Fin (HH:mm), Motivo, Volumen_m3.
  *
  * Comportamiento:
+ * - Si la fila tiene Motivo «Cancelado», se ignora por completo (no cuenta franja ni volumen).
  * - Si la fila tiene Volumen_m3 > 0 se trata como pedido en cascada (Hora_Inicio + volumen → consume capacidad por hora).
  * - Si no, se trata como bloqueo rígido [Hora_Inicio, Hora_Fin) que pone la capacidad a 0 en las horas tocadas.
  *
@@ -1059,6 +1060,7 @@ export async function fetchBloqueosLogisticaIntervalsForDay(fechaYmd: string): P
     let iniVal: unknown;
     let finVal: unknown;
     let volVal: unknown;
+    let motivoVal: unknown;
 
     for (const [k, v] of Object.entries(obj)) {
       const kn = normHeader(k);
@@ -1066,15 +1068,19 @@ export async function fetchBloqueosLogisticaIntervalsForDay(fechaYmd: string): P
       else if (kn.includes("hora") && kn.includes("inicio")) iniVal = iniVal ?? v;
       else if (kn.includes("hora") && (kn.includes("fin") || kn.includes("final"))) finVal = finVal ?? v;
       else if (kn.includes("volumen") || /\bvol\b/.test(kn)) volVal = volVal ?? v;
+      else if (kn === "motivo") motivoVal = motivoVal ?? v;
     }
 
     fechaVal = fechaVal ?? row.get("Fecha" as never);
     iniVal = iniVal ?? row.get("Hora_Inicio" as never) ?? row.get("Hora Inicio" as never);
     finVal = finVal ?? row.get("Hora_Fin" as never) ?? row.get("Hora Fin" as never);
     volVal = volVal ?? row.get("Volumen_m3" as never) ?? row.get("Volumen m3" as never) ?? row.get("Volumen" as never);
+    motivoVal = motivoVal ?? row.get("Motivo" as never);
 
     const fy = fechaCeldaAgendaAYmd(fechaVal);
     if (!fy || fy !== target) continue;
+
+    if (normTexto(motivoVal) === "cancelado") continue;
 
     const start = horaCeldaAMinutos(iniVal);
     if (start == null) continue;
@@ -1128,6 +1134,8 @@ export async function appendBloqueoLogisticaOcupacion(input: {
   capacidadM3PorHora: number;
   /** Texto opcional para columna Motivo (por defecto «Ocupado»). */
   motivo?: string;
+  /** Columna «Ubicación» en Bloqueos_Logistica (texto de la cotización). */
+  ubicacion?: string;
 }): Promise<{
   horaFin: string;
   duracionMinutos: number;
@@ -1189,8 +1197,11 @@ export async function appendBloqueoLogisticaOcupacion(input: {
     );
   }
 
+  const kUbic = pickBloqueosColumnKey(h, (n) => n === "ubicacion");
+
   const fechaCelda = fechaYmdADdMmYyyy(fechaYmd);
   const motivo = (input.motivo ?? "Ocupado").trim() || "Ocupado";
+  const ubicacionTxt = (input.ubicacion ?? "").trim();
 
   const row: Record<string, string | number> = {
     [kFecha]: fechaCelda,
@@ -1199,6 +1210,7 @@ export async function appendBloqueoLogisticaOcupacion(input: {
     [kMotivo]: motivo,
     [kVol]: input.volumenM3,
   };
+  if (kUbic && ubicacionTxt) row[kUbic] = ubicacionTxt;
 
   const bloqueoRow = await sheet.addRow(row, { insert: true });
 
@@ -1216,6 +1228,164 @@ export async function appendBloqueoLogisticaOcupacion(input: {
   );
 
   return { horaFin, duracionMinutos, bloqueoRow };
+}
+
+/**
+ * Llave única alineada con {@link mergeOrdersConDedup} (mismo día): hora normalizada + volumen.
+ * Evita duplicar filas en Bloqueos_Logistica al espejar Agenda.
+ */
+function espejoAgendaBloqueoKey(hora: string, volumen: number): string {
+  return `${normalizeHoraSlot(hora)}|${Number(volumen)}`;
+}
+
+/**
+ * Si en Agenda hay un pedido con Estado «Cancelado» y en Bloqueos_Logistica sigue habiendo
+ * una fila espejo con la misma llave (Hora + Volumen_m3), actualiza Motivo a «Cancelado»
+ * (no borra filas). Así la siguiente lectura de disponibilidad libera el cupo.
+ */
+export async function syncAgendaCanceladosMotivoEnBloqueosLogistica(fechaYmd: string): Promise<void> {
+  const target = normalizeFecha(fechaYmd);
+  try {
+    const doc = await getSpreadsheetDoc();
+    const agendaSheet = doc.sheetsByTitle["Agenda"];
+    const bloqueosSheetOr = bloqueosSheetDesdeDoc(doc);
+    if (!agendaSheet || !bloqueosSheetOr) return;
+
+    await agendaSheet.loadHeaderRow();
+    const agendaRows = await agendaSheet.getRows();
+    const cancelledKeys = new Set<string>();
+
+    for (const row of agendaRows) {
+      const estadoRaw = String(row.get("Estado") ?? "").trim();
+      if (normTexto(estadoRaw) !== "cancelado") continue;
+
+      const rf = normalizeFecha(String(row.get("Fecha") ?? ""));
+      if (rf !== target) continue;
+
+      const rh = normalizeHora(String(row.get("Hora") ?? "0:0"));
+      const volCell = row.get("Volumén") ?? row.get("Volumen") ?? "0";
+      const volumen = parseFloat(String(volCell)) || 0;
+      if (volumen <= 0) continue;
+
+      cancelledKeys.add(espejoAgendaBloqueoKey(rh, volumen));
+    }
+
+    if (cancelledKeys.size === 0) return;
+
+    await reloadSpreadsheetDocInfo();
+    const docB = await getSpreadsheetDoc();
+    const bloqueosSheet = bloqueosSheetDesdeDoc(docB);
+    if (!bloqueosSheet) return;
+
+    await bloqueosSheet.loadHeaderRow();
+    const kMotivo = pickBloqueosColumnKey(bloqueosSheet.headerValues, (n) => n === "motivo");
+    if (!kMotivo) return;
+
+    const bloqueoRows = await bloqueosSheet.getRows();
+
+    for (const brow of bloqueoRows) {
+      const obj = brow.toObject() as Record<string, unknown>;
+      let fechaVal: unknown;
+      let iniVal: unknown;
+      let volVal: unknown;
+      let motivoVal: unknown;
+
+      for (const [kk, v] of Object.entries(obj)) {
+        const kn = normHeader(kk);
+        if (kn === "fecha") fechaVal = fechaVal ?? v;
+        else if (kn.includes("hora") && kn.includes("inicio")) iniVal = iniVal ?? v;
+        else if (kn.includes("volumen") || /\bvol\b/.test(kn)) volVal = volVal ?? v;
+        else if (kn === "motivo") motivoVal = motivoVal ?? v;
+      }
+
+      fechaVal = fechaVal ?? brow.get("Fecha" as never);
+      iniVal = iniVal ?? brow.get("Hora_Inicio" as never) ?? brow.get("Hora Inicio" as never);
+      volVal = volVal ?? brow.get("Volumen_m3" as never) ?? brow.get("Volumen m3" as never) ?? brow.get("Volumen" as never);
+      motivoVal = motivoVal ?? brow.get("Motivo" as never);
+
+      const fy = fechaCeldaAgendaAYmd(fechaVal);
+      if (!fy || fy !== target) continue;
+      if (normTexto(motivoVal) === "cancelado") continue;
+
+      const start = horaCeldaAMinutos(iniVal);
+      if (start == null) continue;
+
+      const volumen = valorCeldaANum(volVal);
+      if (volumen <= 0) continue;
+
+      const k = espejoAgendaBloqueoKey(mmToHm(start), volumen);
+      if (!cancelledKeys.has(k)) continue;
+
+      try {
+        brow.set(kMotivo as never, "Cancelado" as never);
+        await brow.save();
+      } catch (e) {
+        console.error("[Bloqueos_Logistica:sync-cancel]", { llave: k, err: e });
+      }
+    }
+  } catch (e) {
+    console.error("[Bloqueos_Logistica:sync-cancel] error", e);
+  }
+}
+
+/**
+ * Durante consultas de disponibilidad: si un pedido de Agenda (Fecha del día + Hora + Volumen)
+ * no tiene fila equivalente en Bloqueos_Logistica (cascada con Volumen_m3), inserta la fila.
+ * Motivo «Ocupado»; Hora_Fin según capacidad m³/h (Config Sistema o 50).
+ * Fallos de escritura se registran y no bloquean la lectura de disponibilidad.
+ */
+export async function ensureAgendaPedidosEspejadosEnBloqueosLogistica(fechaYmd: string): Promise<void> {
+  const fecha = normalizeFecha(fechaYmd);
+  let baseCap = CAPACIDAD_BASE_M3_HORA;
+  try {
+    const c = await fetchCapacidadMaximaHora();
+    if (Number.isFinite(c) && c > 0) baseCap = c;
+  } catch {
+    /* 50 m³/h por defecto */
+  }
+
+  let pedidos: { hora: string; volumen: number }[];
+  let bloqueosDia: BloqueosLogisticaDia;
+  try {
+    [pedidos, bloqueosDia] = await Promise.all([
+      fetchPedidosAgendaOcupanCupoParaDia(fecha),
+      fetchBloqueosLogisticaIntervalsForDay(fecha),
+    ]);
+  } catch (e) {
+    console.error("[Bloqueos_Logistica:espejo] error leyendo Agenda o Bloqueos", e);
+    return;
+  }
+
+  const keysEnBloqueos = new Set(
+    bloqueosDia.cascadeOrders.map((c) => espejoAgendaBloqueoKey(c.hora, c.volumen)),
+  );
+
+  for (const p of pedidos) {
+    const k = espejoAgendaBloqueoKey(p.hora, p.volumen);
+    if (keysEnBloqueos.has(k)) continue;
+
+    try {
+      await reloadSpreadsheetDocInfo();
+      const recheck = await fetchBloqueosLogisticaIntervalsForDay(fecha);
+      const recheckKeys = new Set(recheck.cascadeOrders.map((c) => espejoAgendaBloqueoKey(c.hora, c.volumen)));
+      if (recheckKeys.has(k)) {
+        keysEnBloqueos.add(k);
+        continue;
+      }
+
+      await appendBloqueoLogisticaOcupacion({
+        fecha,
+        horaInicio: normalizeHora(p.hora),
+        volumenM3: p.volumen,
+        capacidadM3PorHora: baseCap,
+        motivo: "Ocupado",
+      });
+      keysEnBloqueos.add(k);
+      console.log("[Bloqueos_Logistica:espejo]", JSON.stringify({ accion: "insertado", fecha, llave: k, baseCap }));
+    } catch (err) {
+      console.error("[Bloqueos_Logistica:espejo] no se pudo insertar fila espejo", { fecha, llave: k, err });
+    }
+  }
 }
 
 function fechaYmdADdMmYyyy(ymd: string): string {
@@ -1340,6 +1510,7 @@ export async function appendReservaAgenda(payload: ReservaPayload): Promise<void
   };
 
   const optionalColumns: Array<[string, string | number | undefined]> = [
+    ["Ubicación", payload.UbicacionObra],
     ["Ubicación obra", payload.UbicacionObra],
     ["Ruta Maps", payload.RutaMaps],
     ["Zona", payload.Zona],
