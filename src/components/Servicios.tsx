@@ -31,7 +31,7 @@ const servicios = [
     titulo: "Asesoría en Obra",
     descripcion:
       "Ingeniería Especializada en Sitio. Supervisamos tu colado, programamos volúmenes críticos y optimizamos el curado para evitar grietas y desperdicios.",
-    imagen: "/Planta6.jpg",
+    imagen: "/planta6.jpg",
     icon: HardHat,
   },
 ];
