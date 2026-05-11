@@ -12,6 +12,8 @@
   },
   "dependencies": {
     "date-fns": "^4.1.0",
+    "embla-carousel-autoplay": "^8.6.0",
+    "embla-carousel-react": "^8.6.0",
     "framer-motion": "^12.38.0",
     "google-auth-library": "^10.6.2",
     "google-spreadsheet": "^5.2.0",

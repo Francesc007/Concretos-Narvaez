@@ -1,5 +1,7 @@
 "use client";
 
+import Autoplay from "embla-carousel-autoplay";
+import useEmblaCarousel from "embla-carousel-react";
 import { motion } from "framer-motion";
 import { useMemo } from "react";
 
@@ -10,7 +12,34 @@ function fileNameToAlt(file: string): string {
 
 type ClientesProps = { imageFiles: string[] };
 
+/** Slides: ancho fijo (consistente con Embla + loop), min-w-0, mismo px-3 en todos. */
+const slideClassName =
+  "min-w-0 shrink-0 grow-0 basis-[8.5rem] px-3 sm:basis-36 md:basis-40";
+
 export function Clientes({ imageFiles }: ClientesProps) {
+  const plugins = useMemo(
+    () => [
+      Autoplay({
+        delay: 2500,
+        stopOnInteraction: false,
+        jump: false,
+      }),
+    ],
+    [],
+  );
+
+  const [emblaRef] = useEmblaCarousel(
+    {
+      loop: true,
+      align: "start",
+      containScroll: false,
+      duration: 45,
+      dragFree: false,
+      skipSnaps: false,
+    },
+    plugins,
+  );
+
   const logos = useMemo(
     () =>
       imageFiles.map((file) => ({
@@ -19,8 +48,6 @@ export function Clientes({ imageFiles }: ClientesProps) {
       })),
     [imageFiles],
   );
-
-  const trackLogos = useMemo(() => [...logos, ...logos], [logos]);
 
   if (logos.length === 0) return null;
 
@@ -52,7 +79,7 @@ export function Clientes({ imageFiles }: ClientesProps) {
         </motion.div>
       </div>
 
-      {/* Solo la franja del carrusel en blanco */}
+      {/* Franja del carrusel: Embla viewport + track flex */}
       <div className="relative w-full bg-white border-y border-black/[0.07] shadow-[0_12px_40px_-20px_rgba(0,0,0,0.45)]">
         <div className="relative w-full min-w-0 overflow-x-hidden px-4 sm:px-8 md:px-12">
           <div
@@ -65,15 +92,14 @@ export function Clientes({ imageFiles }: ClientesProps) {
           />
 
           <div className="py-2.5 md:py-7">
-            {/* Sin padding en el elemento animado: -50 % = una repetición exacta */}
-            <div className="tepexi-clientes-marquee gap-10 sm:gap-10 md:gap-20">
-              {trackLogos.map((logo, i) => (
-                <LogoSlide
-                  key={`${logo.src}-${i}`}
-                  logo={logo}
-                  duplicate={i >= logos.length}
-                />
-              ))}
+            <div className="overflow-hidden" ref={emblaRef}>
+              <div className="flex items-center">
+                {logos.map((logo, index) => (
+                  <div key={`${logo.src}-${index}`} className={slideClassName}>
+                    <LogoSlide logo={logo} priority={index === 0} />
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </div>
@@ -87,17 +113,17 @@ export function Clientes({ imageFiles }: ClientesProps) {
   );
 }
 
-function LogoSlide({ logo, duplicate }: { logo: { src: string; alt: string }; duplicate: boolean }) {
+function LogoSlide({ logo, priority }: { logo: { src: string; alt: string }; priority?: boolean }) {
   return (
-    <div className="flex h-14 w-[8.5rem] shrink-0 items-center justify-center sm:h-[3.5rem] sm:w-36 md:h-16 md:w-40">
+    <div className="flex h-14 items-center justify-center md:h-16">
       <img
         src={logo.src}
-        alt={duplicate ? "" : logo.alt}
-        {...(duplicate ? { "aria-hidden": true as const } : {})}
-        className="max-h-full w-auto max-w-full object-contain object-center select-none opacity-[0.85] transition-opacity duration-300 ease-out hover:opacity-100 active:opacity-100"
-        loading="lazy"
+        alt={logo.alt}
+        className="max-h-full w-full max-w-full object-contain object-center select-none opacity-[0.85] transition-opacity duration-300 ease-out hover:opacity-100 active:opacity-100"
+        loading={priority ? "eager" : "lazy"}
         decoding="async"
         draggable={false}
+        {...(priority ? { fetchPriority: "high" as const } : {})}
       />
     </div>
   );

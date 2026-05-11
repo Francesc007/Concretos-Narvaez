@@ -71,28 +71,6 @@ body {
   animation: whatsapp-pulse 2s ease-in-out infinite;
 }
 
-@keyframes clientes-marquee {
-  from {
-    transform: translate3d(0, 0, 0);
-  }
-  to {
-    /* Mitad exacta del carril duplicado ([A…A]) — mismo resultado que scrollWidth/2 sin errores de redondeo */
-    transform: translate3d(-50%, 0, 0);
-  }
-}
-
-.tepexi-clientes-marquee {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: nowrap;
-  align-items: center;
-  width: max-content;
-  animation: clientes-marquee 60s linear infinite;
-  will-change: transform;
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
-}
-
 /**
  * Capa de vídeo a pantalla completa: promoción a compositor para menos repintado al hacer scroll.
  */
@@ -107,12 +85,6 @@ body {
   transform: translateZ(0);
   contain: layout style;
   isolation: isolate;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .tepexi-clientes-marquee {
-    animation: none !important;
-  }
 }
 
 .cotizacion-modal-scroll {
