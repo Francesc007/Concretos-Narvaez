@@ -57,11 +57,11 @@ function ServicioCard({
       whileTap={{ scale: 0.985 }}
       className="group relative h-full min-h-[400px] overflow-hidden rounded-xl border-2 border-[#c62828]/120 bg-white shadow-lg transition-[border-color,box-shadow,ring] duration-300 hover:border-[#c62828]/120 hover:shadow-md hover:ring-2 hover:ring-[#c62828]/15 cursor-default md:min-h-[440px]"
     >
-      <div className="absolute inset-0 overflow-hidden rounded-xl">
+      <div className="absolute inset-0 overflow-hidden rounded-xl bg-[var(--tepexi-logo-navy)]">
         <img
           src={item.imagen}
           alt={item.titulo}
-          className="h-full w-full object-cover transition-transform duration-500 ease-out max-md:group-hover:scale-[1.03] group-hover:scale-[1.04]"
+          className="h-full w-full object-contain object-center transition-transform duration-500 ease-out max-md:group-hover:scale-[1.02] group-hover:scale-[1.02]"
         />
         <div
           className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_top,rgba(19,47,76,0.96)_0%,rgba(19,47,76,0.5)_20%,rgba(19,47,76,0.12)_50%,transparent_100%)]"

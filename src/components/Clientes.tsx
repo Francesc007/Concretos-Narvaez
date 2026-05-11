@@ -70,10 +70,11 @@ export function Clientes({ imageFiles }: ClientesProps) {
           className="text-center"
         >
           <h2 className="font-display text-4xl md:text-5xl font-bold text-white mb-3 tracking-wide">
-            Clientes
+            Calidad presente en obras de marcas líderes
           </h2>
-          <p className="max-w-2xl mx-auto text-pretty text-sm text-white/90 sm:text-base leading-relaxed">
-            Empresas y marcas nacionales e internacionales que confían en nosotros: Concretos Tepexi.
+          <p className="max-w-3xl mx-auto text-pretty text-sm text-white/90 sm:text-base leading-relaxed">
+            Desde suministro para infraestructura nacional como CFE y Pemex, hasta proyectos industriales
+            y comerciales para Costco, P&amp;G, Truper y AutoZone.
           </p>
         </motion.div>
       </div>
@@ -104,6 +105,11 @@ export function Clientes({ imageFiles }: ClientesProps) {
           </div>
         </div>
       </div>
+
+      <p className="relative mx-auto mt-5 max-w-4xl px-3 text-center text-[10px] leading-snug text-white/65 sm:text-xs sm:leading-relaxed">
+        Los logotipos son propiedad de sus respectivos titulares y se exhiben con fines informativos
+        sobre proyectos suministrados.
+      </p>
     </section>
   );
 }
@@ -115,9 +121,7 @@ function LogoSlide({ logo, duplicate }: { logo: { src: string; alt: string }; du
         src={logo.src}
         alt={duplicate ? "" : logo.alt}
         {...(duplicate ? { "aria-hidden": true as const } : {})}
-        className={`max-h-full w-auto max-w-full object-contain object-center transition-opacity duration-300 select-none ${
-          duplicate ? "opacity-90" : "opacity-95 hover:opacity-100"
-        }`}
+        className="max-h-full w-auto max-w-full object-contain object-center select-none grayscale opacity-60 transition-[filter,opacity] duration-300 ease-out hover:grayscale-0 hover:opacity-100"
         loading="lazy"
         decoding="async"
         draggable={false}

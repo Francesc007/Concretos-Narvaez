@@ -1,15 +1,31 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import type { ComponentType } from "react";
-import { motion } from "framer-motion";
-import { Square, Cylinder, BrickWall, StretchHorizontal, Box, Info } from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
+import {
+  Square,
+  Cylinder,
+  BrickWall,
+  StretchHorizontal,
+  Box,
+  Info,
+  Layers,
+  SquareStack,
+  X,
+} from "lucide-react";
+import {
+  getSugerenciaVolumenNTC2023,
+  TABLA_RESISTENCIAS_COMUNES,
+  type ElementoVolumenCalculadora,
+} from "@/lib/ntc2023SugerenciasVolumen";
 
 /** Mismo grosor que el resto de iconos (CEMEX / minimal). */
 const ICON_STROKE = 1.5 as const;
 
 type Unidad = "m" | "cm" | "ft" | "in";
-type Forma = "losa" | "columna" | "pared" | "cimientos";
+type Forma = ElementoVolumenCalculadora;
+type FormaColumnaSeccion = "rectangular" | "circular";
 
 const UNIDADES: { value: Unidad; label: string }[] = [
   { value: "m", label: "m" },
@@ -23,14 +39,23 @@ const FORMAS: {
   label: string;
   icon: ComponentType<{ className?: string; strokeWidth?: number }>;
 }[] = [
-  { id: "losa", label: "Losa / Piso", icon: Square },
-  { id: "columna", label: "Columna", icon: Cylinder },
+  { id: "losa", label: "Losa", icon: Square },
+  { id: "piso", label: "Piso / firme", icon: Layers },
   { id: "pared", label: "Muro", icon: BrickWall },
+  { id: "columna", label: "Columna", icon: Cylinder },
   { id: "cimientos", label: "Cimientos", icon: StretchHorizontal },
+  { id: "trabes", label: "Trabes y cadenas", icon: SquareStack },
 ];
 
-/** Fila superior: Losa y Muro; fila inferior: Columna y Cimientos. */
-const FORMAS_GRID_ORDER: Forma[] = ["losa", "pared", "columna", "cimientos"];
+/** Orden en rejilla 2×3 */
+const FORMAS_GRID_ORDER: Forma[] = [
+  "losa",
+  "piso",
+  "pared",
+  "columna",
+  "cimientos",
+  "trabes",
+];
 
 function parseNum(raw: string): number | null {
   const t = raw.trim().replace(/\s/g, "").replace(",", ".");
@@ -56,25 +81,138 @@ function toMeters(value: number, u: Unidad): number {
 }
 
 type DimsLosa = { largo: string; ancho: string; espesor: string };
-type DimsColumna = { diametro: string; altura: string };
+type DimsColumna = {
+  seccion: FormaColumnaSeccion;
+  diametro: string;
+  largo: string;
+  ancho: string;
+  altura: string;
+};
 type DimsPared = { longitud: string; espesor: string; altura: string };
 type DimsCimientos = { longitud: string; ancho: string; profundidad: string };
+type DimsTrabes = { longitud: string; ancho: string; altura: string };
 
 const dimsInicial: {
   losa: DimsLosa;
+  piso: DimsLosa;
   columna: DimsColumna;
   pared: DimsPared;
   cimientos: DimsCimientos;
+  trabes: DimsTrabes;
 } = {
   losa: { largo: "", ancho: "", espesor: "" },
-  columna: { diametro: "", altura: "" },
+  piso: { largo: "", ancho: "", espesor: "" },
+  columna: { seccion: "circular", diametro: "", largo: "", ancho: "", altura: "" },
   pared: { longitud: "", espesor: "", altura: "" },
   cimientos: { longitud: "", ancho: "", profundidad: "" },
+  trabes: { longitud: "", ancho: "", altura: "" },
 };
 
 function formatM3(n: number): string {
   if (!Number.isFinite(n) || n <= 0) return "—";
   return n.toLocaleString("es-MX", { maximumFractionDigits: 3, minimumFractionDigits: 0 });
+}
+
+function etiquetaFormaDetalle(forma: Forma, seccionColumna: FormaColumnaSeccion): string {
+  if (forma !== "columna") {
+    return FORMAS.find((f) => f.id === forma)?.label ?? forma;
+  }
+  return seccionColumna === "circular" ? "Columna (sección circular)" : "Columna (sección rectangular)";
+}
+
+function TablaResistenciasModal({
+  isOpen,
+  onClose,
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+}) {
+  useEffect(() => {
+    if (!isOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [isOpen, onClose]);
+
+  return (
+    <AnimatePresence>
+      {isOpen && (
+        <div className="fixed inset-0 z-[90] flex items-center justify-center p-4 sm:p-6">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={onClose}
+            className="absolute inset-0 bg-slate-900/55 backdrop-blur-[2px]"
+            aria-hidden
+          />
+          <motion.div
+            initial={{ opacity: 0, scale: 0.97, y: 10 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.97, y: 10 }}
+            transition={{ type: "spring", damping: 26, stiffness: 320 }}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="modal-resistencias-title"
+            onClick={(e) => e.stopPropagation()}
+            className="relative w-full max-w-lg max-h-[min(88vh,28rem)] overflow-y-auto rounded-2xl border border-slate-200 bg-white p-5 shadow-xl sm:p-6"
+          >
+            <div className="mb-4 flex items-start justify-between gap-3">
+              <h3
+                id="modal-resistencias-title"
+                className="font-display text-lg font-bold tracking-wide text-[var(--tepexi-logo-navy)] sm:text-xl"
+              >
+                Resistencias <span className="whitespace-nowrap">f&apos;c</span> habituales
+              </h3>
+              <button
+                type="button"
+                onClick={onClose}
+                className="shrink-0 rounded-full p-2 text-slate-500 transition-colors hover:bg-slate-100 hover:text-[var(--tepexi-logo-navy)]"
+                aria-label="Cerrar"
+              >
+                <X className="h-5 w-5" strokeWidth={ICON_STROKE} />
+              </button>
+            </div>
+            <p className="mb-4 text-xs leading-relaxed text-slate-600">
+              Valores orientativos de obra en México. El proyectista estructural define{" "}
+              <span className="whitespace-nowrap">f&apos;c</span> según cargas, exposición ambiental y
+              NTC de Concreto aplicables.
+            </p>
+            <div className="overflow-x-auto rounded-xl border border-slate-200">
+              <table className="w-full min-w-[280px] text-left text-sm">
+                <thead>
+                  <tr className="border-b border-slate-200 bg-slate-50">
+                    <th className="px-3 py-2.5 font-semibold text-[var(--tepexi-logo-navy)]">
+                      Uso típico
+                    </th>
+                    <th className="px-3 py-2.5 font-semibold text-[var(--tepexi-logo-navy)]">
+                      <span className="whitespace-nowrap">f&apos;c</span> común
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {TABLA_RESISTENCIAS_COMUNES.map((row) => (
+                    <tr key={row.uso} className="border-b border-slate-100 last:border-0">
+                      <td className="px-3 py-2.5 text-slate-700">{row.uso}</td>
+                      <td className="px-3 py-2.5 font-medium tabular-nums text-[var(--tepexi-logo-navy)]">
+                        {row.fc}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <p className="mt-4 text-[11px] leading-relaxed text-slate-500">
+              Esta tabla es informativa y no reemplaza las Normas Técnicas Complementarias de Diseño de
+              Concreto (NTC vigentes en tu jurisdicción).
+            </p>
+          </motion.div>
+        </div>
+      )}
+    </AnimatePresence>
+  );
 }
 
 export interface CalculadoraVolumenConcretoProps {
@@ -86,13 +224,17 @@ export function CalculadoraVolumenConcreto({ onCotizarVolumenM3 }: CalculadoraVo
   const [unidad, setUnidad] = useState<Unidad>("m");
   const [dims, setDims] = useState(dimsInicial);
   const [reservaPct, setReservaPct] = useState("5");
+  const [modalResistenciasOpen, setModalResistenciasOpen] = useState(false);
+
+  const cerrarModalResistencias = useCallback(() => setModalResistenciasOpen(false), []);
 
   const { volumenNetoM3 } = useMemo(() => {
     const u = unidad;
-    if (forma === "losa") {
-      const L = parseNum(dims.losa.largo);
-      const A = parseNum(dims.losa.ancho);
-      const E = parseNum(dims.losa.espesor);
+    if (forma === "losa" || forma === "piso") {
+      const key = forma === "losa" ? "losa" : "piso";
+      const L = parseNum(dims[key].largo);
+      const A = parseNum(dims[key].ancho);
+      const E = parseNum(dims[key].espesor);
       if (L == null || A == null || E == null || L === 0 || A === 0 || E === 0) {
         return { volumenNetoM3: null as number | null };
       }
@@ -101,14 +243,27 @@ export function CalculadoraVolumenConcreto({ onCotizarVolumenM3 }: CalculadoraVo
       };
     }
     if (forma === "columna") {
-      const d = parseNum(dims.columna.diametro);
       const h = parseNum(dims.columna.altura);
-      if (d == null || h == null || d === 0 || h === 0) {
+      if (h == null || h === 0) {
         return { volumenNetoM3: null };
       }
-      const r = toMeters(d, u) / 2;
+      if (dims.columna.seccion === "circular") {
+        const d = parseNum(dims.columna.diametro);
+        if (d == null || d === 0) {
+          return { volumenNetoM3: null };
+        }
+        const r = toMeters(d, u) / 2;
+        return {
+          volumenNetoM3: Math.PI * r * r * toMeters(h, u),
+        };
+      }
+      const Lb = parseNum(dims.columna.largo);
+      const Ab = parseNum(dims.columna.ancho);
+      if (Lb == null || Ab == null || Lb === 0 || Ab === 0) {
+        return { volumenNetoM3: null };
+      }
       return {
-        volumenNetoM3: Math.PI * r * r * toMeters(h, u),
+        volumenNetoM3: toMeters(Lb, u) * toMeters(Ab, u) * toMeters(h, u),
       };
     }
     if (forma === "pared") {
@@ -133,6 +288,17 @@ export function CalculadoraVolumenConcreto({ onCotizarVolumenM3 }: CalculadoraVo
         volumenNetoM3: toMeters(L, u) * toMeters(A, u) * toMeters(P, u),
       };
     }
+    if (forma === "trabes") {
+      const L = parseNum(dims.trabes.longitud);
+      const a = parseNum(dims.trabes.ancho);
+      const h = parseNum(dims.trabes.altura);
+      if (L == null || a == null || h == null || L === 0 || a === 0 || h === 0) {
+        return { volumenNetoM3: null };
+      }
+      return {
+        volumenNetoM3: toMeters(L, u) * toMeters(a, u) * toMeters(h, u),
+      };
+    }
     return { volumenNetoM3: null };
   }, [dims, forma, unidad]);
 
@@ -145,11 +311,19 @@ export function CalculadoraVolumenConcreto({ onCotizarVolumenM3 }: CalculadoraVo
       ? volumenNetoM3 + extraM3
       : null;
 
+  const sugerenciaNTC = useMemo(() => getSugerenciaVolumenNTC2023(forma), [forma]);
+
   function setCampoLosa<K extends keyof DimsLosa>(k: K, v: string) {
     setDims((d) => ({ ...d, losa: { ...d.losa, [k]: v } }));
   }
+  function setCampoPiso<K extends keyof DimsLosa>(k: K, v: string) {
+    setDims((d) => ({ ...d, piso: { ...d.piso, [k]: v } }));
+  }
   function setCampoColumna<K extends keyof DimsColumna>(k: K, v: string) {
     setDims((d) => ({ ...d, columna: { ...d.columna, [k]: v } }));
+  }
+  function setSeccionColumna(seccion: FormaColumnaSeccion) {
+    setDims((d) => ({ ...d, columna: { ...d.columna, seccion } }));
   }
   function setCampoPared<K extends keyof DimsPared>(k: K, v: string) {
     setDims((d) => ({ ...d, pared: { ...d.pared, [k]: v } }));
@@ -157,18 +331,23 @@ export function CalculadoraVolumenConcreto({ onCotizarVolumenM3 }: CalculadoraVo
   function setCampoCimientos<K extends keyof DimsCimientos>(k: K, v: string) {
     setDims((d) => ({ ...d, cimientos: { ...d.cimientos, [k]: v } }));
   }
+  function setCampoTrabes<K extends keyof DimsTrabes>(k: K, v: string) {
+    setDims((d) => ({ ...d, trabes: { ...d.trabes, [k]: v } }));
+  }
 
   const inputClass =
     "w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-[var(--tepexi-logo-navy)] placeholder:text-slate-400 outline-none transition focus:border-[#c62828] focus:ring-2 focus:ring-[#c62828]/20";
 
   const formaActual = FORMAS.find((f) => f.id === forma) ?? FORMAS[0]!;
   const IconoForma = formaActual.icon;
+  const etiquetaDetalle = etiquetaFormaDetalle(forma, dims.columna.seccion);
 
   return (
     <section
       id="calculadora-volumen"
       className="relative overflow-hidden border-y border-[var(--tepexi-border-light)] bg-[var(--tepexi-section-gray)] py-20 md:py-28"
     >
+      <TablaResistenciasModal isOpen={modalResistenciasOpen} onClose={cerrarModalResistencias} />
       <div
         className="absolute inset-0 opacity-[0.03] pointer-events-none"
         style={{
@@ -304,18 +483,109 @@ export function CalculadoraVolumenConcreto({ onCotizarVolumenM3 }: CalculadoraVo
                 </>
               )}
 
-              {forma === "columna" && (
+              {forma === "piso" && (
                 <>
                   <div>
-                    <label className="text-xs text-slate-600 block mb-1">Diámetro (D)</label>
+                    <label className="text-xs text-slate-600 block mb-1">Largo (L)</label>
                     <input
                       className={inputClass}
                       inputMode="decimal"
-                      value={dims.columna.diametro}
-                      onChange={(e) => setCampoColumna("diametro", e.target.value)}
+                      value={dims.piso.largo}
+                      onChange={(e) => setCampoPiso("largo", e.target.value)}
                       placeholder="0"
                     />
                   </div>
+                  <div>
+                    <label className="text-xs text-slate-600 block mb-1">Ancho (A)</label>
+                    <input
+                      className={inputClass}
+                      inputMode="decimal"
+                      value={dims.piso.ancho}
+                      onChange={(e) => setCampoPiso("ancho", e.target.value)}
+                      placeholder="0"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs text-slate-600 block mb-1">Espesor (firme) (E)</label>
+                    <input
+                      className={inputClass}
+                      inputMode="decimal"
+                      value={dims.piso.espesor}
+                      onChange={(e) => setCampoPiso("espesor", e.target.value)}
+                      placeholder="0"
+                    />
+                  </div>
+                </>
+              )}
+
+              {forma === "columna" && (
+                <>
+                  <div>
+                    <p className="text-xs text-slate-600 mb-2">Forma de la sección</p>
+                    <div className="flex flex-wrap gap-2" role="group" aria-label="Forma de columna">
+                      <button
+                        type="button"
+                        aria-pressed={dims.columna.seccion === "circular"}
+                        onClick={() => setSeccionColumna("circular")}
+                        className={[
+                          "rounded-lg border px-3 py-2 text-xs font-semibold transition-colors",
+                          dims.columna.seccion === "circular"
+                            ? "border-[#c62828] bg-red-50 text-[#c62828]"
+                            : "border-slate-200 bg-white text-slate-700 hover:border-slate-300",
+                        ].join(" ")}
+                      >
+                        Circular
+                      </button>
+                      <button
+                        type="button"
+                        aria-pressed={dims.columna.seccion === "rectangular"}
+                        onClick={() => setSeccionColumna("rectangular")}
+                        className={[
+                          "rounded-lg border px-3 py-2 text-xs font-semibold transition-colors",
+                          dims.columna.seccion === "rectangular"
+                            ? "border-[#c62828] bg-red-50 text-[#c62828]"
+                            : "border-slate-200 bg-white text-slate-700 hover:border-slate-300",
+                        ].join(" ")}
+                      >
+                        Rectangular
+                      </button>
+                    </div>
+                  </div>
+                  {dims.columna.seccion === "circular" ? (
+                    <div>
+                      <label className="text-xs text-slate-600 block mb-1">Diámetro (D)</label>
+                      <input
+                        className={inputClass}
+                        inputMode="decimal"
+                        value={dims.columna.diametro}
+                        onChange={(e) => setCampoColumna("diametro", e.target.value)}
+                        placeholder="0"
+                      />
+                    </div>
+                  ) : (
+                    <>
+                      <div>
+                        <label className="text-xs text-slate-600 block mb-1">Lado largo de la sección</label>
+                        <input
+                          className={inputClass}
+                          inputMode="decimal"
+                          value={dims.columna.largo}
+                          onChange={(e) => setCampoColumna("largo", e.target.value)}
+                          placeholder="0"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-xs text-slate-600 block mb-1">Lado corto de la sección</label>
+                        <input
+                          className={inputClass}
+                          inputMode="decimal"
+                          value={dims.columna.ancho}
+                          onChange={(e) => setCampoColumna("ancho", e.target.value)}
+                          placeholder="0"
+                        />
+                      </div>
+                    </>
+                  )}
                   <div>
                     <label className="text-xs text-slate-600 block mb-1">Altura (h)</label>
                     <input
@@ -399,6 +669,41 @@ export function CalculadoraVolumenConcreto({ onCotizarVolumenM3 }: CalculadoraVo
                 </>
               )}
 
+              {forma === "trabes" && (
+                <>
+                  <div>
+                    <label className="text-xs text-slate-600 block mb-1">Longitud del tramo (L)</label>
+                    <input
+                      className={inputClass}
+                      inputMode="decimal"
+                      value={dims.trabes.longitud}
+                      onChange={(e) => setCampoTrabes("longitud", e.target.value)}
+                      placeholder="0"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs text-slate-600 block mb-1">Ancho de sección (b)</label>
+                    <input
+                      className={inputClass}
+                      inputMode="decimal"
+                      value={dims.trabes.ancho}
+                      onChange={(e) => setCampoTrabes("ancho", e.target.value)}
+                      placeholder="0"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs text-slate-600 block mb-1">Peralte (h)</label>
+                    <input
+                      className={inputClass}
+                      inputMode="decimal"
+                      value={dims.trabes.altura}
+                      onChange={(e) => setCampoTrabes("altura", e.target.value)}
+                      placeholder="0"
+                    />
+                  </div>
+                </>
+              )}
+
               <div className="pt-1">
                 <label htmlFor="reserva-pct" className="text-xs text-slate-600 block mb-1">
                   Volumen de reserva (desperdicio)
@@ -446,7 +751,7 @@ export function CalculadoraVolumenConcreto({ onCotizarVolumenM3 }: CalculadoraVo
                   </span>
                   <div className="min-w-0">
                     <p className="text-xs font-medium uppercase tracking-wider text-slate-500">Forma</p>
-                    <p className="text-sm font-bold text-[var(--tepexi-logo-navy)] sm:truncate">{formaActual.label}</p>
+                    <p className="text-sm font-bold text-[var(--tepexi-logo-navy)] sm:truncate">{etiquetaDetalle}</p>
                   </div>
                 </div>
                 <p className="shrink-0 text-left text-lg font-bold tabular-nums text-[var(--tepexi-logo-navy)] sm:text-right sm:text-xl">
@@ -477,6 +782,31 @@ export function CalculadoraVolumenConcreto({ onCotizarVolumenM3 }: CalculadoraVo
                   </dd>
                 </div>
               </dl>
+
+              <div
+                className="mt-5 rounded-xl border border-slate-200/80 bg-slate-50/90 px-3.5 py-3 text-xs leading-relaxed text-slate-700"
+                role="note"
+              >
+                <p className="font-semibold text-[var(--tepexi-logo-navy)] mb-1.5">Sugerencia técnica</p>
+                <p>
+                  Sugerencia para{" "}
+                  <span className="font-semibold">{sugerenciaNTC.elementoEtiqueta}</span>: resistencia
+                  mínima de {sugerenciaNTC.resistenciaMinimaFc} en cuanto a{" "}
+                  <span className="whitespace-nowrap">f&apos;c</span>. Basado en las Normas Técnicas
+                  Complementarias de Diseño de Concreto.
+                </p>
+                <p className="mt-2 text-slate-600">{sugerenciaNTC.referenciaNormativa}</p>
+                <button
+                  type="button"
+                  onClick={() => setModalResistenciasOpen(true)}
+                  className="mt-2.5 text-left text-xs font-semibold text-[#c62828] underline decoration-[#c62828]/40 underline-offset-2 transition-colors hover:text-[#a51e24] hover:decoration-[#a51e24]"
+                >
+                  Ver tabla comparativa de resistencias (f&apos;c)
+                </button>
+                <p className="mt-3 text-[11px] text-slate-500 pt-2 border-t border-slate-200/80">
+                  Esta sugerencia es informativa; consulte siempre su proyecto estructural.
+                </p>
+              </div>
 
               <div className="mt-8 space-y-3">
                 {onCotizarVolumenM3 && (
