@@ -121,7 +121,7 @@ function LogoSlide({ logo, duplicate }: { logo: { src: string; alt: string }; du
         src={logo.src}
         alt={duplicate ? "" : logo.alt}
         {...(duplicate ? { "aria-hidden": true as const } : {})}
-        className="max-h-full w-auto max-w-full object-contain object-center select-none grayscale opacity-60 transition-[filter,opacity] duration-300 ease-out hover:grayscale-0 hover:opacity-100"
+        className="max-h-full w-auto max-w-full object-contain object-center select-none opacity-[0.85] transition-opacity duration-300 ease-out hover:opacity-100 active:opacity-100"
         loading="lazy"
         decoding="async"
         draggable={false}
