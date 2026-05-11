@@ -1,7 +1,5 @@
 "use client";
 
-import Autoplay from "embla-carousel-autoplay";
-import useEmblaCarousel from "embla-carousel-react";
 import { motion } from "framer-motion";
 import { useMemo } from "react";
 
@@ -12,34 +10,11 @@ function fileNameToAlt(file: string): string {
 
 type ClientesProps = { imageFiles: string[] };
 
-/** Slides: ancho fijo (consistente con Embla + loop), min-w-0, mismo px-3 en todos. */
+/** Ranuras de ancho fijo + duplicado en carril; -50% del ancho total = un ciclo exacto. */
 const slideClassName =
-  "min-w-0 shrink-0 grow-0 basis-[8.5rem] px-3 sm:basis-36 md:basis-40";
+  "flex min-w-0 shrink-0 grow-0 basis-[8.5rem] items-stretch justify-center px-5.5 sm:basis-46 md:basis-55";
 
 export function Clientes({ imageFiles }: ClientesProps) {
-  const plugins = useMemo(
-    () => [
-      Autoplay({
-        delay: 2500,
-        stopOnInteraction: false,
-        jump: false,
-      }),
-    ],
-    [],
-  );
-
-  const [emblaRef] = useEmblaCarousel(
-    {
-      loop: true,
-      align: "start",
-      containScroll: false,
-      duration: 45,
-      dragFree: false,
-      skipSnaps: false,
-    },
-    plugins,
-  );
-
   const logos = useMemo(
     () =>
       imageFiles.map((file) => ({
@@ -48,6 +23,8 @@ export function Clientes({ imageFiles }: ClientesProps) {
       })),
     [imageFiles],
   );
+
+  const trackLogos = useMemo(() => [...logos, ...logos], [logos]);
 
   if (logos.length === 0) return null;
 
@@ -79,7 +56,7 @@ export function Clientes({ imageFiles }: ClientesProps) {
         </motion.div>
       </div>
 
-      {/* Franja del carrusel: Embla viewport + track flex */}
+      {/* Carril continuo (marquee CSS); sin snaps ni arrastre tipo carrusel */}
       <div className="relative w-full bg-white border-y border-black/[0.07] shadow-[0_12px_40px_-20px_rgba(0,0,0,0.45)]">
         <div className="relative w-full min-w-0 overflow-x-hidden px-4 sm:px-8 md:px-12">
           <div
@@ -92,11 +69,11 @@ export function Clientes({ imageFiles }: ClientesProps) {
           />
 
           <div className="py-2.5 md:py-7">
-            <div className="overflow-hidden" ref={emblaRef}>
-              <div className="flex items-center">
-                {logos.map((logo, index) => (
-                  <div key={`${logo.src}-${index}`} className={slideClassName}>
-                    <LogoSlide logo={logo} priority={index === 0} />
+            <div className="overflow-hidden">
+              <div className="tepexi-clientes-marquee-continuous">
+                {trackLogos.map((logo, i) => (
+                  <div key={`${logo.src}-${i}`} className={slideClassName}>
+                    <LogoSlide logo={logo} duplicate={i >= logos.length} />
                   </div>
                 ))}
               </div>
@@ -113,17 +90,18 @@ export function Clientes({ imageFiles }: ClientesProps) {
   );
 }
 
-function LogoSlide({ logo, priority }: { logo: { src: string; alt: string }; priority?: boolean }) {
+function LogoSlide({ logo, duplicate }: { logo: { src: string; alt: string }; duplicate: boolean }) {
   return (
-    <div className="flex h-14 items-center justify-center md:h-16">
+    <div className="flex h-14 w-full items-center justify-center md:h-16">
       <img
         src={logo.src}
-        alt={logo.alt}
+        alt={duplicate ? "" : logo.alt}
+        {...(duplicate ? { "aria-hidden": true as const } : {})}
         className="max-h-full w-full max-w-full object-contain object-center select-none opacity-[0.85] transition-opacity duration-300 ease-out hover:opacity-100 active:opacity-100"
-        loading={priority ? "eager" : "lazy"}
+        loading={duplicate ? "lazy" : "eager"}
         decoding="async"
         draggable={false}
-        {...(priority ? { fetchPriority: "high" as const } : {})}
+        {...(!duplicate ? { fetchPriority: "high" as const } : {})}
       />
     </div>
   );

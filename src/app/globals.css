@@ -71,6 +71,33 @@ body {
   animation: whatsapp-pulse 2s ease-in-out infinite;
 }
 
+/** Logos clientes: desplazamiento continuo (sin pasos ni drag). Contenido duplicado en JSX. */
+@keyframes tepexi-clientes-marquee-scroll {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+.tepexi-clientes-marquee-continuous {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: center;
+  width: max-content;
+  animation: tepexi-clientes-marquee-scroll 55s linear infinite;
+  will-change: transform;
+  backface-visibility: hidden;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tepexi-clientes-marquee-continuous {
+    animation: none !important;
+  }
+}
+
 /**
  * Capa de vídeo a pantalla completa: promoción a compositor para menos repintado al hacer scroll.
  */
