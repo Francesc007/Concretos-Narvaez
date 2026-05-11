@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { useLayoutEffect, useMemo, useRef } from "react";
+import { useMemo } from "react";
 
 function fileNameToAlt(file: string): string {
   const base = file.replace(/\.[^.]+$/, "");
@@ -11,8 +11,6 @@ function fileNameToAlt(file: string): string {
 type ClientesProps = { imageFiles: string[] };
 
 export function Clientes({ imageFiles }: ClientesProps) {
-  const trackRef = useRef<HTMLDivElement>(null);
-
   const logos = useMemo(
     () =>
       imageFiles.map((file) => ({
@@ -23,31 +21,6 @@ export function Clientes({ imageFiles }: ClientesProps) {
   );
 
   const trackLogos = useMemo(() => [...logos, ...logos], [logos]);
-
-  useLayoutEffect(() => {
-    const node = trackRef.current;
-    if (!node) return;
-
-    const syncMarqueeDistance = () => {
-      const w = node.scrollWidth;
-      if (w <= 0) return;
-      const half = w / 2;
-      node.style.setProperty("--tepexi-clientes-marquee-x", `-${half}px`);
-    };
-
-    syncMarqueeDistance();
-
-    const ro = new ResizeObserver(() => syncMarqueeDistance());
-    ro.observe(node);
-
-    const imgs = node.querySelectorAll("img");
-    imgs.forEach((img) => {
-      if (img.complete) return;
-      img.addEventListener("load", syncMarqueeDistance, { once: true });
-    });
-
-    return () => ro.disconnect();
-  }, [logos]);
 
   if (logos.length === 0) return null;
 
@@ -93,7 +66,7 @@ export function Clientes({ imageFiles }: ClientesProps) {
 
           <div className="py-2.5 md:py-7">
             {/* Sin padding en el elemento animado: -50 % = una repetición exacta */}
-            <div ref={trackRef} className="tepexi-clientes-marquee gap-10 sm:gap-10 md:gap-20">
+            <div className="tepexi-clientes-marquee gap-10 sm:gap-10 md:gap-20">
               {trackLogos.map((logo, i) => (
                 <LogoSlide
                   key={`${logo.src}-${i}`}
