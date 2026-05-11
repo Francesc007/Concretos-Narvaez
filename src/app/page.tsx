@@ -1,7 +1,7 @@
 import { LandingPage } from "@/components/LandingPage";
-import { getClientesImageFiles, shuffleArray } from "@/lib/clientes-assets";
+import { getClientesImageFilesForCarousel } from "@/lib/clientes-assets";
 
 export default function Home() {
-  const clientesImageFiles = shuffleArray(getClientesImageFiles());
+  const clientesImageFiles = getClientesImageFilesForCarousel();
   return <LandingPage clientesImageFiles={clientesImageFiles} />;
 }
