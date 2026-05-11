@@ -5,13 +5,21 @@ import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { Calendar, FileText, Menu, X } from "lucide-react";
 import { LOGO_BLUR_DATA_URL } from "@/lib/image-blur-placeholders";
+import { CONFIG } from "@/config";
 
-const navLinks = [
+type NavLink = {
+  href: string;
+  label: string;
+  /** Si existe, el clic abre Maps (misma lógica que el footer) en lugar de navegar por ancla. */
+  mapsUrl?: string;
+};
+
+const navLinks: NavLink[] = [
   { href: "#inicio", label: "Inicio" },
   { href: "#servicios", label: "Servicios" },
   { href: "#proyectos", label: "Proyectos" },
   { href: "#calculadora-volumen", label: "Calculadora" },
-  { href: "#ubicacion", label: "Ubicación" },
+  { href: "#ubicacion", label: "Ubicación", mapsUrl: CONFIG.googleMapsUrl },
 ];
 
 interface NavbarProps {
@@ -145,10 +153,15 @@ export function Navbar({ onCotizadorClick, onAgendaVisitaClick }: NavbarProps) {
           <div className="hidden lg:flex flex-1 items-center justify-center gap-8">
             {navLinks.map((link) => {
               const active = activeHref === link.href;
+              const dest = link.mapsUrl ?? link.href;
+              const isMaps = Boolean(link.mapsUrl);
               return (
                 <a
                   key={link.href}
-                  href={link.href}
+                  href={dest}
+                  target={isMaps ? "_blank" : undefined}
+                  rel={isMaps ? "noopener noreferrer" : undefined}
+                  aria-label={isMaps ? "Abrir ubicación en Google Maps" : undefined}
                   className={`font-display text-base font-semibold uppercase tracking-wide transition-colors ${
                     active
                       ? "text-[#c62828]"
@@ -230,10 +243,15 @@ export function Navbar({ onCotizadorClick, onAgendaVisitaClick }: NavbarProps) {
               <nav className="relative z-10 flex flex-col gap-0.5 px-1" aria-label="Móvil">
                 {navLinks.map((link) => {
                   const active = activeHref === link.href;
+                  const dest = link.mapsUrl ?? link.href;
+                  const isMaps = Boolean(link.mapsUrl);
                   return (
                     <a
                       key={link.href}
-                      href={link.href}
+                      href={dest}
+                      target={isMaps ? "_blank" : undefined}
+                      rel={isMaps ? "noopener noreferrer" : undefined}
+                      aria-label={isMaps ? "Abrir ubicación en Google Maps" : undefined}
                       className={`rounded-lg px-4 py-3 text-left font-display text-base font-semibold uppercase tracking-wide transition-colors ${
                         active
                           ? "bg-white/10 text-[#c62828]"

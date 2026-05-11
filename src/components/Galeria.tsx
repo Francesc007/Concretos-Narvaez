@@ -27,11 +27,11 @@ const SLIDE_INTERVAL_MS = 4500;
 
 const items = [
   {
-    titulo: "Acceso B Central Park 57, Tepeji del Río, Hgo.",
+    titulo: "Central Park 57, Tepeji del Río, Hgo.",
     imagenes: PROYECTO_IMAGENES[0],
   },
   {
-    titulo: "Muro de contención en Autopista Méx-Qro.",
+    titulo: "Muro de Contención en Autopista Méx-Qro.",
     imagenes: PROYECTO_IMAGENES[1],
   },
   {
@@ -39,7 +39,7 @@ const items = [
     imagenes: PROYECTO_IMAGENES[2],
   },
   {
-    titulo: "Suministro de Vialidades principales, Hgo.",
+    titulo: "Colado Masivo Pericimbras, Parque de las Américas, Huehuetoca, Edo. Méx.",
     imagenes: PROYECTO_IMAGENES[3],
   },
   {
@@ -47,11 +47,11 @@ const items = [
     imagenes: PROYECTO_IMAGENES[4],
   },
   {
-    titulo: "Terminal Tepeji del Río, Hgo.",
+    titulo: "Terminal Tepeji del Río, Parque Industrial Tepeji del Río, Hgo.",
     imagenes: PROYECTO_IMAGENES[5],
   },
   {
-    titulo: "Bombeo plaza comercial, Huehuetla, Hgo.",
+    titulo: "Naves Industriales Marvic Ingeniería, Tepeji del Río, Hgo.",
     imagenes: PROYECTO_IMAGENES[6],
   },
   {
@@ -59,15 +59,15 @@ const items = [
     imagenes: PROYECTO_IMAGENES[7],
   },
   {
-    titulo: "Parque Industrial Tepeji del Río, Hgo.",
+    titulo: "Tubos y Barras Huecas, Parque Industrial Tepeji del Río, Tepeji del Río, Hgo.",
     imagenes: PROYECTO_IMAGENES[8],
   },
   {
-    titulo: "Puente en Taxhido, Hgo.",
+    titulo: "Vialidad Melchor Ocampo, Puente de Taxhido, Tepeji del Río, Hgo.",
     imagenes: PROYECTO_IMAGENES[9],
   },
   {
-    titulo: "Avenida Principal, Tepeji del Río, Hgo.",
+    titulo: "Vialidad Melchor Ocampo, Tepeji del Río, Hgo.",
     imagenes: PROYECTO_IMAGENES[10],
   },
   {
@@ -75,15 +75,15 @@ const items = [
     imagenes: PROYECTO_IMAGENES[11],
   },
   {
-    titulo: "Estacionamiento,  Tepeji del Río, Hgo.",
+    titulo: "Suministro Tiendas 3B, Tepeji del Río, Hgo.",
     imagenes: PROYECTO_IMAGENES[12],
   },
   {
-    titulo: "Colado y bombeo en proyecto de concreto, zona metropolitana.",
+    titulo: "Bodegas Industriales, Tepeji del Río, Hgo..",
     imagenes: PROYECTO_IMAGENES[13],
   },
   {
-    titulo: "Pavimentación en Calles de Santa María, Hgo.",
+    titulo: "Vialidades en Santa María Magdalena, Tepeji del Río,Hgo.",
     imagenes: PROYECTO_IMAGENES[14],
   },
 ] as const;

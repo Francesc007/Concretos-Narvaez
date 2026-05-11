@@ -47,7 +47,7 @@ export function Clientes({ imageFiles }: ClientesProps) {
           className="text-center"
         >
           <h2 className="font-display text-4xl md:text-5xl font-bold text-white mb-3 tracking-wide">
-            Calidad presente en obras de marcas líderes
+            Clientes de marcas líderes que confian en nosotros
           </h2>
           <p className="max-w-3xl mx-auto text-pretty text-sm text-white/90 sm:text-base leading-relaxed">
             Desde suministro para infraestructura nacional como CFE y Pemex, hasta proyectos industriales

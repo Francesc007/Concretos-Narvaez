@@ -49,7 +49,7 @@ export function Hero() {
           transition={{ duration: 0.8, delay: 0.15 }}
           className="font-display mb-6 text-4xl font-extrabold leading-tight text-white [text-wrap:balance] drop-shadow-[0_4px_28px_rgba(0,0,0,0.55)] sm:text-5xl md:text-6xl lg:text-7xl"
         >
-          Solidez certificada · Confianza para cada metro de tu obra
+          Solidez certificada | Confianza para cada metro de tu obra
         </motion.h2>
         <motion.p
           initial={{ opacity: 0, y: 30 }}
