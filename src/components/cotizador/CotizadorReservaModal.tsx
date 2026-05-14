@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type MouseEvent } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, ChevronLeft, ChevronRight, CheckCircle2 } from "lucide-react";
+import { X, ChevronLeft, ChevronRight, CheckCircle2, Phone } from "lucide-react";
 import { CONFIG } from "@/config";
 import { apiUrl, fetchApiJson } from "@/lib/api";
 import {
@@ -14,6 +14,7 @@ import {
   vaciadoApiDesdeSeleccion,
   resistenciaRapidaDesdeSeleccion,
   volumenMaximoCotizadorM3,
+  volumenM3DesdeCampoTexto,
   type CotizacionDinamicaResultado,
   type ResistenciaKg,
   type TipoBombaCotizador,
@@ -47,7 +48,9 @@ interface Props {
   volumenInicialM3?: number | null;
 }
 
+/** Reactivar agenda y reservas: `CONFIG.cotizadorAgendaActiva = true` en `src/config.ts`. */
 export function CotizadorReservaModal({ isOpen, onClose, volumenInicialM3 = null }: Props) {
+  const agendaActiva = CONFIG.cotizadorAgendaActiva;
   const [step, setStep] = useState<1 | 2>(1);
   const [cotizacion, setCotizacion] = useState<CotizacionPreciosConfig | null>(null);
   const [capacidadMaximaHora, setCapacidadMaximaHora] = useState(50);
@@ -79,6 +82,11 @@ export function CotizadorReservaModal({ isOpen, onClose, volumenInicialM3 = null
   const [reservando, setReservando] = useState(false);
   const [errorReserva, setErrorReserva] = useState<string | null>(null);
   const [mensajePagoAbierto, setMensajePagoAbierto] = useState(false);
+  const [errorLeadSheets, setErrorLeadSheets] = useState<string | null>(null);
+  const [enviandoLeadSheets, setEnviandoLeadSheets] = useState(false);
+  /** Tras guardar bien en «Cotizaciones», no repetir fila si usa WA y luego teléfono. */
+  const leadSheetsGuardadoOkRef = useRef(false);
+  const guardandoLeadSheetsRef = useRef(false);
   const datosWaPendientes = useRef<{
     total: number;
     resistencia: string;
@@ -90,6 +98,8 @@ export function CotizadorReservaModal({ isOpen, onClose, volumenInicialM3 = null
     if (!isOpen) return;
     setMensajePagoAbierto(false);
     datosWaPendientes.current = null;
+    leadSheetsGuardadoOkRef.current = false;
+    setErrorLeadSheets(null);
     setStep(1);
     setLoadErr(null);
     setLoadingSheet(true);
@@ -132,7 +142,7 @@ export function CotizadorReservaModal({ isOpen, onClose, volumenInicialM3 = null
     setVolumen(String(t));
   }, [isOpen, volumenInicialM3]);
 
-  const volumenNumerico = useMemo(() => parseFloat(volumen.replace(",", ".")) || 0, [volumen]);
+  const volumenNumerico = useMemo(() => volumenM3DesdeCampoTexto(volumen), [volumen]);
   const diasRapidosElegidos = resistenciaRapidaDesdeSeleccion(resistenciaRapidaDias);
 
   useEffect(() => {
@@ -176,6 +186,70 @@ export function CotizadorReservaModal({ isOpen, onClose, volumenInicialM3 = null
     !distanciaObra.bloqueado &&
     !cotizacionResultado.bloqueado;
 
+  /** Guarda lead en «Cotizaciones» solo bajo demanda (WA u oficina). */
+  async function enviarLeadCotizacionASheets(): Promise<boolean> {
+    if (agendaActiva || !puedeAvanzar) return false;
+    if (leadSheetsGuardadoOkRef.current) return true;
+    if (guardandoLeadSheetsRef.current) return false;
+
+    const vol = volumenNumerico;
+    const rutaMaps = distanciaObra
+      ? `${distanciaObra.distanceText}${distanciaObra.durationText ? `, ${distanciaObra.durationText}` : ""} · ${distanciaObra.zonaLabel}`
+      : "";
+    const desgloseCotizacion = [
+      ...cotizacionResultado.lineas.map((linea) => `${linea.concepto} $${linea.importe.toFixed(2)}`),
+      tipoVaciado === "bombeo" ? "Bombeo a cotizar con asesor" : null,
+    ]
+      .filter(Boolean)
+      .join(" | ");
+    const aditivosLabel = aditivosSeleccionados
+      .map((aditivo) => (aditivo === "fibra" ? "Fibra de polipropileno" : "Impermeabilizante integral"))
+      .join(", ");
+
+    guardandoLeadSheetsRef.current = true;
+    setEnviandoLeadSheets(true);
+    setErrorLeadSheets(null);
+    try {
+      await fetchApiJson<{ ok?: boolean }>(apiUrl("/api/cotizacion-lead"), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          volumen: vol,
+          vaciado: vaciadoApiDesdeSeleccion(tipoVaciado, tipoBomba),
+          resistenciaKg,
+          cotizacionTotal: cotizacionResultado.total,
+          ubicacionObra: destinoObra.trim(),
+          rutaMaps,
+          zona: distanciaObra?.zonaLabel ?? "",
+          distancia: distanciaObra?.distanceText ?? "",
+          duracion: distanciaObra?.durationText ?? "",
+          tipoBomba:
+            tipoVaciado === "bombeo"
+              ? tipoBomba === "pluma"
+                ? "Bomba Pluma"
+                : "Bomba Estacionaria"
+              : "",
+          aditivos: aditivosLabel,
+          resistenciaRapida: diasRapidosElegidos ? `${diasRapidosElegidos} días` : "",
+          precioM3: cotizacionResultado.precioM3,
+          desglose: desgloseCotizacion,
+        }),
+      });
+      leadSheetsGuardadoOkRef.current = true;
+      return true;
+    } catch (e) {
+      setErrorLeadSheets(
+        e instanceof Error
+          ? e.message
+          : "No se guardó la cotización en el sistema. Revisa tu conexión o inténtalo de nuevo.",
+      );
+      return false;
+    } finally {
+      guardandoLeadSheetsRef.current = false;
+      setEnviandoLeadSheets(false);
+    }
+  }
+
   function resetReservaForm() {
     setNombre("");
     setTelefono("");
@@ -195,6 +269,11 @@ export function CotizadorReservaModal({ isOpen, onClose, volumenInicialM3 = null
     setTipoVaciado("tiro_directo");
     setTipoBomba("estacionaria");
     setStep(1);
+    setMensajePagoAbierto(false);
+    setErrorReserva(null);
+    setErrorLeadSheets(null);
+    datosWaPendientes.current = null;
+    leadSheetsGuardadoOkRef.current = false;
   }
 
   async function calcularDistanciaObra() {
@@ -219,19 +298,13 @@ export function CotizadorReservaModal({ isOpen, onClose, volumenInicialM3 = null
   }
 
   function cerrarModal() {
-    if (mensajePagoAbierto) {
-      datosWaPendientes.current = null;
-      setMensajePagoAbierto(false);
-      resetReservaForm();
-    }
+    resetReservaForm();
     onClose();
   }
 
   function confirmarMensajePagoYWhatsApp() {
     const d = datosWaPendientes.current;
     if (d) abrirWhatsAppReserva(d);
-    datosWaPendientes.current = null;
-    setMensajePagoAbierto(false);
     resetReservaForm();
     onClose();
   }
@@ -272,9 +345,54 @@ export function CotizadorReservaModal({ isOpen, onClose, volumenInicialM3 = null
     window.open(`https://wa.me/${CONFIG.whatsappNumber}?text=${text}`, "_blank");
   };
 
+  async function abrirWhatsAppCotizacionInformativa() {
+    const ok = await enviarLeadCotizacionASheets();
+    if (!ok) return;
+
+    const vol = volumenNumerico;
+    const total = cotizacionResultado.total;
+    const rutaMaps = distanciaObra
+      ? `${distanciaObra.distanceText}${distanciaObra.durationText ? `, ${distanciaObra.durationText}` : ""} · ${distanciaObra.zonaLabel}`
+      : null;
+    const desglose = [
+      ...cotizacionResultado.lineas.map((linea) => `${linea.concepto}: $${linea.importe.toFixed(2)}`),
+      tipoVaciado === "bombeo" ? "Bombeo: a cotizar con asesor" : null,
+    ]
+      .filter(Boolean)
+      .join(" | ");
+    const aditivosLabel = aditivosSeleccionados
+      .map((aditivo) => (aditivo === "fibra" ? "Fibra de polipropileno" : "Impermeabilizante integral"))
+      .join(", ");
+    const lineas = [
+      `*Cotización Concretos Tepexi*`,
+      destinoObra.trim() ? `Ubicación obra: ${destinoObra.trim()}` : null,
+      rutaMaps ? `Ruta: ${rutaMaps}` : null,
+      `Volumen: ${vol} m³`,
+      `Resistencia: ${labelResistenciaKg(resistenciaKg)}`,
+      `Vaciado: ${labelVaciadoCliente(tipoVaciado, tipoBomba)}`,
+      aditivosLabel ? `Aditivos: ${aditivosLabel}` : null,
+      diasRapidosElegidos ? `Resistencia rápida: ${diasRapidosElegidos} días` : null,
+      desglose ? `Desglose: ${desglose}` : null,
+      `Total estimado: $${total.toLocaleString("es-MX", { minimumFractionDigits: 2 })}${tipoVaciado === "bombeo" ? " (solo concreto; bombeo a cotizar)" : ""}`,
+      `Quiero formalizar mi pedido, agendar colado o recibir atención personalizada.`,
+    ].filter(Boolean) as string[];
+    window.open(`https://wa.me/${CONFIG.whatsappNumber}?text=${encodeURIComponent(lineas.join("\n"))}`, "_blank");
+    resetReservaForm();
+    onClose();
+  }
+
+  async function onLlamarOficina(e: MouseEvent<HTMLAnchorElement>) {
+    e.preventDefault();
+    const ok = await enviarLeadCotizacionASheets();
+    if (!ok) return;
+    resetReservaForm();
+    onClose();
+    window.location.href = `tel:${CONFIG.landlinePhoneE164}`;
+  }
+
   const handleReservar = async () => {
     setErrorReserva(null);
-    const vol = parseFloat(volumen.replace(",", ".")) || 0;
+    const vol = volumenM3DesdeCampoTexto(volumen);
     if (!nombre.trim() || !telefono.trim() || vol <= 0) {
       setErrorReserva("Completa nombre, teléfono y volumen válido.");
       return;
@@ -406,10 +524,10 @@ export function CotizadorReservaModal({ isOpen, onClose, volumenInicialM3 = null
             <div className="mb-4 flex items-start justify-between gap-3">
               <div>
                 <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-[#c62828]">
-                  Paso {step} de 2
+                  {agendaActiva ? `Paso ${step} de 2` : "Cotización en línea"}
                 </p>
                 <h3 className="font-display text-xl font-bold tracking-wide text-[var(--tepexi-logo-navy)] sm:text-2xl">
-                  {step === 1 ? "Cotizar" : "Agenda y reserva"}
+                  {agendaActiva ? (step === 1 ? "Cotizar" : "Agenda y reserva") : "Cotizar"}
                 </h3>
               </div>
               <button
@@ -452,21 +570,54 @@ export function CotizadorReservaModal({ isOpen, onClose, volumenInicialM3 = null
                   setResistenciaRapidaDias={setResistenciaRapidaDias}
                   cotizacionResultado={cotizacionResultado}
                 />
-                <div className="mt-6 flex justify-end">
-                  <button
-                    type="button"
-                    disabled={!puedeAvanzar}
-                    onClick={() => setStep(2)}
-                    className="inline-flex items-center gap-2 px-5 py-3 rounded-lg bg-[#c62828] hover:bg-[#e53935] disabled:opacity-45 text-white font-semibold uppercase text-sm"
-                  >
-                    Siguiente: fecha y hora
-                    <ChevronRight size={20} />
-                  </button>
-                </div>
+                {!agendaActiva && puedeAvanzar && (
+                  <div className="mt-6 rounded-2xl border border-emerald-200/90 bg-gradient-to-br from-emerald-50 via-white to-sky-50/40 px-4 py-5 shadow-sm sm:px-5">
+                    <p className="text-center text-sm font-semibold leading-relaxed text-[var(--tepexi-logo-navy)] sm:text-[0.95rem]">
+                      ¡Cotización lista! Para formalizar tu pedido, agendar el colado o recibir atención personalizada,
+                      contáctanos directamente:
+                    </p>
+                    {errorLeadSheets && (
+                      <p className="mt-3 rounded-lg border border-amber-200 bg-amber-50/90 px-3 py-2 text-center text-xs text-amber-900">
+                        {errorLeadSheets}
+                      </p>
+                    )}
+                    <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:justify-center sm:gap-4">
+                      <button
+                        type="button"
+                        disabled={enviandoLeadSheets}
+                        onClick={() => void abrirWhatsAppCotizacionInformativa()}
+                        className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-[#25D366] px-4 py-3.5 text-sm font-bold uppercase tracking-wide text-white shadow-md transition hover:bg-[#20bd5a] enabled:cursor-pointer disabled:opacity-45 sm:flex-initial sm:min-w-[180px]"
+                      >
+                        {enviandoLeadSheets ? "Guardando…" : "WhatsApp"}
+                      </button>
+                      <a
+                        href={`tel:${CONFIG.landlinePhoneE164}`}
+                        onClick={(e) => void onLlamarOficina(e)}
+                        className={`inline-flex flex-1 items-center justify-center gap-2 rounded-xl border-2 border-[var(--tepexi-logo-navy)] bg-white px-4 py-3.5 text-sm font-bold uppercase tracking-wide text-[var(--tepexi-logo-navy)] shadow-sm transition hover:bg-slate-50 sm:flex-initial sm:min-w-[200px] ${enviandoLeadSheets ? "pointer-events-none opacity-45" : ""}`}
+                      >
+                        <Phone className="h-5 w-5 shrink-0" aria-hidden />
+                        Llamar a oficina
+                      </a>
+                    </div>
+                  </div>
+                )}
+                {agendaActiva && (
+                  <div className="mt-6 flex justify-end">
+                    <button
+                      type="button"
+                      disabled={!puedeAvanzar}
+                      onClick={() => setStep(2)}
+                      className="inline-flex items-center gap-2 rounded-lg bg-[#c62828] px-5 py-3 text-sm font-semibold uppercase text-white hover:bg-[#e53935] disabled:opacity-45"
+                    >
+                      Siguiente: fecha y hora
+                      <ChevronRight size={20} />
+                    </button>
+                  </div>
+                )}
               </>
             )}
 
-            {step === 2 && (
+            {agendaActiva && step === 2 && (
               <>
                 <button
                   type="button"

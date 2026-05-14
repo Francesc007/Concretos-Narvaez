@@ -3,12 +3,12 @@ import { Info } from "lucide-react";
 import type { CotizacionPreciosConfig } from "@/types/sheets";
 import {
   MENSAJE_COTIZACION_ASESOR,
-  MENSAJE_INFORMATIVO_BOMBEO_PENDIENTE,
   volumenMaximoCotizadorM3,
   labelResistenciaKg,
   labelZona,
   resistenciasCotizacion,
   resistenciaRapidaDesdeSeleccion,
+  volumenM3DesdeCampoTexto,
   VOLUMEN_MINIMO_OLLA_M3,
   type ResistenciaKg,
   type CotizacionDinamicaResultado,
@@ -188,7 +188,7 @@ export function Cotizador({
   const [destinoSuggestions, setDestinoSuggestions] = useState<PlaceAutocompleteSuggestion[]>([]);
   const [mostrarDestinoSuggestions, setMostrarDestinoSuggestions] = useState(false);
   const [mrLeyendaAbierta, setMrLeyendaAbierta] = useState(false);
-  const vol = parseFloat(volumen.replace(",", ".")) || 0;
+  const vol = volumenM3DesdeCampoTexto(volumen);
   const avisoCargoVacio = vol > 0 && vol < VOLUMEN_MINIMO_OLLA_M3;
   const volMaxUi = volumenMaximoCotizadorM3(cotizacion);
   const leyendaVolumenExcedido = !!cotizacion && vol > volMaxUi;
@@ -467,15 +467,6 @@ export function Cotizador({
         </p>
       </div>
 
-      {tipoVaciado === "bombeo" && (
-        <div className="rounded-lg border border-sky-200 bg-sky-50/95 px-3 py-3 text-sm text-slate-800 shadow-sm">
-          <div className="flex gap-2.5">
-            <Info className="mt-0.5 h-4 w-4 shrink-0 text-[#0c4a6e]" aria-hidden />
-            <p className="min-w-0 leading-relaxed">{MENSAJE_INFORMATIVO_BOMBEO_PENDIENTE}</p>
-          </div>
-        </div>
-      )}
-
       <div>
         <label className="mb-2 block text-sm font-medium text-[var(--tepexi-text-body)]">Volumen (m³)</label>
         {cotizacion && (
@@ -548,9 +539,6 @@ export function Cotizador({
           <option value={7}>Resistencia rápida a 7 días</option>
           <option value={3}>Resistencia rápida a 3 días</option>
         </select>
-        {resistenciaKg < 200 && resistenciaRapidaDesdeSeleccion(resistenciaRapidaDias) != null && (
-          <p className="text-xs text-red-700">Las resistencias rápidas solo aplican con f&apos;c ≥ 200 kg/cm².</p>
-        )}
       </div>
 
       <div className="space-y-2 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">

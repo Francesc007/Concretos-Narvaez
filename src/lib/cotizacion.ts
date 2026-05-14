@@ -31,13 +31,13 @@ export const PLANTA_TEPEXI = {
 } as const;
 
 export const ZONAS_COTIZACION: Record<ZonaCotizacion, { minKm: number; maxKm: number; label: string }> = {
-  Z1: { minKm: 0, maxKm: 20, label: "Zona 1 (0 a 20 km)" },
-  Z2: { minKm: 20, maxKm: 30, label: "Zona 2 (21 a 30 km)" },
-  Z3: { minKm: 30, maxKm: 40, label: "Zona 3 (31 a 40 km)" },
-  Z4: { minKm: 40, maxKm: 50, label: "Zona 4 (41 a 50 km)" },
+  Z1: { minKm: 1, maxKm: 10, label: "Zona 1 (1 a 10 km)" },
+  Z2: { minKm: 11, maxKm: 20, label: "Zona 2 (11 a 20 km)" },
+  Z3: { minKm: 21, maxKm: 30, label: "Zona 3 (21 a 30 km)" },
+  Z4: { minKm: 31, maxKm: 40, label: "Zona 4 (31 a 40 km)" },
 };
 
-export const DISTANCIA_MAXIMA_COTIZACION_KM = 50;
+export const DISTANCIA_MAXIMA_COTIZACION_KM = 40;
 export const VOLUMEN_MINIMO_OLLA_M3 = 5;
 /** Cargo por m³ faltante hasta el mínimo de olla (LDP julio 2025 / nota en PDF). Fallback si la hoja no define el valor. */
 export const CARGO_VACIO_REFERENCIA_MXN = 600;
@@ -54,6 +54,16 @@ export const MENSAJE_INFORMATIVO_BOMBEO_PENDIENTE =
 export function volumenMaximoCotizadorM3(config: CotizacionPreciosConfig | null): number {
   const n = config?.volumenMaximoCotizadorM3;
   return typeof n === "number" && Number.isFinite(n) && n > 0 ? n : VOLUMEN_MAXIMO_COTIZADOR_M3;
+}
+
+/**
+ * m³ desde el input del cotizador: quita espacios/NBSP para que no se trunque
+ * (`parseFloat("5 0")` daría 5). Acepta coma como decimal.
+ */
+export function volumenM3DesdeCampoTexto(raw: string): number {
+  const t = String(raw).trim().replace(/[\s\u00a0\u202f]+/g, "").replace(",", ".");
+  const n = parseFloat(t);
+  return Number.isFinite(n) && n >= 0 ? n : 0;
 }
 
 /** Unitario para textos de ayuda; en el total rige el valor configurado por zona en Sheets. */
@@ -236,10 +246,10 @@ export function servicioConcretoDesdeSeleccion(
 
 export function zonaDesdeDistanciaKm(distanciaKm: number): ZonaCotizacion | null {
   if (!Number.isFinite(distanciaKm) || distanciaKm < 0) return null;
-  if (distanciaKm <= 20) return "Z1";
-  if (distanciaKm <= 30) return "Z2";
-  if (distanciaKm <= 40) return "Z3";
-  if (distanciaKm <= 50) return "Z4";
+  if (distanciaKm <= 10) return "Z1";
+  if (distanciaKm <= 20) return "Z2";
+  if (distanciaKm <= 30) return "Z3";
+  if (distanciaKm <= 40) return "Z4";
   return null;
 }
 
@@ -308,8 +318,6 @@ export function calcularCotizacionDinamica(
     );
   }
 
-  const resistenciaRapidaInvalida = diasRapidos != null && input.resistenciaKg < 200;
-
   /** Con bombeo, el subtotal mostrado usa precio de tiro directo (sin rubros automáticos de bombeo). */
   const servicioParaPrecioM3: ServicioConcreto = esBombeo
     ? "tiro_directo"
@@ -357,7 +365,7 @@ export function calcularCotizacionDinamica(
     });
   }
 
-  if (diasRapidos != null && !resistenciaRapidaInvalida) {
+  if (diasRapidos != null) {
     const unitario = importeRapida(config, diasRapidos);
     if (unitario <= 0) {
       motivosBloqueo.push(`Falta configurar el precio de resistencia rápida a ${diasRapidos} días.`);
@@ -376,7 +384,7 @@ export function calcularCotizacionDinamica(
     precioM3,
     subtotalConcreto,
     lineas,
-    bloqueado: motivosBloqueo.length > 0 || resistenciaRapidaInvalida,
+    bloqueado: motivosBloqueo.length > 0,
     motivosBloqueo,
     totalExcluyeBombeo: esBombeo,
   };

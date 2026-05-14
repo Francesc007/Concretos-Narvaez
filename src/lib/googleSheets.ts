@@ -1532,6 +1532,89 @@ export async function appendReservaAgenda(payload: ReservaPayload): Promise<void
   await writeAgendaRow(sheet, row);
 }
 
+/** Encabezados fila 1 de la pestaña «Cotizaciones» (leads del cotizador en modo informativo / sin agenda). */
+export const COTIZACIONES_WEB_HEADERS = [
+  "Timestamp",
+  "Volumen_m3",
+  "Resistencia_kg_cm2",
+  "Vaciado",
+  "Tipo_bomba",
+  "Zona",
+  "Ubicacion_obra",
+  "Ruta_Maps",
+  "Distancia",
+  "Duracion",
+  "Aditivos",
+  "Resistencia_rapida",
+  "Precio_m3",
+  "Total_MXN",
+  "Desglose",
+] as const;
+
+export interface CotizacionWebLeadPayload {
+  Timestamp: string;
+  Volumen_m3: number;
+  Resistencia_kg_cm2: number;
+  Vaciado: string;
+  Tipo_bomba: string;
+  Zona: string;
+  Ubicacion_obra: string;
+  Ruta_Maps: string;
+  Distancia: string;
+  Duracion: string;
+  Aditivos: string;
+  Resistencia_rapida: string;
+  Precio_m3: number;
+  Total_MXN: number;
+  Desglose: string;
+}
+
+/**
+ * Garantiza fila 1 con encabezados en «Cotizaciones».
+ * Si la hoja es nueva o la fila 1 está vacía, la librería lanzaba «No values in the header row…».
+ */
+async function ensureCotizacionesWebHeaders(sheet: GoogleSpreadsheetWorksheet): Promise<void> {
+  try {
+    await sheet.loadHeaderRow();
+  } catch {
+    /* Primera fila vacía: loadHeaderRow puede fallar según versión de google-spreadsheet. */
+  }
+  const vals = sheet.headerValues;
+  const headersEmpty =
+    !vals?.length || vals.every((h) => !String(h ?? "").trim());
+  if (headersEmpty) {
+    await sheet.setHeaderRow([...COTIZACIONES_WEB_HEADERS]);
+    await sheet.loadHeaderRow();
+  }
+  const missing = COTIZACIONES_WEB_HEADERS.filter((header) => !sheet.headerValues.includes(header));
+  if (missing.length > 0) {
+    throw new Error(
+      `La hoja "Cotizaciones" tiene columnas distintas a las esperadas. Faltan: ${missing.join(
+        ", ",
+      )}. La fila 1 debe incluir: ${COTIZACIONES_WEB_HEADERS.join(", ")}`,
+    );
+  }
+}
+
+/** Inserta un lead técnico al final de «Cotizaciones» (sin tocar Agenda ni bloqueos). */
+export async function appendCotizacionWebLead(payload: CotizacionWebLeadPayload): Promise<void> {
+  const doc = await getSpreadsheetDoc();
+  const sheet = doc.sheetsByTitle["Cotizaciones"];
+  if (!sheet) {
+    throw new Error(
+      'No existe la hoja "Cotizaciones". Crea una pestaña con ese nombre en el mismo Google Sheet del proyecto.',
+    );
+  }
+  await ensureCotizacionesWebHeaders(sheet);
+
+  const row: Record<string, string | number> = {};
+  for (const key of COTIZACIONES_WEB_HEADERS) {
+    row[key] = payload[key as keyof CotizacionWebLeadPayload];
+  }
+
+  await sheet.addRow(row, { insert: true });
+}
+
 async function writeAgendaRow(sheet: GoogleSpreadsheetWorksheet, row: Record<string, string | number>): Promise<void> {
   const targetRow = await findFirstEmptyAgendaRow(sheet);
   if (targetRow == null) {

@@ -1,9 +1,11 @@
 "use client";
 
+import Image from "next/image";
 import { motion } from "framer-motion";
 import { useInView } from "framer-motion";
 import { useRef } from "react";
 import { Truck, HardHat, Gauge, Cylinder } from "lucide-react";
+import { blurDataUrlForPublicImage } from "@/lib/image-blur-placeholders";
 
 const servicios = [
   {
@@ -58,11 +60,18 @@ function ServicioCard({
       className="group relative h-full min-h-[320px] overflow-hidden rounded-xl border-2 border-[#c62828]/120 bg-white shadow-lg transition-[border-color,box-shadow,ring] duration-300 hover:border-[#c62828]/120 hover:shadow-md hover:ring-2 hover:ring-[#c62828]/15 cursor-default sm:min-h-[380px] md:min-h-[440px] lg:min-h-[480px]"
     >
       <div className="absolute inset-0 overflow-hidden rounded-xl">
-        <img
-          src={item.imagen}
-          alt={item.titulo}
-          className="h-full w-full object-cover object-center transition-transform duration-500 ease-out max-md:group-hover:scale-[1.03] group-hover:scale-[1.04]"
-        />
+        <div className="relative h-full w-full">
+          <Image
+            src={item.imagen}
+            alt={item.titulo}
+            fill
+            sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 640px"
+            quality={75}
+            placeholder="blur"
+            blurDataURL={blurDataUrlForPublicImage(item.imagen)}
+            className="object-cover object-center transition-transform duration-500 ease-out max-md:group-hover:scale-[1.03] group-hover:scale-[1.04]"
+          />
+        </div>
         <div
           className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_top,rgba(19,47,76,0.96)_0%,rgba(19,47,76,0.5)_20%,rgba(19,47,76,0.12)_50%,transparent_100%)]"
           aria-hidden

@@ -31,4 +31,9 @@ export const CONFIG = {
   companyAddressShort: "Tepeji del Río, Estado de Hidalgo, México",
   /** Razón social o denominación utilizada en el sitio público */
   companyLegalName: "CONCRETOS TEPEXI",
+  /**
+   * `true`: flujo completo con agenda, capacidad y escritura en «Agenda» + «Bloqueos_Logistica».
+   * `false` (stand by): solo cotización informativa + contacto; los leads van a la hoja «Cotizaciones».
+   */
+  cotizadorAgendaActiva: false,
 };

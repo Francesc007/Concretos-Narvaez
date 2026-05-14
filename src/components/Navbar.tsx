@@ -139,6 +139,7 @@ export function Navbar({ onCotizadorClick, onAgendaVisitaClick }: NavbarProps) {
                 width={188}
                 height={188}
                 priority
+                quality={75}
                 placeholder="blur"
                 blurDataURL={LOGO_BLUR_DATA_URL}
                 sizes="(max-width: 768px) 4rem, 4.7rem"

@@ -25,10 +25,10 @@ export function WhatsAppButton() {
       transition={{ delay: 1, type: "spring", stiffness: 200 }}
       whileHover={{ scale: 1.1 }}
       whileTap={{ scale: 0.95 }}
-      className="fixed z-[90] flex h-14 w-14 items-center justify-center rounded-full bg-[#25D366] shadow-2xl animate-whatsapp-pulse [bottom:max(1.25rem,env(safe-area-inset-bottom,0px))] [right:max(1.25rem,env(safe-area-inset-right,0px))] hover:shadow-[#25D366]/50 md:bottom-6 md:right-6 md:h-28 md:w-28"
+      className="fixed z-[90] flex h-14 w-14 items-center justify-center rounded-full bg-[#25D366] shadow-2xl animate-whatsapp-pulse [bottom:max(1.25rem,env(safe-area-inset-bottom,0px))] [right:max(1.25rem,env(safe-area-inset-right,0px))] hover:shadow-[#25D366]/50 md:bottom-6 md:right-6 md:h-20 md:w-20"
       aria-label="Contactar por WhatsApp"
     >
-      <WhatsAppIcon className="h-8 w-8 text-white md:h-14 md:w-14" />
+      <WhatsAppIcon className="h-8 w-8 text-white md:h-12 md:w-12" />
     </motion.a>
   );
 }

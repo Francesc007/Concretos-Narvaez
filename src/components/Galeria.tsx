@@ -3,6 +3,7 @@
 import { memo, useEffect, useState } from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
+import { blurDataUrlForPublicImage } from "@/lib/image-blur-placeholders";
 
 /** Tres vistas por proyecto; rutas bajo /public (p. ej. 1→1,1.2,1.3 / 2→2,2.1,2.3 / 3→3,3.1,3.2 …). */
 const PROYECTO_IMAGENES = [
@@ -108,11 +109,9 @@ type Proyecto = (typeof items)[number];
 
 const ProyectoCardContent = memo(function ProyectoCardContent({
   item,
-  index,
   activeSlide,
 }: {
   item: Proyecto;
-  index: number;
   activeSlide: number;
 }) {
   return (
@@ -126,12 +125,13 @@ const ProyectoCardContent = memo(function ProyectoCardContent({
               alt={item.titulo}
               fill
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-              placeholder="empty"
+              quality={75}
+              placeholder="blur"
+              blurDataURL={blurDataUrlForPublicImage(src)}
+              loading="lazy"
               className={`object-cover object-center transition-opacity ease-in-out duration-[900ms] ${
                 slideIdx === activeSlide ? "opacity-100 z-[1]" : "opacity-0 z-0"
               }`}
-              loading={index < 3 ? "eager" : "lazy"}
-              priority={index < 2 && slideIdx === 0}
             />
           ))}
         </div>
@@ -197,7 +197,7 @@ export function Galeria() {
               whileTap={{ scale: 0.985 }}
               className="group rounded-2xl overflow-hidden border-2 border-[#c62828]/120 bg-white shadow-lg transition-[border-color,box-shadow,ring] duration-300 hover:border-[#c62828]/120 hover:shadow-md hover:ring-2 hover:ring-[#c62828]/15 transform-gpu"
             >
-              <ProyectoCardContent item={item} index={i} activeSlide={activeSlide} />
+              <ProyectoCardContent item={item} activeSlide={activeSlide} />
             </motion.article>
           ))}
         </motion.div>
