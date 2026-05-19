@@ -323,7 +323,7 @@ export function CotizadorReservaModal({ isOpen, onClose, volumenInicialM3 = null
       .map((aditivo) => (aditivo === "fibra" ? "Fibra de polipropileno" : "Impermeabilizante integral"))
       .join(", ");
     const lineas = [
-      `*Reserva Concretos Tepexi*`,
+      `*Reserva Concretos Narváez*`,
       `Nombre: ${nombre.trim()}`,
       `Teléfono: ${telefono.trim()}`,
       empresa.trim() ? `Empresa: ${empresa.trim()}` : null,
@@ -364,7 +364,7 @@ export function CotizadorReservaModal({ isOpen, onClose, volumenInicialM3 = null
       .map((aditivo) => (aditivo === "fibra" ? "Fibra de polipropileno" : "Impermeabilizante integral"))
       .join(", ");
     const lineas = [
-      `*Cotización Concretos Tepexi*`,
+      `*Cotización Concretos Narváez*`,
       destinoObra.trim() ? `Ubicación obra: ${destinoObra.trim()}` : null,
       rutaMaps ? `Ruta: ${rutaMaps}` : null,
       `Volumen: ${vol} m³`,
@@ -514,7 +514,7 @@ export function CotizadorReservaModal({ isOpen, onClose, volumenInicialM3 = null
                 <button
                   type="button"
                   onClick={confirmarMensajePagoYWhatsApp}
-                  className="w-full min-w-[200px] rounded-lg bg-[#c62828] px-6 py-3.5 font-display text-sm font-bold uppercase tracking-wide text-white transition-colors hover:bg-[#e53935] sm:w-auto"
+                  className="w-full min-w-[200px] rounded-lg bg-tepexi-accent px-6 py-3.5 font-display text-sm font-bold uppercase tracking-wide text-white transition-colors hover:bg-tepexi-accent-hover sm:w-auto"
                 >
                   Entendido, continuar a WhatsApp
                 </button>
@@ -523,7 +523,7 @@ export function CotizadorReservaModal({ isOpen, onClose, volumenInicialM3 = null
               <>
             <div className="mb-4 flex items-start justify-between gap-3">
               <div>
-                <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-[#c62828]">
+                <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-tepexi-accent">
                   {agendaActiva ? `Paso ${step} de 2` : "Cotización en línea"}
                 </p>
                 <h3 className="font-display text-xl font-bold tracking-wide text-[var(--tepexi-logo-navy)] sm:text-2xl">
@@ -607,7 +607,7 @@ export function CotizadorReservaModal({ isOpen, onClose, volumenInicialM3 = null
                       type="button"
                       disabled={!puedeAvanzar}
                       onClick={() => setStep(2)}
-                      className="inline-flex items-center gap-2 rounded-lg bg-[#c62828] px-5 py-3 text-sm font-semibold uppercase text-white hover:bg-[#e53935] disabled:opacity-45"
+                      className="inline-flex items-center gap-2 rounded-lg bg-tepexi-accent px-5 py-3 text-sm font-semibold uppercase text-white hover:bg-tepexi-accent-hover disabled:opacity-45"
                     >
                       Siguiente: fecha y hora
                       <ChevronRight size={20} />
@@ -622,7 +622,7 @@ export function CotizadorReservaModal({ isOpen, onClose, volumenInicialM3 = null
                 <button
                   type="button"
                   onClick={() => setStep(1)}
-                  className="mb-4 inline-flex items-center gap-1 text-sm font-medium text-[var(--tepexi-logo-navy)] transition-colors hover:text-[#c62828]"
+                  className="mb-4 inline-flex items-center gap-1 text-sm font-medium text-[var(--tepexi-logo-navy)] transition-colors hover:text-tepexi-accent"
                 >
                   <ChevronLeft size={18} />
                   Volver a cotización

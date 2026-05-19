@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { DM_Sans, Oswald } from "next/font/google";
-import { heroVideoSrc } from "@/config";
+import { heroImageSrc } from "@/config";
 import "./globals.css";
 
 const dmSans = DM_Sans({
@@ -16,22 +16,26 @@ const oswald = Oswald({
 });
 
 export const metadata: Metadata = {
-  title: "Concretos Tepexi | Concreto premezclado en Tepeji del Río",
+  title: "Concretos Narváez Jilotepec | Premezclado, bombeo y suministro en Edoméx",
   description:
-    "Concreto premezclado de calidad en Tepeji del Río, Hidalgo. Servicio de bombeo, asesoría técnica y entrega puntual. Solicita tu cotización por WhatsApp.",
+    "Fabricación y despacho de concreto hidráulico premezclado desde Jilotepec (Estado de México): recetas bajo normas NMX-C, bombeo y rutas para obra en Atlacomulco y zona norte del Estado de México. Cotiza por WhatsApp.",
   keywords: [
-    "concreto premezclado Tepeji",
-    "concretos Tepexi",
-    "concreto Hidalgo",
-    "bombeo de concreto",
-    "cotización concreto",
+    "concreto premezclado Jilotepec",
+    "premezclado Edoméx",
+    "Concretos Narváez",
+    "bombeo de concreto Estado de México",
+    "mezclas certificadas NMX-C",
+    "suministro de concreto Atlacomulco",
+    "cotización concreto Jilotepec",
+    "colado industrial Estado de México",
   ],
   robots: "index, follow",
   openGraph: {
-    title: "Concretos Tepexi | Concreto premezclado",
+    title: "Concretos Narváez — Premezclado en Jilotepec y cobertura regional",
     description:
-      "Solidez y confianza para tu obra. Concreto premezclado con respaldo técnico en la región.",
+      "Mezclas diseñadas para tu proyecto: resistencias comerciales e industriales, logística propia y asesoría en obra en la región centro-norte del Estado de México.",
     type: "website",
+    locale: "es_MX",
   },
 };
 
@@ -43,7 +47,7 @@ export default function RootLayout({
   return (
     <html lang="es-MX" className={`${dmSans.variable} ${oswald.variable} h-full antialiased`}>
       <head>
-        <link rel="preload" href={heroVideoSrc()} as="video" type="video/mp4" />
+        <link rel="preload" href={heroImageSrc()} as="image" />
       </head>
       <body
         suppressHydrationWarning

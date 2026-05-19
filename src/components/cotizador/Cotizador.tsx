@@ -272,7 +272,7 @@ export function Cotizador({
       </h4>
       {loading && <p className="text-sm text-slate-600">Cargando precios desde la tabla…</p>}
       {error && (
-        <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800">{error}</p>
+        <p className="rounded-lg border border-orange-200/90 bg-tepexi-accent-soft px-3 py-2 text-sm text-[var(--tepexi-logo-navy)]">{error}</p>
       )}
 
       <div>
@@ -291,7 +291,7 @@ export function Cotizador({
               onFocus={() => setMostrarDestinoSuggestions(true)}
               onBlur={() => window.setTimeout(() => setMostrarDestinoSuggestions(false), 120)}
               autoComplete="off"
-              className="w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-[var(--tepexi-logo-navy)] placeholder:text-slate-400 outline-none transition focus:border-[#c62828] focus:ring-2 focus:ring-[#c62828]/20"
+              className="w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-[var(--tepexi-logo-navy)] placeholder:text-slate-400 outline-none transition focus:border-tepexi-accent focus:ring-2 focus:ring-tepexi-accent/20"
               placeholder="Ej. colonia, municipio o dirección de la obra"
             />
             {mostrarDestinoSuggestions && destinoSuggestions.length > 0 && (
@@ -337,7 +337,7 @@ export function Cotizador({
           </div>
         )}
         {errorDistancia && (
-          <p className="mt-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800">
+          <p className="mt-2 rounded-lg border border-orange-200/90 bg-tepexi-accent-soft px-3 py-2 text-sm text-[var(--tepexi-logo-navy)]">
             {errorDistancia}
           </p>
         )}
@@ -353,7 +353,7 @@ export function Cotizador({
             value={resistenciaKg}
             onChange={(e) => setResistenciaKg(Number(e.target.value) as ResistenciaKg)}
             disabled={!cotizacion}
-            className="w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-[var(--tepexi-logo-navy)] outline-none transition focus:border-[#c62828] focus:ring-2 focus:ring-[#c62828]/20 disabled:opacity-50"
+            className="w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-[var(--tepexi-logo-navy)] outline-none transition focus:border-tepexi-accent focus:ring-2 focus:ring-tepexi-accent/20 disabled:opacity-50"
           >
             {resistenciasDisponibles.map((kg) => (
               <option key={kg} value={kg}>
@@ -369,7 +369,7 @@ export function Cotizador({
           >
             Resistencia f&apos;c
           </label>
-          <div className="overflow-hidden rounded-lg border border-slate-300 bg-white shadow-none transition-[box-shadow] focus-within:ring-2 focus-within:ring-[#c62828]/20 focus-within:ring-offset-0">
+          <div className="overflow-hidden rounded-lg border border-slate-300 bg-white shadow-none transition-[box-shadow] focus-within:ring-2 focus-within:ring-tepexi-accent/20 focus-within:ring-offset-0">
             <button
               type="button"
               id="cotiz-resistencia-mr"
@@ -387,7 +387,7 @@ export function Cotizador({
                 role="region"
                 aria-label="Información resistencia MR"
               >
-                <Info className="mt-0.5 h-4 w-4 shrink-0 text-[#c62828]" aria-hidden />
+                <Info className="mt-0.5 h-4 w-4 shrink-0 text-tepexi-accent" aria-hidden />
                 <div className="min-w-0 text-xs leading-relaxed text-amber-950/90">
                   <p>
                     <span className="font-semibold text-[var(--tepexi-logo-navy)]">
@@ -413,7 +413,7 @@ export function Cotizador({
             onClick={() => setTipoVaciado("tiro_directo")}
             className={`flex-1 py-3 rounded-lg border text-sm font-semibold uppercase tracking-wide transition-colors ${
               tipoVaciado === "tiro_directo"
-                ? "border-2 border-[#c62828] bg-[#fef2f2] text-[var(--tepexi-logo-navy)]"
+                ? "border-2 border-tepexi-accent bg-tepexi-accent-soft text-[var(--tepexi-logo-navy)]"
                 : "border border-slate-200 text-[var(--tepexi-logo-navy)] hover:bg-slate-50"
             }`}
           >
@@ -424,7 +424,7 @@ export function Cotizador({
             onClick={() => setTipoVaciado("bombeo")}
             className={`flex-1 py-3 rounded-lg border text-sm font-semibold uppercase tracking-wide transition-colors ${
               tipoVaciado === "bombeo"
-                ? "border-2 border-[#c62828] bg-[#fef2f2] text-[var(--tepexi-logo-navy)]"
+                ? "border-2 border-tepexi-accent bg-tepexi-accent-soft text-[var(--tepexi-logo-navy)]"
                 : "border border-slate-200 text-[var(--tepexi-logo-navy)] hover:bg-slate-50"
             }`}
           >
@@ -440,7 +440,7 @@ export function Cotizador({
                 onClick={() => setTipoBomba("estacionaria")}
                 className={`flex-1 py-2.5 rounded-lg border px-3 text-sm font-semibold transition-colors ${
                   tipoBomba === "estacionaria"
-                    ? "border-2 border-[#c62828] bg-[#fef2f2] text-[var(--tepexi-logo-navy)]"
+                    ? "border-2 border-tepexi-accent bg-tepexi-accent-soft text-[var(--tepexi-logo-navy)]"
                     : "border border-slate-200 text-[var(--tepexi-logo-navy)] hover:bg-slate-50"
                 }`}
               >
@@ -451,7 +451,7 @@ export function Cotizador({
                 onClick={() => setTipoBomba("pluma")}
                 className={`flex-1 py-2.5 rounded-lg border px-3 text-sm font-semibold transition-colors ${
                   tipoBomba === "pluma"
-                    ? "border-2 border-[#c62828] bg-[#fef2f2] text-[var(--tepexi-logo-navy)]"
+                    ? "border-2 border-tepexi-accent bg-tepexi-accent-soft text-[var(--tepexi-logo-navy)]"
                     : "border border-slate-200 text-[var(--tepexi-logo-navy)] hover:bg-slate-50"
                 }`}
               >
@@ -476,7 +476,7 @@ export function Cotizador({
           inputMode="decimal"
           value={volumen}
           onChange={(e) => setVolumen(e.target.value)}
-          className="w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-[var(--tepexi-logo-navy)] placeholder:text-slate-400 outline-none transition focus:border-[#c62828] focus:ring-2 focus:ring-[#c62828]/20"
+          className="w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-[var(--tepexi-logo-navy)] placeholder:text-slate-400 outline-none transition focus:border-tepexi-accent focus:ring-2 focus:ring-tepexi-accent/20"
           placeholder="Ej. 12"
         />
         {avisoCargoVacio && (
@@ -502,7 +502,7 @@ export function Cotizador({
             onClick={() => toggleAditivo("fibra")}
             className={`rounded-lg border px-3 py-2.5 text-left text-sm transition-colors ${
               aditivos.fibra
-                ? "border-2 border-[#c62828] bg-[#fef2f2] text-[var(--tepexi-logo-navy)]"
+                ? "border-2 border-tepexi-accent bg-tepexi-accent-soft text-[var(--tepexi-logo-navy)]"
                 : "border border-slate-200 text-[var(--tepexi-logo-navy)] hover:bg-slate-50"
             }`}
           >
@@ -513,7 +513,7 @@ export function Cotizador({
             onClick={() => toggleAditivo("impermeabilizante")}
             className={`rounded-lg border px-3 py-2.5 text-left text-sm transition-colors ${
               aditivos.impermeabilizante
-                ? "border-2 border-[#c62828] bg-[#fef2f2] text-[var(--tepexi-logo-navy)]"
+                ? "border-2 border-tepexi-accent bg-tepexi-accent-soft text-[var(--tepexi-logo-navy)]"
                 : "border border-slate-200 text-[var(--tepexi-logo-navy)] hover:bg-slate-50"
             }`}
           >
@@ -532,7 +532,7 @@ export function Cotizador({
             const n = Number(raw);
             if (n === 3 || n === 7 || n === 14) setResistenciaRapidaDias(n);
           }}
-          className="w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-[var(--tepexi-logo-navy)] outline-none transition focus:border-[#c62828] focus:ring-2 focus:ring-[#c62828]/20"
+          className="w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-[var(--tepexi-logo-navy)] outline-none transition focus:border-tepexi-accent focus:ring-2 focus:ring-tepexi-accent/20"
         >
           <option value="">Resistencia normal a 28 días</option>
           <option value={14}>Resistencia rápida a 14 días</option>
@@ -573,13 +573,13 @@ export function Cotizador({
         <div className="mt-2 border-t border-slate-200 pt-2">
           <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-slate-500">Total estimado</p>
           {totalExcluyeBombeo && Number.isFinite(totalEstimado) && totalEstimado > 0 ? (
-            <p className="font-display text-lg font-bold leading-snug text-[#c62828] sm:text-xl md:text-2xl">
+            <p className="font-display text-lg font-bold leading-snug text-tepexi-accent sm:text-xl md:text-2xl">
               {fmtTotal(totalEstimado)}{" "}
               <span className="font-semibold text-slate-700">(Solo concreto)</span>{" "}
-              <span className="font-bold text-[#c62828]">+ Bombeo a cotizar</span>
+              <span className="font-bold text-tepexi-accent">+ Bombeo a cotizar</span>
             </p>
           ) : (
-            <p className="font-display text-2xl font-bold text-[#c62828]">
+            <p className="font-display text-2xl font-bold text-tepexi-accent">
               {Number.isFinite(totalEstimado) && totalEstimado > 0 ? fmtTotal(totalEstimado) : "—"}
             </p>
           )}

@@ -190,7 +190,7 @@ export function DateFieldCalendar({
         onClick={() => setOpen((o) => !o)}
         aria-expanded={open ? "true" : "false"}
         aria-haspopup="dialog"
-        className="flex w-full items-center justify-between gap-2 rounded-lg border border-slate-300 bg-white px-4 py-3 text-left text-base outline-none transition focus:border-[#c62828] focus:ring-2 focus:ring-[#c62828]/20"
+        className="flex w-full items-center justify-between gap-2 rounded-lg border border-slate-300 bg-white px-4 py-3 text-left text-base outline-none transition focus:border-tepexi-accent focus:ring-2 focus:ring-tepexi-accent/20"
       >
         <span
           className={

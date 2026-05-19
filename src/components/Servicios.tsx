@@ -4,37 +4,37 @@ import Image from "next/image";
 import { motion } from "framer-motion";
 import { useInView } from "framer-motion";
 import { useRef } from "react";
-import { Truck, HardHat, Gauge, Cylinder } from "lucide-react";
+import { Truck, FlaskConical, Gauge, Cylinder } from "lucide-react";
 import { blurDataUrlForPublicImage } from "@/lib/image-blur-placeholders";
 
 const servicios = [
   {
-    titulo: "Concreto Premezclado",
+    titulo: "Concreto Hidráulico Premezclado Certificado",
     descripcion:
-      "Mezclas Certificadas de Alto Rendimiento. Producimos concreto bajo normas NMX con laboratorio propio para asegurar la resistencia exacta de tu proyecto.",
+      "Dosificación controlada en planta y registro de resistencias según normas NMX-C aplicables; orientamos la curva de elaboración para tu especificación de obra.",
     imagen: "/Planta 3.jpg",
     icon: Truck,
   },
   {
-    titulo: "Bombeo y Colado",
+    titulo: "Bombeo y Vaciado Programado",
     descripcion:
-      "Logística de Bombeo de Gran Alcance. Contamos con equipo de última generación para colados en altura y zonas de difícil acceso, optimizando tus tiempos de ejecución.",
+      "Equipos para altura y frentes angostos; enlazamos bomba con rutas internas para reducir esperas en sitio y mantener la calidad de la mezcla.",
     imagen: "/bombeo.jpg",
     icon: Cylinder,
   },
   {
-    titulo: "Entrega y Logística",
+    titulo: "Despacho con flota propia",
     descripcion:
-      "Flota Propia y Entrega Programada. Control total de nuestra logística para garantizar que el concreto llegue a tu obra en el momento exacto, sin retrasos que comprometan la mezcla.",
+      "Ventanas horarias coordinadas contigo y tu cuadrilla; salimos desde planta Jilotepec con trayectos pensados para obra en Edo. Méx. y municipios cercanos.",
     imagen: "/TX6.jpg",
     icon: Gauge,
   },
   {
-    titulo: "Asesoría en Obra",
+    titulo: "Pruebas de laboratorio",
     descripcion:
-      "Ingeniería Especializada en Sitio. Supervisamos tu colado, programamos volúmenes críticos y optimizamos el curado para evitar grietas y desperdicios.",
+      "Contamos con laboratorio propio para ensayos de resistencia, revenimiento y control de calidad de la mezcla; respaldamos tu obra con resultados documentados.",
     imagen: "/planta6.jpg",
-    icon: HardHat,
+    icon: FlaskConical,
   },
 ];
 
@@ -57,7 +57,7 @@ function ServicioCard({
       transition={{ type: "spring", stiffness: 300, damping: 26, delay: index * 0.08 }}
       whileHover={{ y: -4 }}
       whileTap={{ scale: 0.985 }}
-      className="group relative h-full min-h-[320px] overflow-hidden rounded-xl border-2 border-[#c62828]/120 bg-white shadow-lg transition-[border-color,box-shadow,ring] duration-300 hover:border-[#c62828]/120 hover:shadow-md hover:ring-2 hover:ring-[#c62828]/15 cursor-default sm:min-h-[380px] md:min-h-[440px] lg:min-h-[480px]"
+      className="group relative h-full min-h-[320px] overflow-hidden rounded-xl border-2 border-tepexi-accent/90 bg-white shadow-lg transition-[border-color,box-shadow,ring] duration-300 hover:border-tepexi-accent/90 hover:shadow-md hover:ring-2 hover:ring-tepexi-accent/15 cursor-default sm:min-h-[380px] md:min-h-[440px] lg:min-h-[480px]"
     >
       <div className="absolute inset-0 overflow-hidden rounded-xl">
         <div className="relative h-full w-full">
@@ -73,7 +73,7 @@ function ServicioCard({
           />
         </div>
         <div
-          className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_top,rgba(19,47,76,0.96)_0%,rgba(19,47,76,0.5)_20%,rgba(19,47,76,0.12)_50%,transparent_100%)]"
+          className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_top,rgba(61,61,61,0.96)_0%,rgba(61,61,61,0.52)_20%,rgba(61,61,61,0.14)_50%,transparent_100%)]"
           aria-hidden
         />
       </div>
@@ -108,11 +108,11 @@ export function Servicios() {
           className="text-center mb-16"
         >
           <h2 className="font-display text-4xl md:text-5xl font-bold text-[var(--tepexi-logo-navy)] mb-4 tracking-wide">
-            Servicios para tu proyecto
+            Capacidades para obra desde planta Jilotepec
           </h2>
           <p className="text-[var(--tepexi-text-muted)] max-w-2xl mx-auto leading-relaxed">
-            Cubrimos desde la mezcla hasta la puesta en obra, con el respaldo de un equipo enfocado
-            en resultados duraderos.
+            Fabricación premezclada, distribución en camión mixer y pruebas de laboratorio—todo integrado para que tu
+            vaciado siga la marcha prevista sin sacrificar especificación ni seguridad.
           </p>
         </motion.div>
 

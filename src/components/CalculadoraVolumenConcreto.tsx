@@ -20,7 +20,7 @@ import {
   type ElementoVolumenCalculadora,
 } from "@/lib/ntc2023SugerenciasVolumen";
 
-/** Mismo grosor que el resto de iconos (CEMEX / minimal). */
+/** Mismo grosor que el resto de iconos (minimal). */
 const ICON_STROKE = 1.5 as const;
 
 type Unidad = "m" | "cm" | "ft" | "in";
@@ -111,6 +111,65 @@ const dimsInicial: {
 function formatM3(n: number): string {
   if (!Number.isFinite(n) || n <= 0) return "—";
   return n.toLocaleString("es-MX", { maximumFractionDigits: 3, minimumFractionDigits: 0 });
+}
+
+/** Ejemplo y nota para espesor según unidad (evita confusión m vs cm). */
+function ayudaEspesorPorUnidad(u: Unidad): { placeholder: string; nota: string } {
+  switch (u) {
+    case "m":
+      return {
+        placeholder: "0.10",
+        nota: "En metros (m), escribe el espesor en decimales (ej. 0.10 = 10 cm).",
+      };
+    case "cm":
+      return {
+        placeholder: "10",
+        nota: "En centímetros (cm), escribe el espesor directo (ej. 10 = 10 cm).",
+      };
+    case "ft":
+      return {
+        placeholder: "0.33",
+        nota: "En pies (ft), escribe el espesor en decimales (ej. 0.33 ≈ 10 cm).",
+      };
+    case "in":
+      return {
+        placeholder: "4",
+        nota: "En pulgadas (in), escribe el espesor directo (ej. 4 ≈ 10 cm).",
+      };
+    default:
+      return { placeholder: "0.10", nota: "Usa decimales si la unidad es metros (m)." };
+  }
+}
+
+function CampoEspesor({
+  label,
+  value,
+  onChange,
+  unidad,
+  inputClass,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  unidad: Unidad;
+  inputClass: string;
+}) {
+  const { placeholder, nota } = ayudaEspesorPorUnidad(unidad);
+  return (
+    <div>
+      <div className="mb-1 flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+        <label className="text-xs text-slate-600">{label}</label>
+        <span className="text-[11px] leading-snug text-tepexi-accent">{nota}</span>
+      </div>
+      <input
+        className={inputClass}
+        inputMode="decimal"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+      />
+    </div>
+  );
 }
 
 function etiquetaFormaDetalle(forma: Forma, seccionColumna: FormaColumnaSeccion): string {
@@ -336,7 +395,7 @@ export function CalculadoraVolumenConcreto({ onCotizarVolumenM3 }: CalculadoraVo
   }
 
   const inputClass =
-    "w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-[var(--tepexi-logo-navy)] placeholder:text-slate-400 outline-none transition focus:border-[#c62828] focus:ring-2 focus:ring-[#c62828]/20";
+    "w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-[var(--tepexi-logo-navy)] placeholder:text-slate-400 outline-none transition focus:border-tepexi-accent focus:ring-2 focus:ring-tepexi-accent/20";
 
   const formaActual = FORMAS.find((f) => f.id === forma) ?? FORMAS[0]!;
   const IconoForma = formaActual.icon;
@@ -351,7 +410,7 @@ export function CalculadoraVolumenConcreto({ onCotizarVolumenM3 }: CalculadoraVo
       <div
         className="absolute inset-0 opacity-[0.03] pointer-events-none"
         style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg width='64' height='64' viewBox='0 0 64 64' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M32 0v64M0 32h64' stroke='%23132f4c' stroke-width='0.5' fill='none'/%3E%3C/svg%3E")`,
+          backgroundImage: `url("data:image/svg+xml,%3Csvg width='64' height='64' viewBox='0 0 64 64' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M32 0v64M0 32h64' stroke='%233d3d3d' stroke-width='0.5' fill='none'/%3E%3C/svg%3E")`,
         }}
       />
 
@@ -362,16 +421,16 @@ export function CalculadoraVolumenConcreto({ onCotizarVolumenM3 }: CalculadoraVo
           viewport={{ once: true }}
           className="text-center mb-12 md:mb-16"
         >
-          <div className="mb-4 inline-flex items-center justify-center gap-2 rounded-full border border-[#c62828]/40 bg-[#fef2f2] px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-[#c62828]">
+          <div className="mb-4 inline-flex items-center justify-center gap-2 rounded-full border border-tepexi-accent/40 bg-tepexi-accent-soft px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-tepexi-accent">
             <Box className="h-3.5 w-3.5" aria-hidden />
-            Herramienta para tu obra
+            Estima m³ antes de cotizar
           </div>
           <h2 className="font-display mb-4 text-4xl font-bold tracking-wide text-[var(--tepexi-logo-navy)] md:text-5xl">
-            Calculadora de volumen de concreto
+            Calculadora rápida de metros cúbicos (m³)
           </h2>
           <p className="mx-auto max-w-2xl leading-relaxed text-[var(--tepexi-text-muted)]">
-            Selecciona la forma, ingresa medidas y obtén el volumen en metros cúbicos (m³) con reserva
-            de desperdicio.
+            Cubica tu elemento de concreto con tus medidas de campo y obtén volumen neto más factor de desperdicio—ideal
+            para preparar tu solicitud de precio en línea.
           </p>
         </motion.div>
 
@@ -381,10 +440,10 @@ export function CalculadoraVolumenConcreto({ onCotizarVolumenM3 }: CalculadoraVo
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.45 }}
-            className="group min-w-0 rounded-2xl border-2 border-slate-200 bg-white p-5 shadow-lg transition-[border-color,box-shadow,ring] duration-300 hover:border-[#c62828]/45 hover:shadow-md hover:ring-2 hover:ring-[#c62828]/15 sm:p-6"
+            className="group min-w-0 rounded-2xl border-2 border-slate-200 bg-white p-5 shadow-lg transition-[border-color,box-shadow,ring] duration-300 hover:border-tepexi-accent/45 hover:shadow-md hover:ring-2 hover:ring-tepexi-accent/15 sm:p-6"
           >
             <h3 className="font-display mb-4 flex items-center gap-2 text-lg font-bold tracking-wide text-[var(--tepexi-logo-navy)] sm:text-xl">
-              <span className="h-1 w-1 rounded-full bg-[#c62828]" />
+              <span className="h-1 w-1 rounded-full bg-tepexi-accent" />
               Forma del elemento
             </h3>
             <div
@@ -405,7 +464,7 @@ export function CalculadoraVolumenConcreto({ onCotizarVolumenM3 }: CalculadoraVo
                     className={[
                       "group flex min-h-0 w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-left transition-all duration-200",
                       active
-                        ? "border-2 border-[#c62828] bg-red-50 shadow-sm shadow-red-100"
+                        ? "border-2 border-tepexi-accent bg-tepexi-accent-soft shadow-sm shadow-orange-200/35"
                         : "border border-slate-200 bg-slate-50 hover:border-slate-300 hover:bg-white",
                     ].join(" ")}
                   >
@@ -413,7 +472,7 @@ export function CalculadoraVolumenConcreto({ onCotizarVolumenM3 }: CalculadoraVo
                       className={[
                         "flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border bg-white transition-colors",
                         active
-                          ? "border-[#c62828]/40 text-[#c62828]"
+                          ? "border-tepexi-accent/40 text-tepexi-accent"
                           : "border-slate-200 text-slate-500 group-hover:border-slate-300 group-hover:text-[var(--tepexi-logo-navy)]",
                       ].join(" ")}
                     >
@@ -470,16 +529,13 @@ export function CalculadoraVolumenConcreto({ onCotizarVolumenM3 }: CalculadoraVo
                       placeholder="0"
                     />
                   </div>
-                  <div>
-                    <label className="text-xs text-slate-600 block mb-1">Espesor (E)</label>
-                    <input
-                      className={inputClass}
-                      inputMode="decimal"
-                      value={dims.losa.espesor}
-                      onChange={(e) => setCampoLosa("espesor", e.target.value)}
-                      placeholder="0"
-                    />
-                  </div>
+                  <CampoEspesor
+                    label="Espesor (E)"
+                    value={dims.losa.espesor}
+                    onChange={(v) => setCampoLosa("espesor", v)}
+                    unidad={unidad}
+                    inputClass={inputClass}
+                  />
                 </>
               )}
 
@@ -505,16 +561,13 @@ export function CalculadoraVolumenConcreto({ onCotizarVolumenM3 }: CalculadoraVo
                       placeholder="0"
                     />
                   </div>
-                  <div>
-                    <label className="text-xs text-slate-600 block mb-1">Espesor (firme) (E)</label>
-                    <input
-                      className={inputClass}
-                      inputMode="decimal"
-                      value={dims.piso.espesor}
-                      onChange={(e) => setCampoPiso("espesor", e.target.value)}
-                      placeholder="0"
-                    />
-                  </div>
+                  <CampoEspesor
+                    label="Espesor (firme) (E)"
+                    value={dims.piso.espesor}
+                    onChange={(v) => setCampoPiso("espesor", v)}
+                    unidad={unidad}
+                    inputClass={inputClass}
+                  />
                 </>
               )}
 
@@ -530,7 +583,7 @@ export function CalculadoraVolumenConcreto({ onCotizarVolumenM3 }: CalculadoraVo
                         className={[
                           "rounded-lg border px-3 py-2 text-xs font-semibold transition-colors",
                           dims.columna.seccion === "circular"
-                            ? "border-[#c62828] bg-red-50 text-[#c62828]"
+                            ? "border-tepexi-accent bg-tepexi-accent-soft text-tepexi-accent"
                             : "border-slate-200 bg-white text-slate-700 hover:border-slate-300",
                         ].join(" ")}
                       >
@@ -543,7 +596,7 @@ export function CalculadoraVolumenConcreto({ onCotizarVolumenM3 }: CalculadoraVo
                         className={[
                           "rounded-lg border px-3 py-2 text-xs font-semibold transition-colors",
                           dims.columna.seccion === "rectangular"
-                            ? "border-[#c62828] bg-red-50 text-[#c62828]"
+                            ? "border-tepexi-accent bg-tepexi-accent-soft text-tepexi-accent"
                             : "border-slate-200 bg-white text-slate-700 hover:border-slate-300",
                         ].join(" ")}
                       >
@@ -611,16 +664,13 @@ export function CalculadoraVolumenConcreto({ onCotizarVolumenM3 }: CalculadoraVo
                       placeholder="0"
                     />
                   </div>
-                  <div>
-                    <label className="text-xs text-slate-600 block mb-1">Espesor (t)</label>
-                    <input
-                      className={inputClass}
-                      inputMode="decimal"
-                      value={dims.pared.espesor}
-                      onChange={(e) => setCampoPared("espesor", e.target.value)}
-                      placeholder="0"
-                    />
-                  </div>
+                  <CampoEspesor
+                    label="Espesor (t)"
+                    value={dims.pared.espesor}
+                    onChange={(v) => setCampoPared("espesor", v)}
+                    unidad={unidad}
+                    inputClass={inputClass}
+                  />
                   <div>
                     <label className="text-xs text-slate-600 block mb-1">Altura (h)</label>
                     <input
@@ -739,14 +789,14 @@ export function CalculadoraVolumenConcreto({ onCotizarVolumenM3 }: CalculadoraVo
             transition={{ duration: 0.45, delay: 0.05 }}
             className="min-w-0 lg:sticky lg:top-28"
           >
-            <div className="group min-w-0 rounded-2xl border-2 border-slate-200 bg-white p-5 shadow-lg transition-[border-color,box-shadow,ring] duration-300 hover:border-[#c62828]/45 hover:shadow-md hover:ring-2 hover:ring-[#c62828]/15 sm:p-8">
+            <div className="group min-w-0 rounded-2xl border-2 border-slate-200 bg-white p-5 shadow-lg transition-[border-color,box-shadow,ring] duration-300 hover:border-tepexi-accent/45 hover:shadow-md hover:ring-2 hover:ring-tepexi-accent/15 sm:p-8">
               <h3 className="font-display mb-1 flex items-center gap-2 text-lg font-bold tracking-wide text-[var(--tepexi-logo-navy)] sm:text-xl">
-                <span className="h-1 w-1 rounded-full bg-[#c62828]" />
+                <span className="h-1 w-1 rounded-full bg-tepexi-accent" />
                 Detalle del pedido
               </h3>
               <div className="mb-5 flex flex-col gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
                 <div className="flex min-w-0 items-center gap-2.5">
-                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-white text-[#c62828]">
+                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-white text-tepexi-accent">
                     <IconoForma className="h-5 w-5" strokeWidth={ICON_STROKE} aria-hidden />
                   </span>
                   <div className="min-w-0">
@@ -777,7 +827,7 @@ export function CalculadoraVolumenConcreto({ onCotizarVolumenM3 }: CalculadoraVo
                 </div>
                 <div className="flex min-w-0 flex-col items-start gap-1 border-t border-slate-200 pt-4 sm:flex-row sm:items-baseline sm:justify-between sm:gap-4">
                   <dt className="shrink-0 font-semibold text-[var(--tepexi-logo-navy)]">Volumen total</dt>
-                  <dd className="w-full min-w-0 break-words font-display text-2xl font-bold text-[#c62828] tabular-nums sm:w-auto sm:text-right sm:text-3xl">
+                  <dd className="w-full min-w-0 break-words font-display text-2xl font-bold text-tepexi-accent tabular-nums sm:w-auto sm:text-right sm:text-3xl">
                     {totalM3 != null ? `${formatM3(totalM3)} m³` : "— m³"}
                   </dd>
                 </div>
@@ -799,7 +849,7 @@ export function CalculadoraVolumenConcreto({ onCotizarVolumenM3 }: CalculadoraVo
                 <button
                   type="button"
                   onClick={() => setModalResistenciasOpen(true)}
-                  className="mt-2.5 text-left text-xs font-semibold text-[#c62828] underline decoration-[#c62828]/40 underline-offset-2 transition-colors hover:text-[#a51e24] hover:decoration-[#a51e24]"
+                  className="mt-2.5 text-left text-xs font-semibold text-tepexi-accent underline decoration-tepexi-accent/40 underline-offset-2 transition-colors hover:text-tepexi-accent-hover hover:decoration-tepexi-accent-hover"
                 >
                   Ver tabla comparativa de resistencias (f&apos;c)
                 </button>
@@ -814,7 +864,7 @@ export function CalculadoraVolumenConcreto({ onCotizarVolumenM3 }: CalculadoraVo
                     type="button"
                     disabled={totalM3 == null || totalM3 <= 0}
                     onClick={() => onCotizarVolumenM3(totalM3!)}
-                    className="w-full font-display flex items-center justify-center gap-2 rounded-xl bg-gradient-to-b from-[#e53935] to-[#c62828] px-5 py-4 text-base font-bold uppercase tracking-wide text-white shadow-lg shadow-red-900/30 ring-2 ring-red-100 transition-all hover:scale-[1.01] hover:shadow-xl disabled:opacity-40 disabled:hover:scale-100 disabled:cursor-not-allowed"
+                    className="w-full font-display flex items-center justify-center gap-2 rounded-xl bg-gradient-to-b from-tepexi-accent-hover to-tepexi-accent px-5 py-4 text-base font-bold uppercase tracking-wide text-white shadow-lg shadow-orange-950/25 ring-2 ring-orange-100 transition-all hover:scale-[1.01] hover:shadow-xl disabled:opacity-40 disabled:hover:scale-100 disabled:cursor-not-allowed"
                   >
                     Cotizar este volumen
                   </button>

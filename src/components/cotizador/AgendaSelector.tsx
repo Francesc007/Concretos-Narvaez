@@ -214,14 +214,14 @@ export function AgendaSelector({
       <div className="grid sm:grid-cols-2 gap-4">
         <div>
           <label htmlFor="agenda-nombre" className="mb-2 block text-sm font-medium text-[var(--tepexi-text-body)]">
-            Nombre <span className="text-[#c62828]" aria-hidden="true">*</span>
+            Nombre <span className="text-tepexi-accent" aria-hidden="true">*</span>
           </label>
           <input
             id="agenda-nombre"
             value={nombre}
             onChange={(e) => setNombre(e.target.value)}
             aria-required="true"
-            className="w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-[var(--tepexi-logo-navy)] outline-none transition focus:border-[#c62828] focus:ring-2 focus:ring-[#c62828]/20"
+            className="w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-[var(--tepexi-logo-navy)] outline-none transition focus:border-tepexi-accent focus:ring-2 focus:ring-tepexi-accent/20"
           />
         </div>
         <div>
@@ -232,7 +232,7 @@ export function AgendaSelector({
             id="agenda-empresa"
             value={empresa}
             onChange={(e) => setEmpresa(e.target.value)}
-            className="w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-[var(--tepexi-logo-navy)] outline-none transition focus:border-[#c62828] focus:ring-2 focus:ring-[#c62828]/20"
+            className="w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-[var(--tepexi-logo-navy)] outline-none transition focus:border-tepexi-accent focus:ring-2 focus:ring-tepexi-accent/20"
             placeholder="Opcional"
           />
         </div>
@@ -241,7 +241,7 @@ export function AgendaSelector({
       <div className="grid sm:grid-cols-2 gap-4">
         <div>
           <label htmlFor="agenda-telefono" className="mb-2 block text-sm font-medium text-[var(--tepexi-text-body)]">
-            Teléfono <span className="text-[#c62828]" aria-hidden="true">*</span>
+            Teléfono <span className="text-tepexi-accent" aria-hidden="true">*</span>
           </label>
           <input
             id="agenda-telefono"
@@ -251,7 +251,7 @@ export function AgendaSelector({
             value={telefono}
             onChange={(e) => setTelefono(e.target.value)}
             aria-required="true"
-            className="w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-[var(--tepexi-logo-navy)] outline-none transition focus:border-[#c62828] focus:ring-2 focus:ring-[#c62828]/20"
+            className="w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-[var(--tepexi-logo-navy)] outline-none transition focus:border-tepexi-accent focus:ring-2 focus:ring-tepexi-accent/20"
             placeholder="10 dígitos"
           />
         </div>
@@ -263,7 +263,7 @@ export function AgendaSelector({
             id="agenda-obra"
             value={obra}
             onChange={(e) => setObra(e.target.value)}
-            className="w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-[var(--tepexi-logo-navy)] outline-none transition focus:border-[#c62828] focus:ring-2 focus:ring-[#c62828]/20"
+            className="w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-[var(--tepexi-logo-navy)] outline-none transition focus:border-tepexi-accent focus:ring-2 focus:ring-tepexi-accent/20"
           >
             {OBRA_OPTIONS.map((o) => (
               <option key={o.value} value={o.value}>
@@ -296,7 +296,7 @@ export function AgendaSelector({
             id="agenda-hora"
             value={hora}
             onChange={(e) => setHora(e.target.value)}
-            className="w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-base text-[var(--tepexi-logo-navy)] outline-none transition focus:border-[#c62828] focus:ring-2 focus:ring-[#c62828]/20"
+            className="w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-base text-[var(--tepexi-logo-navy)] outline-none transition focus:border-tepexi-accent focus:ring-2 focus:ring-tepexi-accent/20"
           >
             {horasDisponibles.map((h) => (
               <option key={h} value={h} disabled={horasBloqueadasUi.includes(h)}>
@@ -316,7 +316,7 @@ export function AgendaSelector({
           inputMode="decimal"
           value={volumen}
           onChange={(e) => setVolumen(e.target.value)}
-          className="w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-[var(--tepexi-logo-navy)] outline-none transition focus:border-[#c62828] focus:ring-2 focus:ring-[#c62828]/20"
+          className="w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-[var(--tepexi-logo-navy)] outline-none transition focus:border-tepexi-accent focus:ring-2 focus:ring-tepexi-accent/20"
         />
       </div>
 
@@ -358,20 +358,20 @@ export function AgendaSelector({
           rows={3}
           value={comentarios}
           onChange={(e) => setComentarios(e.target.value)}
-          className="w-full resize-none rounded-lg border border-slate-300 bg-white px-4 py-3 text-[var(--tepexi-logo-navy)] placeholder:text-slate-400 outline-none transition focus:border-[#c62828] focus:ring-2 focus:ring-[#c62828]/20"
+          className="w-full resize-none rounded-lg border border-slate-300 bg-white px-4 py-3 text-[var(--tepexi-logo-navy)] placeholder:text-slate-400 outline-none transition focus:border-tepexi-accent focus:ring-2 focus:ring-tepexi-accent/20"
           placeholder="Acceso, bombeo, dudas…"
         />
       </div>
 
       {errorReserva && (
-        <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800">{errorReserva}</p>
+        <p className="rounded-lg border border-orange-200/90 bg-tepexi-accent-soft px-3 py-2 text-sm text-[var(--tepexi-logo-navy)]">{errorReserva}</p>
       )}
 
       <button
         type="button"
         disabled={!nombre.trim() || !telefono.trim() || !fecha || !cupoOk || reservando}
         onClick={onSubmitReserva}
-        className="w-full py-3 rounded-lg bg-[#c62828] hover:bg-[#e53935] disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold uppercase tracking-wide transition-colors"
+        className="w-full py-3 rounded-lg bg-tepexi-accent hover:bg-tepexi-accent-hover disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold uppercase tracking-wide transition-colors"
       >
         {reservando ? "Guardando reserva…" : "Reservar y abrir WhatsApp"}
       </button>

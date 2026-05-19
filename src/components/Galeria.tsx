@@ -163,7 +163,7 @@ export function Galeria() {
       <div
         className="absolute inset-0 opacity-[0.04] pointer-events-none"
         style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg width='64' height='64' viewBox='0 0 64 64' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M32 0v64M0 32h64' stroke='%23132f4c' stroke-width='0.5' fill='none'/%3E%3C/svg%3E")`,
+          backgroundImage: `url("data:image/svg+xml,%3Csvg width='64' height='64' viewBox='0 0 64 64' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M32 0v64M0 32h64' stroke='%233d3d3d' stroke-width='0.5' fill='none'/%3E%3C/svg%3E")`,
         }}
       />
 
@@ -175,10 +175,11 @@ export function Galeria() {
           className="text-center mb-16"
         >
           <h2 className="font-display text-4xl md:text-5xl font-bold text-[var(--tepexi-logo-navy)] mb-4 tracking-wide">
-            Proyectos
+            Nuestros Proyectos de obra en la región
           </h2>
           <p className="text-[var(--tepexi-text-muted)] max-w-2xl mx-auto leading-relaxed">
-            Un vistazo a nuestra operación y al tipo de proyectos que acompañamos en la región.
+            Galería ilustrativa de colados industriales, urbanos y comerciales donde se ha aplicado concreto premezclado en
+            proyectos cercanos en el Estado de México e Hidalgo.
           </p>
         </motion.div>
 
@@ -195,7 +196,7 @@ export function Galeria() {
               variants={cardVariants}
               whileHover={{ y: -4 }}
               whileTap={{ scale: 0.985 }}
-              className="group rounded-2xl overflow-hidden border-2 border-[#c62828]/120 bg-white shadow-lg transition-[border-color,box-shadow,ring] duration-300 hover:border-[#c62828]/120 hover:shadow-md hover:ring-2 hover:ring-[#c62828]/15 transform-gpu"
+              className="group rounded-2xl overflow-hidden border-2 border-tepexi-accent/90 bg-white shadow-lg transition-[border-color,box-shadow,ring] duration-300 hover:border-tepexi-accent/90 hover:shadow-md hover:ring-2 hover:ring-tepexi-accent/15 transform-gpu"
             >
               <ProyectoCardContent item={item} activeSlide={activeSlide} />
             </motion.article>

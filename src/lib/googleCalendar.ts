@@ -89,7 +89,7 @@ export async function createVisitaAgendadaCalendarEvent(opts: {
     opts.correo.trim() ? `Correo: ${opts.correo.trim()}` : null,
     `Teléfono / WhatsApp: ${opts.telefono.trim()}`,
     "",
-    "Registrado desde la landing de Concretos Tepexi.",
+    "Registrado desde la landing de Concretos Narváez.",
   ]
     .filter(Boolean)
     .join("\n");

@@ -144,7 +144,7 @@ export function AgendaVisitaModal({ isOpen, onClose }: AgendaVisitaModalProps) {
           >
             <div className="mb-2 flex items-start justify-between gap-3">
               <div>
-                <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-[#c62828]">
+                <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-tepexi-accent">
                   Visita a planta / obra
                 </p>
                 <h3
@@ -172,13 +172,13 @@ export function AgendaVisitaModal({ isOpen, onClose }: AgendaVisitaModalProps) {
             <div className="space-y-4">
               <div>
                 <label htmlFor="av-nombre" className="mb-2 block text-sm font-medium text-[var(--tepexi-text-body)]">
-                  Nombre <span className="text-[#c62828]">*</span>
+                  Nombre <span className="text-tepexi-accent">*</span>
                 </label>
                 <input
                   id="av-nombre"
                   value={nombre}
                   onChange={(e) => setNombre(e.target.value)}
-                  className="w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-[var(--tepexi-logo-navy)] placeholder:text-slate-400 outline-none transition focus:border-[#c62828] focus:ring-2 focus:ring-[#c62828]/20"
+                  className="w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-[var(--tepexi-logo-navy)] placeholder:text-slate-400 outline-none transition focus:border-tepexi-accent focus:ring-2 focus:ring-tepexi-accent/20"
                   placeholder="Nombre y apellido"
                   autoComplete="name"
                 />
@@ -191,7 +191,7 @@ export function AgendaVisitaModal({ isOpen, onClose }: AgendaVisitaModalProps) {
                   id="av-empresa"
                   value={empresa}
                   onChange={(e) => setEmpresa(e.target.value)}
-                  className="w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-[var(--tepexi-logo-navy)] placeholder:text-slate-400 outline-none transition focus:border-[#c62828] focus:ring-2 focus:ring-[#c62828]/20"
+                  className="w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-[var(--tepexi-logo-navy)] placeholder:text-slate-400 outline-none transition focus:border-tepexi-accent focus:ring-2 focus:ring-tepexi-accent/20"
                   placeholder="Opcional"
                   autoComplete="organization"
                 />
@@ -206,14 +206,14 @@ export function AgendaVisitaModal({ isOpen, onClose }: AgendaVisitaModalProps) {
                   inputMode="email"
                   value={correo}
                   onChange={(e) => setCorreo(e.target.value)}
-                  className="w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-[var(--tepexi-logo-navy)] placeholder:text-slate-400 outline-none transition focus:border-[#c62828] focus:ring-2 focus:ring-[#c62828]/20"
+                  className="w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-[var(--tepexi-logo-navy)] placeholder:text-slate-400 outline-none transition focus:border-tepexi-accent focus:ring-2 focus:ring-tepexi-accent/20"
                   placeholder="Opcional"
                   autoComplete="email"
                 />
               </div>
               <div>
                 <label htmlFor="av-tel" className="block text-sm font-medium text-[var(--tepexi-text-body)] mb-2">
-                  WhatsApp o teléfono <span className="text-[#c62828]">*</span>
+                  WhatsApp o teléfono <span className="text-tepexi-accent">*</span>
                 </label>
                 <input
                   id="av-tel"
@@ -222,7 +222,7 @@ export function AgendaVisitaModal({ isOpen, onClose }: AgendaVisitaModalProps) {
                   inputMode="tel"
                   value={telefono}
                   onChange={(e) => setTelefono(e.target.value)}
-                  className="w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-[var(--tepexi-logo-navy)] placeholder:text-slate-400 outline-none transition focus:border-[#c62828] focus:ring-2 focus:ring-[#c62828]/20"
+                  className="w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-[var(--tepexi-logo-navy)] placeholder:text-slate-400 outline-none transition focus:border-tepexi-accent focus:ring-2 focus:ring-tepexi-accent/20"
                   placeholder="Ej. 55 1234 5678"
                   autoComplete="tel"
                 />
@@ -230,13 +230,13 @@ export function AgendaVisitaModal({ isOpen, onClose }: AgendaVisitaModalProps) {
 
               <div>
                 <label htmlFor="av-visita" className="block text-sm font-medium text-[var(--tepexi-text-body)] mb-2">
-                  Tipo de visita <span className="text-[#c62828]">*</span>
+                  Tipo de visita <span className="text-tepexi-accent">*</span>
                 </label>
                 <select
                   id="av-visita"
                   value={visita}
                   onChange={(e) => setVisita(e.target.value as TipoVisitaAgendada)}
-                  className="w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-[var(--tepexi-logo-navy)] outline-none transition focus:border-[#c62828] focus:ring-2 focus:ring-[#c62828]/20"
+                  className="w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-[var(--tepexi-logo-navy)] outline-none transition focus:border-tepexi-accent focus:ring-2 focus:ring-tepexi-accent/20"
                 >
                   {TIPOS_VISITA_AGENDADA.map((v) => (
                     <option key={v} value={v}>
@@ -248,7 +248,7 @@ export function AgendaVisitaModal({ isOpen, onClose }: AgendaVisitaModalProps) {
 
               <div>
                 <span className="block text-sm font-medium text-[var(--tepexi-text-body)] mb-2">
-                  Fecha <span className="text-[#c62828]">*</span>
+                  Fecha <span className="text-tepexi-accent">*</span>
                 </span>
                 <DateFieldCalendar
                   value={fecha}
@@ -261,7 +261,7 @@ export function AgendaVisitaModal({ isOpen, onClose }: AgendaVisitaModalProps) {
 
               <div>
                 <label htmlFor="av-hora" className="block text-sm font-medium text-[var(--tepexi-text-body)] mb-2">
-                  Horario <span className="text-[#c62828]">*</span>
+                  Horario <span className="text-tepexi-accent">*</span>
                 </label>
                 {horarios.length === 0 ? (
                   <p className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900">
@@ -272,7 +272,7 @@ export function AgendaVisitaModal({ isOpen, onClose }: AgendaVisitaModalProps) {
                     id="av-hora"
                     value={hora}
                     onChange={(e) => setHora(e.target.value)}
-                    className="w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-[var(--tepexi-logo-navy)] outline-none transition focus:border-[#c62828] focus:ring-2 focus:ring-[#c62828]/20"
+                    className="w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-[var(--tepexi-logo-navy)] outline-none transition focus:border-tepexi-accent focus:ring-2 focus:ring-tepexi-accent/20"
                   >
                     {horarios.map((h) => (
                       <option key={h} value={h}>
@@ -285,7 +285,7 @@ export function AgendaVisitaModal({ isOpen, onClose }: AgendaVisitaModalProps) {
             </div>
 
             {error && (
-              <p className="mt-4 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800">
+              <p className="mt-4 rounded-lg border border-orange-200/90 bg-tepexi-accent-soft px-3 py-2 text-sm text-[var(--tepexi-logo-navy)]">
                 {error}
               </p>
             )}
@@ -308,7 +308,7 @@ export function AgendaVisitaModal({ isOpen, onClose }: AgendaVisitaModalProps) {
                 type="button"
                 onClick={handleEnviar}
                 disabled={loading || !!okMsg}
-                className="inline-flex items-center justify-center gap-2 py-3 px-5 rounded-lg bg-[#c62828] hover:bg-[#e53935] text-white font-display font-bold uppercase tracking-wide text-sm transition-colors disabled:opacity-60 disabled:pointer-events-none"
+                className="inline-flex items-center justify-center gap-2 py-3 px-5 rounded-lg bg-tepexi-accent hover:bg-tepexi-accent-hover text-white font-display font-bold uppercase tracking-wide text-sm transition-colors disabled:opacity-60 disabled:pointer-events-none"
               >
                 <CalendarCheck size={20} className="shrink-0" aria-hidden />
                 {loading ? "Enviando…" : "Confirmar visita"}

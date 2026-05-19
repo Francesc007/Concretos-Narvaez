@@ -3,9 +3,9 @@ import Image from "next/image";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Política de calidad | Concretos Tepexi",
+  title: "Política de calidad | Concretos Narváez",
   description:
-    "Compromiso de TEPEXI CONCRETOS con la calidad del concreto premezclado y la satisfacción del cliente.",
+    "Enfoque de CONCRETOS NARVAEZ en gestión de calidad del CH premezclado: cumplimiento normativo, seguimiento al cliente y mejora continua operativa.",
   robots: "index, follow",
 };
 
@@ -16,14 +16,14 @@ export default function PoliticaCalidadPage() {
         <div className="mx-auto flex h-14 sm:h-16 max-w-3xl items-center justify-between gap-4 px-4 sm:px-6">
           <Link
             href="/"
-            className="flex items-center gap-2 font-display text-sm font-semibold tracking-wide text-[var(--tepexi-logo-navy)] transition-colors hover:text-[#c62828] sm:text-base"
+            className="flex items-center gap-2 font-display text-sm font-semibold tracking-wide text-[var(--tepexi-logo-navy)] transition-colors hover:text-tepexi-accent sm:text-base"
           >
             <span
               className="relative inline-block h-9 w-9 sm:h-10 sm:w-10 shrink-0 overflow-hidden rounded-full border-2 border-[var(--tepexi-logo-navy)] bg-white shadow-sm"
               aria-hidden
             >
               <Image
-                src="/Tepexi%20A-R.jpeg"
+                src="/C%20Narvaez.jpg"
                 alt=""
                 fill
                 className="object-contain"
@@ -31,11 +31,11 @@ export default function PoliticaCalidadPage() {
                 priority
               />
             </span>
-            CONCRETOS TEPEXI
+            CONCRETOS NARVAEZ
           </Link>
           <Link
             href="/"
-            className="text-xs font-medium text-[var(--tepexi-text-muted)] underline-offset-4 hover:text-[#c62828] hover:underline sm:text-sm"
+            className="text-xs font-medium text-[var(--tepexi-text-muted)] underline-offset-4 hover:text-tepexi-accent hover:underline sm:text-sm"
           >
             Volver al inicio
           </Link>
@@ -50,7 +50,7 @@ export default function PoliticaCalidadPage() {
 
           <div className="space-y-6 leading-relaxed text-[15px] text-[var(--tepexi-text-body)] sm:text-base">
             <p>
-              <strong className="text-[var(--tepexi-logo-navy)]">TEPEXI CONCRETOS</strong> es una empresa mexicana
+              <strong className="text-[var(--tepexi-logo-navy)]">CONCRETOS NARVAEZ</strong> es una empresa mexicana
               especializada en la fabricación, transporte y entrega de Concreto Hidráulico Premezclado para la industria
               de la construcción; elaboramos productos con la más alta calidad exigida en las normas de calidad vigentes.
             </p>

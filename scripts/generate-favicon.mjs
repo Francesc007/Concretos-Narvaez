@@ -9,7 +9,7 @@ import { dirname, join } from "path";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = join(__dirname, "..");
-const logo = join(root, "public", "Tepexi A-R.jpeg");
+const logo = join(root, "public", "C Narvaez.jpg");
 const appDir = join(root, "src", "app");
 
 function toSquareIcon(size) {

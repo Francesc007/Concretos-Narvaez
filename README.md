@@ -1,36 +1,49 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Concretos Narváez — Sitio web
 
-## Getting Started
+Landing y herramientas comerciales para **Concretos Narváez** (Jilotepec, Estado de México): servicios de premezclado, galería de proyectos, calculadora de volumen, cotización y agenda de visitas.
 
-First, run the development server:
+Stack: [Next.js](https://nextjs.org) 16, React 19, Tailwind CSS 4, Framer Motion.
+
+## Requisitos
+
+- Node.js 20+
+- npm 10+
+
+## Instalación local
 
 ```bash
+git clone https://github.com/Francesc007/Concretos-Narvaez.git
+cd Concretos-Narvaez
+npm install
+cp .env.example .env.local
+# Edita .env.local con tus credenciales (ver SECURITY.md)
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Abre [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Scripts
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Comando | Descripción |
+|---------|-------------|
+| `npm run dev` | Servidor de desarrollo |
+| `npm run build` | Build de producción |
+| `npm run start` | Servir build |
+| `npm run lint` | ESLint |
+| `npm run generate-favicon` | Regenera iconos desde `public/C Narvaez.jpg` |
+| `npm run generate-image-blurs` | Regenera placeholders blur de imágenes |
 
-## Learn More
+## Configuración
 
-To learn more about Next.js, take a look at the following resources:
+- Datos públicos (WhatsApp, redes, textos legales): `src/config.ts`
+- Variables secretas: `.env.local` (ver `.env.example`)
+- Seguridad y despliegue: [SECURITY.md](./SECURITY.md)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Repositorio
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- **GitHub:** https://github.com/Francesc007/Concretos-Narvaez
+- Rama principal: `main`
 
-## Deploy on Vercel
+## Licencia
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Proyecto privado — uso exclusivo de Concretos Narváez y colaboradores autorizados.

@@ -1,5 +1,10 @@
 {
-  "name": "tepexi",
+  "name": "concretos-narvaez",
+  "description": "Sitio web Concretos Narváez — premezclado, cotización y agenda",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Francesc007/Concretos-Narvaez.git"
+  },
   "version": "0.1.0",
   "private": true,
   "scripts": {

@@ -25,9 +25,10 @@ export function resistenciaRapidaDesdeSeleccion(
   return null;
 }
 
-export const PLANTA_TEPEXI = {
-  lat: 19.8419145,
-  lng: -99.3477361,
+/** Coordenadas planta Concretos Narváez — Jilotepec (Google Maps). */
+export const PLANTA_NARVAEZ_JILOTEPEC = {
+  lat: 19.8776495,
+  lng: -99.5569655,
 } as const;
 
 export const ZONAS_COTIZACION: Record<ZonaCotizacion, { minKm: number; maxKm: number; label: string }> = {

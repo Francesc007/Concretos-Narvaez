@@ -90,17 +90,17 @@ export function buildGoogleCalendarVisitaUrl(opts: BuildGoogleCalendarVisitaPara
     ? `• Correo: ${opts.correo.trim()}`
     : null;
   const details = [
-    "Visita a planta — Concretos Tepexi",
+    "Visita a planta — Concretos Narváez",
     "",
     "Contacto",
     ...(correoLine ? [correoLine] : []),
     `• WhatsApp / Teléfono: ${opts.telefono.trim()}`,
     "",
     `Duración: ${dur} minutos`,
-    "Solicitud generada desde el sitio web de Concretos Tepexi.",
+    "Solicitud generada desde el sitio web de Concretos Narváez.",
   ].join("\n");
 
-  const location = opts.ubicacion ?? "Tepeji del Río, Hidalgo, México";
+  const location = opts.ubicacion ?? "Jilotepec, Estado de México, México";
 
   const dates = `${formatGCalLocal(start)}/${formatGCalLocal(end)}`;
   const qs = [

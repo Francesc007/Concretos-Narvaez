@@ -1,4 +1,9 @@
-import { DISTANCIA_MAXIMA_COTIZACION_KM, PLANTA_TEPEXI, labelZona, zonaDesdeDistanciaKm } from "@/lib/cotizacion";
+import {
+  DISTANCIA_MAXIMA_COTIZACION_KM,
+  PLANTA_NARVAEZ_JILOTEPEC,
+  labelZona,
+  zonaDesdeDistanciaKm,
+} from "@/lib/cotizacion";
 import { emptyWithCors, jsonWithCors } from "@/lib/api-cors";
 
 export const dynamic = "force-dynamic";
@@ -35,7 +40,7 @@ export async function GET(request: Request) {
   }
 
   const params = new URLSearchParams({
-    origins: `${PLANTA_TEPEXI.lat},${PLANTA_TEPEXI.lng}`,
+    origins: `${PLANTA_NARVAEZ_JILOTEPEC.lat},${PLANTA_NARVAEZ_JILOTEPEC.lng}`,
     destinations: destino,
     mode: "driving",
     units: "metric",

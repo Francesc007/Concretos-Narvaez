@@ -79,7 +79,7 @@ export function CotizacionModal({ isOpen, onClose }: CotizacionModalProps) {
   const handleEnviar = () => {
     if (!autorizoDatos) return;
     const lineas = [
-      `Hola Concretos Tepexi, solicito cotización de concreto premezclado.`,
+      `Hola Concretos Narváez, solicito cotización de concreto premezclado.`,
       `Tiro directo o bombeo: ${labelEntrega(entrega)}`,
       nombre.trim() ? `Nombre: ${nombre.trim()}` : null,
       `Tipo de obra: ${tipoObra}`,
@@ -113,7 +113,7 @@ export function CotizacionModal({ isOpen, onClose }: CotizacionModalProps) {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.96, y: 12 }}
             transition={{ type: "spring", damping: 26, stiffness: 320 }}
-            className="cotizacion-modal-scroll relative w-full max-w-md max-h-[min(90vh,36rem)] overflow-y-auto rounded-2xl border-2 border-[#c62828]/75 bg-[#141922] p-5 shadow-[0_0_0_1px_rgba(198,40,40,0.45),0_0_36px_-4px_rgba(198,40,40,0.35),0_20px_50px_-12px_rgba(0,0,0,0.55)] ring-2 ring-[#c62828]/25 sm:p-6"
+            className="cotizacion-modal-scroll relative w-full max-w-md max-h-[min(90vh,36rem)] overflow-y-auto rounded-2xl border-2 border-tepexi-accent/75 bg-[#141922] p-5 shadow-[0_0_0_1px_rgba(233,117,40,0.45),0_0_36px_-4px_rgba(233,117,40,0.32),0_20px_50px_-12px_rgba(0,0,0,0.55)] ring-2 ring-tepexi-accent/25 sm:p-6"
             role="dialog"
             aria-modal="true"
             aria-labelledby="cotizacion-modal-title"
@@ -149,7 +149,7 @@ export function CotizacionModal({ isOpen, onClose }: CotizacionModalProps) {
                   id="cot-entrega"
                   value={entrega}
                   onChange={(e) => setEntrega(e.target.value)}
-                  className="w-full py-3 px-4 bg-[#0c0f14] border border-[#cfd8e4]/35 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#c62828]/60"
+                  className="w-full py-3 px-4 bg-[#0c0f14] border border-[#cfd8e4]/35 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-tepexi-accent/60"
                 >
                   {ENTREGA_OPCIONES.map((o) => (
                     <option key={o.value} value={o.value}>
@@ -167,7 +167,7 @@ export function CotizacionModal({ isOpen, onClose }: CotizacionModalProps) {
                   id="cot-nombre"
                   value={nombre}
                   onChange={(e) => setNombre(e.target.value)}
-                  className="w-full py-3 px-4 bg-[#0c0f14] border border-[#cfd8e4]/35 rounded-lg text-white placeholder:text-[#b0bcc9] focus:outline-none focus:ring-2 focus:ring-[#c62828]/60"
+                  className="w-full py-3 px-4 bg-[#0c0f14] border border-[#cfd8e4]/35 rounded-lg text-white placeholder:text-[#b0bcc9] focus:outline-none focus:ring-2 focus:ring-tepexi-accent/60"
                   placeholder="Opcional"
                 />
               </div>
@@ -180,7 +180,7 @@ export function CotizacionModal({ isOpen, onClose }: CotizacionModalProps) {
                   id="cot-tipo"
                   value={tipoObra}
                   onChange={(e) => setTipoObra(e.target.value)}
-                  className="w-full py-3 px-4 bg-[#0c0f14] border border-[#cfd8e4]/35 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#c62828]/60"
+                  className="w-full py-3 px-4 bg-[#0c0f14] border border-[#cfd8e4]/35 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-tepexi-accent/60"
                 >
                   <option value="residencial">Particular</option>
                   <option value="comercial">Residencial</option>
@@ -197,7 +197,7 @@ export function CotizacionModal({ isOpen, onClose }: CotizacionModalProps) {
                   id="cot-res"
                   value={resistencia}
                   onChange={(e) => setResistencia(e.target.value)}
-                  className="w-full py-3 px-4 bg-[#0c0f14] border border-[#cfd8e4]/35 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#c62828]/60"
+                  className="w-full py-3 px-4 bg-[#0c0f14] border border-[#cfd8e4]/35 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-tepexi-accent/60"
                 >
                   {RESISTENCIA_OPCIONES.map((o) => (
                     <option key={o.value} value={o.value}>
@@ -215,7 +215,7 @@ export function CotizacionModal({ isOpen, onClose }: CotizacionModalProps) {
                   id="cot-dist"
                   value={distancia}
                   onChange={(e) => setDistancia(e.target.value)}
-                  className="w-full py-3 px-4 bg-[#0c0f14] border border-[#cfd8e4]/35 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#c62828]/60"
+                  className="w-full py-3 px-4 bg-[#0c0f14] border border-[#cfd8e4]/35 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-tepexi-accent/60"
                 >
                   {DISTANCIA_OPCIONES.map((o) => (
                     <option key={o.value} value={o.value}>
@@ -234,7 +234,7 @@ export function CotizacionModal({ isOpen, onClose }: CotizacionModalProps) {
                   inputMode="decimal"
                   value={volumen}
                   onChange={(e) => setVolumen(e.target.value)}
-                  className="w-full py-3 px-4 bg-[#0c0f14] border border-[#cfd8e4]/35 rounded-lg text-white placeholder:text-[#b0bcc9] focus:outline-none focus:ring-2 focus:ring-[#c62828]/60"
+                  className="w-full py-3 px-4 bg-[#0c0f14] border border-[#cfd8e4]/35 rounded-lg text-white placeholder:text-[#b0bcc9] focus:outline-none focus:ring-2 focus:ring-tepexi-accent/60"
                   placeholder="Ej. 12"
                 />
               </div>
@@ -261,7 +261,7 @@ export function CotizacionModal({ isOpen, onClose }: CotizacionModalProps) {
                   rows={3}
                   value={comentarios}
                   onChange={(e) => setComentarios(e.target.value)}
-                  className="w-full py-3 px-4 bg-[#0c0f14] border border-[#cfd8e4]/35 rounded-lg text-white placeholder:text-[#b0bcc9] focus:outline-none focus:ring-2 focus:ring-[#c62828]/60 resize-none"
+                  className="w-full py-3 px-4 bg-[#0c0f14] border border-[#cfd8e4]/35 rounded-lg text-white placeholder:text-[#b0bcc9] focus:outline-none focus:ring-2 focus:ring-tepexi-accent/60 resize-none"
                   placeholder="Acceso a obra, horario preferido…"
                 />
               </div>
@@ -275,7 +275,7 @@ export function CotizacionModal({ isOpen, onClose }: CotizacionModalProps) {
                 className="mt-1 h-4 w-4 shrink-0 rounded border-[#b8c4d8]/55 text-[#25D366] focus:ring-[#25D366]"
               />
               <span>
-                Autorizo el uso de mis datos para que Concretos Tepexi me contacte con la cotización.
+                Autorizo el uso de mis datos para que Concretos Narváez me contacte con la cotización.
               </span>
             </label>
 

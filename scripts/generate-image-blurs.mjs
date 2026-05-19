@@ -89,7 +89,7 @@ for (const p of PUBLIC_IMAGES) {
   if (!entries[p]) entries[p] = fallbackBlur;
 }
 
-const logo = await tinyBlur(path.join(root, "public", "Tepexi A-R.jpeg"));
+const logo = await tinyBlur(path.join(root, "public", "C Narvaez.jpg"));
 
 const out = `export const GALERIA_BLUR_DATA_URL: Record<string, string> = ${JSON.stringify(entries, null, 2)} as const;
 

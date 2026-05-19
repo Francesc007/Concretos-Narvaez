@@ -36,7 +36,7 @@ function whatsappHref(phoneDigits: string) {
 
 export function Footer() {
   return (
-    <footer id="ubicacion" className="border-t border-slate-500/30 bg-[#5c6777] py-12 md:py-14 text-white">
+    <footer id="ubicacion" className="border-t border-white/10 bg-[var(--tepexi-footer-bg)] py-12 md:py-14 text-white">
       <div className="mx-auto w-full min-w-0 max-w-7xl px-3 sm:px-4">
         <div className="grid md:grid-cols-3 gap-8 lg:gap-10 mb-8 md:mb-10 items-start">
           <motion.div
@@ -47,16 +47,16 @@ export function Footer() {
           >
             <div className="inline-flex flex-col items-center md:items-start">
               <a href="#inicio" className="inline-flex flex-col items-center md:items-start">
-                <div className="flex h-[4rem] w-[4rem] shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-[var(--tepexi-logo-navy)] bg-white p-2 shadow-sm md:h-[4.7rem] md:w-[4.7rem] md:p-1.5">
+                <div className="flex h-[4rem] w-[4rem] shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-[var(--tepexi-logo-navy)] bg-white p-[3px] shadow-sm ring-1 ring-black/[0.06] md:h-[4.7rem] md:w-[4.7rem] md:p-1">
                   <img
-                    src="/Tepexi%20A-R.jpeg"
-                    alt="Concretos Tepexi"
-                    className="max-h-full max-w-full object-contain object-center"
+                    src="/C%20Narvaez.jpg"
+                    alt="Concretos Narváez"
+                    className="h-full w-full object-contain object-center scale-[1.14]"
                   />
                 </div>
                 <p className="mt-3 max-w-xs text-sm leading-snug text-slate-100">
-                  Concreto premezclado y servicio cercano para constructoras y proyectos en Tepeji del
-                  Río y alrededores.
+                  Concreto Premezclado en Jilotepec: rutas de despacho para obra civil e industrial en el Edo. Méx. y municipios
+                  colindantes del Altiplano.
                 </p>
               </a>
             </div>
@@ -76,13 +76,12 @@ export function Footer() {
               href={CONFIG.googleMapsUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-start justify-center gap-2 text-white transition-colors hover:text-[#a5d8ff] mb-2"
+              className="flex items-start justify-center gap-2 text-white transition-colors hover:text-[#ffb87a] mb-2"
               aria-label="Abrir ubicación en Google Maps"
             >
               <MapPin size={18} className="shrink-0 mt-0.5" aria-hidden />
               <span className="max-w-md text-center text-sm sm:text-base leading-snug [word-break:normal]">
-                <span className="block">Carretera Tepeji-San Ignacio Nopala,</span>
-                <span className="block">Km 6, San Ignacio Nopala, 42890, Hgo.</span>
+                <span className="block">Carretera Jilotepec-Chapa de Mota km 11, 54254 Jilotepec de Molina Enríquez, Méx.</span>
               </span>
             </a>
             <div className="flex items-start justify-center gap-2 text-slate-200 text-sm mt-5">
@@ -107,7 +106,7 @@ export function Footer() {
             <address className="not-italic mx-auto mb-6 flex w-full max-w-md flex-col items-center space-y-5">
               <a
                 href={`mailto:${CONFIG.contactEmail}`}
-                className="flex max-w-full items-center justify-center gap-2 text-sm text-white transition-colors hover:text-[#a5d8ff] break-words text-center"
+                className="flex max-w-full items-center justify-center gap-2 text-sm text-white transition-colors hover:text-[#ffb87a] break-words text-center"
               >
                 <Mail size={15} className="shrink-0 opacity-90" aria-hidden />
                 <span>{CONFIG.contactEmail}</span>
@@ -118,10 +117,10 @@ export function Footer() {
                     href={whatsappHref(CONFIG.whatsappNumber)}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center justify-center gap-2 text-white transition-colors hover:text-[#a5d8ff]"
+                    className="inline-flex items-center justify-center gap-2 text-white transition-colors hover:text-[#ffb87a]"
                   >
                     <WhatsAppIconSmall className="h-4 w-4 shrink-0 text-[#25D366]" />
-                    <span>55 4260 0590</span>
+                    <span>55 2140 4539</span>
                   </a>
                 </li>
                 <li>
@@ -129,19 +128,19 @@ export function Footer() {
                     href={whatsappHref(CONFIG.whatsappSecondaryNumber)}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center justify-center gap-2 text-white transition-colors hover:text-[#a5d8ff]"
+                    className="inline-flex items-center justify-center gap-2 text-white transition-colors hover:text-[#ffb87a]"
                   >
                     <WhatsAppIconSmall className="h-4 w-4 shrink-0 text-[#25D366]" />
-                    <span>773 158 5835</span>
+                    <span>56 1987 7440</span>
                   </a>
                 </li>
                 <li>
                   <a
                     href={`tel:${CONFIG.landlinePhoneE164}`}
-                    className="inline-flex items-center justify-center gap-2 text-white transition-colors hover:text-[#a5d8ff]"
+                    className="inline-flex items-center justify-center gap-2 text-white transition-colors hover:text-[#ffb87a]"
                   >
                     <Phone size={15} className="shrink-0 opacity-90" aria-hidden />
-                    <span>55 1555 2097</span>
+                    <span>55 7488 9773</span>
                   </a>
                 </li>
               </ul>
@@ -151,8 +150,8 @@ export function Footer() {
                 href={CONFIG.instagramUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex h-12 w-12 items-center justify-center rounded-full border border-white/30 bg-white/15 text-white transition-all hover:bg-[#c62828]"
-                aria-label="Instagram @tconcretos"
+                className="flex h-12 w-12 items-center justify-center rounded-full border border-white/30 bg-white/15 text-white transition-all hover:bg-tepexi-accent"
+                aria-label="Instagram @narvaezconcretos"
               >
                 <InstagramIcon className="h-6 w-6" />
               </a>
@@ -160,8 +159,8 @@ export function Footer() {
                 href={CONFIG.facebookUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex h-12 w-12 items-center justify-center rounded-full border border-white/30 bg-white/15 text-white transition-all hover:bg-[#c62828]"
-                aria-label="Facebook Concretos Tepexi"
+                className="flex h-12 w-12 items-center justify-center rounded-full border border-white/30 bg-white/15 text-white transition-all hover:bg-tepexi-accent"
+                aria-label="Facebook Concretos Narváez oficial"
               >
                 <FacebookIcon className="h-6 w-6" />
               </a>
@@ -173,7 +172,7 @@ export function Footer() {
           <p className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 break-words text-xs md:text-[13px]">
             <Link
               href="/aviso-privacidad"
-              className="text-[#fafaf9] transition-colors underline-offset-4 hover:text-[#a5d8ff] hover:underline"
+              className="text-[#fafaf9] transition-colors underline-offset-4 hover:text-[#ffb87a] hover:underline"
             >
               Aviso de privacidad
             </Link>
@@ -182,19 +181,19 @@ export function Footer() {
             </span>
             <Link
               href="/politica-calidad"
-              className="text-[#fafaf9] transition-colors underline-offset-4 hover:text-[#a5d8ff] hover:underline"
+              className="text-[#fafaf9] transition-colors underline-offset-4 hover:text-[#ffb87a] hover:underline"
             >
               Política de calidad
             </Link>
           </p>
-          <p>© {new Date().getFullYear()} CONCRETOS TEPEXI · TODOS LOS DERECHOS RESERVADOS.</p>
+          <p>© {new Date().getFullYear()} CONCRETOS NARVAEZ · TODOS LOS DERECHOS RESERVADOS.</p>
           <p className="break-words text-xs">
             Powered by{" "}
             <a
               href="https://sigmaaiagency.com"
               target="_blank"
               rel="noopener noreferrer"
-              className="font-semibold text-white transition-colors hover:text-[#a5d8ff]"
+              className="font-semibold text-white transition-colors hover:text-[#ffb87a]"
             >
               Sigma AI Agency
             </a>{" "}

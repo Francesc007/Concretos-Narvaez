@@ -103,7 +103,7 @@ export function Navbar({ onCotizadorClick, onAgendaVisitaClick }: NavbarProps) {
   }, []);
 
   const navBarClass =
-    "tepexi-nav-shell fixed top-0 left-0 right-0 z-[90] w-full min-w-0 border-b border-[var(--tepexi-logo-navy)]/15 bg-[#a8a5a0]/94 transition-colors duration-300";
+    "tepexi-nav-shell fixed top-0 left-0 right-0 z-[90] w-full min-w-0 border-b border-[var(--tepexi-logo-navy)]/20 bg-[color:rgb(168_168_168/0.94)] transition-colors duration-300";
 
   const texturaFondo: CSSProperties = {
     backgroundColor: "#a8a5a0",
@@ -132,10 +132,10 @@ export function Navbar({ onCotizadorClick, onAgendaVisitaClick }: NavbarProps) {
             className="inline-flex items-center gap-2 sm:gap-3 shrink-0 min-w-0"
             onClick={() => setMobileMenuOpen(false)}
           >
-            <div className="relative flex h-[4rem] w-[4rem] shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-[var(--tepexi-logo-navy)] bg-white p-2 shadow-sm sm:h-[4rem] sm:w-[4rem] md:h-[4.7rem] md:w-[4.7rem] md:p-1.5">
+            <div className="relative flex h-[4rem] w-[4rem] shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-[var(--tepexi-logo-navy)] bg-white p-[3px] shadow-sm ring-1 ring-black/[0.06] sm:h-[4rem] sm:w-[4rem] md:h-[4.7rem] md:w-[4.7rem] md:p-1">
               <Image
-                src="/Tepexi%20A-R.jpeg"
-                alt="Concretos Tepexi"
+                src="/C%20Narvaez.jpg"
+                alt="Concretos Narváez"
                 width={188}
                 height={188}
                 priority
@@ -143,11 +143,11 @@ export function Navbar({ onCotizadorClick, onAgendaVisitaClick }: NavbarProps) {
                 placeholder="blur"
                 blurDataURL={LOGO_BLUR_DATA_URL}
                 sizes="(max-width: 768px) 4rem, 4.7rem"
-                className="max-h-full max-w-full object-contain object-center"
+                className="h-full w-full object-contain object-center [transform:translateZ(0)] scale-[1.14]"
               />
             </div>
             <span className="font-display hidden max-w-[40vw] truncate text-base font-semibold tracking-wide text-[var(--tepexi-logo-navy)] sm:inline sm:text-xl md:max-w-none md:text-2xl drop-shadow-sm">
-              CONCRETOS TEPEXI
+              CONCRETOS NARVAEZ
             </span>
           </a>
 
@@ -165,8 +165,8 @@ export function Navbar({ onCotizadorClick, onAgendaVisitaClick }: NavbarProps) {
                   aria-label={isMaps ? "Abrir ubicación en Google Maps" : undefined}
                   className={`font-display text-base font-semibold uppercase tracking-wide transition-colors ${
                     active
-                      ? "text-[#c62828]"
-                      : "text-[var(--tepexi-logo-navy)] hover:text-[#c62828]"
+                      ? "text-tepexi-accent"
+                      : "text-[var(--tepexi-logo-navy)] hover:text-tepexi-accent"
                   }`}
                 >
                   {link.label}
@@ -182,7 +182,7 @@ export function Navbar({ onCotizadorClick, onAgendaVisitaClick }: NavbarProps) {
                 onCotizadorClick();
                 setMobileMenuOpen(false);
               }}
-              className="font-display flex items-center gap-1.5 sm:gap-2 rounded-xl border-2 border-transparent bg-gradient-to-b from-[#e53935] to-[#c62828] px-3 py-2.5 text-white shadow-md shadow-red-900/25 ring-1 ring-white/30 transition-all hover:scale-[1.02] hover:shadow-lg active:scale-[0.98] uppercase text-[11px] font-bold tracking-wide sm:px-5 sm:text-sm"
+              className="font-display flex items-center gap-1.5 sm:gap-2 rounded-xl border-2 border-transparent bg-gradient-to-b from-tepexi-accent-hover to-tepexi-accent px-3 py-2.5 text-white shadow-md shadow-orange-950/20 ring-1 ring-white/30 transition-all hover:scale-[1.02] hover:shadow-lg active:scale-[0.98] uppercase text-[11px] font-bold tracking-wide sm:px-5 sm:text-sm"
             >
               <FileText size={17} className="shrink-0 sm:h-[18px] sm:w-[18px]" aria-hidden />
               <span>Cotizar</span>
@@ -193,9 +193,9 @@ export function Navbar({ onCotizadorClick, onAgendaVisitaClick }: NavbarProps) {
                 onAgendaVisitaClick();
                 setMobileMenuOpen(false);
               }}
-              className="font-display flex items-center gap-1.5 sm:gap-2 rounded-xl border-2 border-white/90 bg-white px-3 py-2.5 text-[var(--tepexi-logo-navy)] shadow-sm transition-all hover:border-[#c62828]/50 hover:bg-white hover:text-[#c62828] hover:shadow-md active:scale-[0.98] uppercase text-[11px] font-bold tracking-wide sm:border-[var(--tepexi-logo-navy)]/25 sm:px-5 sm:text-sm"
+              className="font-display flex items-center gap-1.5 sm:gap-2 rounded-xl border-2 border-white/90 bg-white px-3 py-2.5 text-[var(--tepexi-logo-navy)] shadow-sm transition-all hover:border-tepexi-accent/50 hover:bg-white hover:text-tepexi-accent hover:shadow-md active:scale-[0.98] uppercase text-[11px] font-bold tracking-wide sm:border-[var(--tepexi-logo-navy)]/25 sm:px-5 sm:text-sm"
             >
-              <Calendar size={17} className="shrink-0 text-[#c62828] sm:h-[18px] sm:w-[18px]" aria-hidden />
+              <Calendar size={17} className="shrink-0 text-tepexi-accent sm:h-[18px] sm:w-[18px]" aria-hidden />
               <span>Agenda</span>
             </button>
 
@@ -255,8 +255,8 @@ export function Navbar({ onCotizadorClick, onAgendaVisitaClick }: NavbarProps) {
                       aria-label={isMaps ? "Abrir ubicación en Google Maps" : undefined}
                       className={`rounded-lg px-4 py-3 text-left font-display text-base font-semibold uppercase tracking-wide transition-colors ${
                         active
-                          ? "bg-white/10 text-[#c62828]"
-                          : "text-[var(--tepexi-logo-navy)] hover:bg-white/15 hover:text-[#c62828]"
+                          ? "bg-white/10 text-tepexi-accent"
+                          : "text-[var(--tepexi-logo-navy)] hover:bg-white/15 hover:text-tepexi-accent"
                       }`}
                       onClick={() => setMobileMenuOpen(false)}
                     >

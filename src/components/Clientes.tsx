@@ -36,7 +36,7 @@ export function Clientes({ imageFiles }: ClientesProps) {
       <div
         className="absolute inset-0 opacity-[0.05] pointer-events-none"
         style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg width='64' height='64' viewBox='0 0 64 64' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M32 0v64M0 32h64' stroke='%23c62828' stroke-width='0.5' fill='none'/%3E%3C/svg%3E")`,
+          backgroundImage: `url("data:image/svg+xml,%3Csvg width='64' height='64' viewBox='0 0 64 64' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M32 0v64M0 32h64' stroke='%233d3d3d' stroke-width='0.5' fill='none'/%3E%3C/svg%3E")`,
         }}
       />
       <div className="relative mx-auto w-full min-w-0 max-w-7xl px-3 sm:px-4 mb-6 md:mb-7">
@@ -47,11 +47,10 @@ export function Clientes({ imageFiles }: ClientesProps) {
           className="text-center"
         >
           <h2 className="font-display text-4xl md:text-5xl font-bold text-white mb-3 tracking-wide">
-            Clientes de marcas líderes que confian en nosotros
+            Marcas que han sumado con nosotros en obra
           </h2>
           <p className="max-w-3xl mx-auto text-pretty text-sm text-white/90 sm:text-base leading-relaxed">
-            Desde suministro para infraestructura nacional como CFE y Pemex, hasta proyectos industriales
-            y comerciales para Costco, P&amp;G, Truper y AutoZone.
+            Cartera heterogénea: infraestructura eléctrica y petrolera federal, retail mayorista y cadena automotriz.
           </p>
         </motion.div>
       </div>
