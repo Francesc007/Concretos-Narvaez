@@ -29,8 +29,8 @@
   --tepexi-section-bluewash: #f5f4f3;
   --tepexi-logo-gray: #6e6e6e;
   --tepexi-concrete-frame: #9e9e9e;
-  /** Barra superior / pies: gris medio marca */
-  --tepexi-nav-bg: #a8a8a8;
+  /** Barra superior: gris marca (alineado al gris del logotipo) */
+  --tepexi-nav-bg: #6e6e6e;
   --tepexi-footer-bg: #525252;
   /** Modales / superficies oscuras (cotizador) */
   --tepexi-surface-dark: #141922;

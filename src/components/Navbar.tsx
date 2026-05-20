@@ -103,10 +103,10 @@ export function Navbar({ onCotizadorClick, onAgendaVisitaClick }: NavbarProps) {
   }, []);
 
   const navBarClass =
-    "tepexi-nav-shell fixed top-0 left-0 right-0 z-[90] w-full min-w-0 border-b border-[var(--tepexi-logo-navy)]/20 bg-[color:rgb(168_168_168/0.94)] transition-colors duration-300";
+    "tepexi-nav-shell fixed top-0 left-0 right-0 z-[90] w-full min-w-0 border-b border-[var(--tepexi-logo-navy)]/25 bg-[color:color-mix(in_srgb,var(--tepexi-nav-bg)_94%,transparent)] transition-colors duration-300";
 
   const texturaFondo: CSSProperties = {
-    backgroundColor: "#a8a5a0",
+    backgroundColor: "var(--tepexi-nav-bg)",
     backgroundImage: "url(/concrete-texture.svg)",
     backgroundSize: "88px 88px",
     backgroundRepeat: "repeat",

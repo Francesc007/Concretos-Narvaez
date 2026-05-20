@@ -7,6 +7,7 @@ import { GoogleSpreadsheet } from "google-spreadsheet";
 import type { TipoVisitaAgendada } from "@/lib/agendaVisita";
 import {
   RESISTENCIAS_KG,
+  buildCotizacionConfigFromRows,
   mergePreciosRowsPreferColumnasAb,
   parseResistenciaKg,
 } from "@/lib/cotizacion";
@@ -44,6 +45,71 @@ export function getGoogleServiceAccountJwt(): JWT {
   });
 }
 
+function isSheets403Error(e: unknown): boolean {
+  if (!e || typeof e !== "object") return false;
+  const status = (e as { response?: { status?: number } }).response?.status;
+  if (status === 403) return true;
+  const msg = e instanceof Error ? e.message : String(e);
+  return msg.includes("[403]") || msg.includes("does not have permission");
+}
+
+function sheetsPermissionError(): Error {
+  const email = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL ?? "GOOGLE_SERVICE_ACCOUNT_EMAIL";
+  const sheetId = process.env.GOOGLE_SHEET_ID ?? "";
+  return new Error(
+    `Google Sheets: sin permiso (403). Abre la hoja ${sheetId} → Compartir → añade ${email} como Editor.`,
+  );
+}
+
+async function loadSpreadsheetInfo(doc: GoogleSpreadsheet): Promise<void> {
+  try {
+    await doc.loadInfo();
+  } catch (e) {
+    if (isSheets403Error(e)) throw sheetsPermissionError();
+    throw e;
+  }
+}
+
+function normSheetTitleKey(title: string): string {
+  return title
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function findSheetByTitleCandidates(
+  doc: GoogleSpreadsheet,
+  candidates: string[],
+): GoogleSpreadsheetWorksheet | undefined {
+  for (const name of candidates) {
+    const sheet = doc.sheetsByTitle[name];
+    if (sheet) return sheet;
+  }
+  const wanted = new Set(candidates.map(normSheetTitleKey));
+  for (const sheet of doc.sheetsByIndex) {
+    if (wanted.has(normSheetTitleKey(sheet.title))) return sheet;
+  }
+  return undefined;
+}
+
+/** Pestaña de precios del cotizador (Footer / Narváez: «Precios concretos», legado: «Precios Concreto»). */
+function findPreciosConcretoSheet(doc: GoogleSpreadsheet): GoogleSpreadsheetWorksheet | undefined {
+  const named = findSheetByTitleCandidates(doc, [
+    "Precios concretos",
+    "Precios Concreto",
+    "Precios Concretos",
+    "Precios concreto",
+  ]);
+  if (named) return named;
+  for (const sheet of doc.sheetsByIndex) {
+    const key = normSheetTitleKey(sheet.title);
+    if (key.includes("precio") && key.includes("concreto")) return sheet;
+  }
+  return undefined;
+}
+
 export async function getSpreadsheetDoc(): Promise<GoogleSpreadsheet> {
   if (docSingleton) return docSingleton;
 
@@ -53,7 +119,7 @@ export async function getSpreadsheetDoc(): Promise<GoogleSpreadsheet> {
   const auth = getGoogleServiceAccountJwt();
 
   const doc = new GoogleSpreadsheet(sheetId, auth);
-  await doc.loadInfo();
+  await loadSpreadsheetInfo(doc);
   docSingleton = doc;
   return doc;
 }
@@ -61,7 +127,7 @@ export async function getSpreadsheetDoc(): Promise<GoogleSpreadsheet> {
 /** Recarga metadatos del spreadsheet (pestañas nuevas o renombradas). Útil antes de escribir en Bloqueos_Logistica. */
 export async function reloadSpreadsheetDocInfo(): Promise<GoogleSpreadsheet> {
   const doc = await getSpreadsheetDoc();
-  await doc.loadInfo();
+  await loadSpreadsheetInfo(doc);
   return doc;
 }
 
@@ -549,9 +615,14 @@ export async function fetchPreciosConcretoConfig(): Promise<CotizacionPreciosCon
   const sheetId = process.env.GOOGLE_SHEET_ID;
   if (!sheetId) throw new Error("GOOGLE_SHEET_ID no está definida");
   const doc = new GoogleSpreadsheet(sheetId, getGoogleServiceAccountJwt());
-  await doc.loadInfo();
-  const sheet = doc.sheetsByTitle["Precios Concreto"];
-  if (!sheet) throw new Error('No existe la hoja "Precios Concreto"');
+  await loadSpreadsheetInfo(doc);
+  const sheet = findPreciosConcretoSheet(doc);
+  if (!sheet) {
+    const tabs = doc.sheetsByIndex.map((s) => `"${s.title}"`).join(", ");
+    throw new Error(
+      `No existe la hoja de precios ("Precios concretos" / "Precios Concreto"). Pestañas en el documento: ${tabs || "(ninguna)"}`,
+    );
+  }
 
   await loadSheetGrid(sheet);
   const zonas = mergeZonas(parseNormalizedConcreteTable(sheet), parseConcreteBlocks(sheet));
@@ -565,8 +636,31 @@ export async function fetchPreciosConcretoConfig(): Promise<CotizacionPreciosCon
     if (zonaConfig && zonaConfig.cargoVacioM3 <= 0) zonaConfig.cargoVacioM3 = adicionalesGlobal.cargoVacioM3;
   }
 
+  const aditivos = { ...adicionalesPdf.aditivos, ...adicionalesGlobal.aditivos };
+  const resistenciasRapidas = {
+    ...adicionalesPdf.resistenciasRapidas,
+    ...adicionalesGlobal.resistenciasRapidas,
+  };
+  const extras = {
+    tuberiaExtraTramo10mM3: tuberiaExtraFromServicios || adicionalesPdf.tuberiaExtraTramo10mM3,
+    volumenMaximoCotizadorM3: sistemaExtras.volumenMaximoCotizadorM3,
+  };
+
+  let resistenciasKg = resistenciasDesdeZonas(zonas);
+  if (resistenciasKg.length === 0) {
+    const simple = buildCotizacionConfigFromRows(await fetchPreciosDesdeColumnasAB(sheet));
+    if (simple.resistenciasKg.length > 0) {
+      return {
+        ...simple,
+        ...extras,
+        aditivos,
+        resistenciasRapidas,
+        fuente: "Precios Concreto",
+      };
+    }
+  }
+
   const preciosPorResistencia: Record<string, number> = {};
-  const resistenciasKg = resistenciasDesdeZonas(zonas);
   for (const kg of resistenciasKg) {
     preciosPorResistencia[String(kg)] = zonas.Z1?.preciosPorResistencia[String(kg)]?.tiro_directo ?? 0;
   }
@@ -575,13 +669,9 @@ export async function fetchPreciosConcretoConfig(): Promise<CotizacionPreciosCon
     resistenciasKg,
     preciosPorResistencia,
     zonas,
-    aditivos: { ...adicionalesPdf.aditivos, ...adicionalesGlobal.aditivos },
-    resistenciasRapidas: {
-      ...adicionalesPdf.resistenciasRapidas,
-      ...adicionalesGlobal.resistenciasRapidas,
-    },
-    tuberiaExtraTramo10mM3: tuberiaExtraFromServicios || adicionalesPdf.tuberiaExtraTramo10mM3,
-    volumenMaximoCotizadorM3: sistemaExtras.volumenMaximoCotizadorM3,
+    aditivos,
+    resistenciasRapidas,
+    ...extras,
     fuente: "Precios Concreto",
   };
 }
@@ -634,9 +724,11 @@ export async function fetchPreciosRows(): Promise<PrecioRow[]> {
   const sheetId = process.env.GOOGLE_SHEET_ID;
   if (!sheetId) throw new Error("GOOGLE_SHEET_ID no está definida");
   const doc = new GoogleSpreadsheet(sheetId, getGoogleServiceAccountJwt());
-  await doc.loadInfo();
-  const sheet = doc.sheetsByTitle["Precios"];
-  if (!sheet) throw new Error('No existe la hoja "Precios"');
+  await loadSpreadsheetInfo(doc);
+  const sheet =
+    findSheetByTitleCandidates(doc, ["Precios", "Precios concretos", "Precios Concreto"]) ??
+    findPreciosConcretoSheet(doc);
+  if (!sheet) throw new Error('No existe la hoja "Precios" ni "Precios concretos"');
   const rows = await sheet.getRows();
   const mapped: PrecioRow[] = rows.map((row) => {
     const rFlex = extractResistenciaFlexible(row);

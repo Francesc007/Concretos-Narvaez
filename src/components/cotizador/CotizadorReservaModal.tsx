@@ -30,6 +30,13 @@ const OBRA_LABELS: Record<string, string> = {
   infraestructura: "Comercial / industrial",
 };
 
+/** Mismo formato que Footer / botón flotante (api.whatsapp.com + solo dígitos en phone). */
+function openWhatsAppSend(phone: string, message: string) {
+  const digits = phone.replace(/\D/g, "");
+  const url = `https://api.whatsapp.com/send?phone=${digits}&text=${encodeURIComponent(message)}`;
+  window.open(url, "_blank", "noopener,noreferrer");
+}
+
 interface MapsDistanceInfo {
   destino: string;
   distanceKm: number;
@@ -341,13 +348,11 @@ export function CotizadorReservaModal({ isOpen, onClose, volumenInicialM3 = null
       `Estado en agenda: Agendado`,
       comentarios.trim() ? `Comentarios: ${comentarios.trim()}` : null,
     ].filter(Boolean) as string[];
-    const text = encodeURIComponent(lineas.join("\n"));
-    window.open(`https://wa.me/${CONFIG.whatsappNumber}?text=${text}`, "_blank");
+    openWhatsAppSend(CONFIG.whatsappNumber, lineas.join("\n"));
   };
 
   async function abrirWhatsAppCotizacionInformativa() {
-    const ok = await enviarLeadCotizacionASheets();
-    if (!ok) return;
+    await enviarLeadCotizacionASheets();
 
     const vol = volumenNumerico;
     const total = cotizacionResultado.total;
@@ -376,7 +381,7 @@ export function CotizadorReservaModal({ isOpen, onClose, volumenInicialM3 = null
       `Total estimado: $${total.toLocaleString("es-MX", { minimumFractionDigits: 2 })}${tipoVaciado === "bombeo" ? " (solo concreto; bombeo a cotizar)" : ""}`,
       `Quiero formalizar mi pedido, agendar colado o recibir atención personalizada.`,
     ].filter(Boolean) as string[];
-    window.open(`https://wa.me/${CONFIG.whatsappNumber}?text=${encodeURIComponent(lineas.join("\n"))}`, "_blank");
+    openWhatsAppSend(CONFIG.whatsappNumber, lineas.join("\n"));
     resetReservaForm();
     onClose();
   }
