@@ -9,6 +9,8 @@ import { appendVisitaAgendadaRow, normalizeHora } from "@/lib/googleSheets";
 
 const METHODS = "POST, OPTIONS";
 
+export const dynamic = "force-dynamic";
+
 function isTipoVisita(t: string): t is TipoVisitaAgendada {
   return (TIPOS_VISITA_AGENDADA as readonly string[]).includes(t);
 }

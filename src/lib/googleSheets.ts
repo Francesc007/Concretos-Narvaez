@@ -34,6 +34,17 @@ function getPrivateKey(): string {
   return raw.replace(/\\n/g, "\n");
 }
 
+/** ID del spreadsheet (servidor). `.env.local` solo aplica en desarrollo local; en Vercel hay que definir la variable en el panel. */
+export function getGoogleSheetId(): string {
+  const sheetId = process.env.GOOGLE_SHEET_ID?.trim();
+  if (!sheetId) {
+    throw new Error(
+      "GOOGLE_SHEET_ID no está definida. En tu PC: revisa `.env.local` y reinicia `npm run dev`. En producción (Vercel/hosting): añade GOOGLE_SHEET_ID en Variables de entorno del proyecto (`.env.local` no se sube a Git).",
+    );
+  }
+  return sheetId;
+}
+
 /** JWT de la cuenta de servicio (Sheets + Calendar). Solo servidor. */
 export function getGoogleServiceAccountJwt(): JWT {
   const email = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
@@ -113,8 +124,7 @@ function findPreciosConcretoSheet(doc: GoogleSpreadsheet): GoogleSpreadsheetWork
 export async function getSpreadsheetDoc(): Promise<GoogleSpreadsheet> {
   if (docSingleton) return docSingleton;
 
-  const sheetId = process.env.GOOGLE_SHEET_ID;
-  if (!sheetId) throw new Error("GOOGLE_SHEET_ID no está definida");
+  const sheetId = getGoogleSheetId();
 
   const auth = getGoogleServiceAccountJwt();
 
@@ -612,8 +622,7 @@ async function parseAdicionalesGlobalSheet(sheet: GoogleSpreadsheetWorksheet | u
 }
 
 export async function fetchPreciosConcretoConfig(): Promise<CotizacionPreciosConfig> {
-  const sheetId = process.env.GOOGLE_SHEET_ID;
-  if (!sheetId) throw new Error("GOOGLE_SHEET_ID no está definida");
+  const sheetId = getGoogleSheetId();
   const doc = new GoogleSpreadsheet(sheetId, getGoogleServiceAccountJwt());
   await loadSpreadsheetInfo(doc);
   const sheet = findPreciosConcretoSheet(doc);
@@ -721,8 +730,7 @@ async function fetchPreciosDesdeColumnasAB(sheet: GoogleSpreadsheetWorksheet): P
 export async function fetchPreciosRows(): Promise<PrecioRow[]> {
   /* Documento nuevo por petición: así los precios reflejan cambios en Sheets de inmediato
    * (el singleton de getSpreadsheetDoc() podía dejar filas/celdas desactualizadas). */
-  const sheetId = process.env.GOOGLE_SHEET_ID;
-  if (!sheetId) throw new Error("GOOGLE_SHEET_ID no está definida");
+  const sheetId = getGoogleSheetId();
   const doc = new GoogleSpreadsheet(sheetId, getGoogleServiceAccountJwt());
   await loadSpreadsheetInfo(doc);
   const sheet =
