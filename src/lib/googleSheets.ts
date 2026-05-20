@@ -649,7 +649,7 @@ export async function fetchPreciosConcretoConfig(): Promise<CotizacionPreciosCon
   let resistenciasKg = resistenciasDesdeZonas(zonas);
   if (resistenciasKg.length === 0) {
     const simple = buildCotizacionConfigFromRows(await fetchPreciosDesdeColumnasAB(sheet));
-    if (simple.resistenciasKg?.length > 0) {
+    if ((simple.resistenciasKg?.length ?? 0) > 0) {
       return {
         ...simple,
         ...extras,
