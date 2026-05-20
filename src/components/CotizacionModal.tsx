@@ -79,7 +79,7 @@ export function CotizacionModal({ isOpen, onClose }: CotizacionModalProps) {
   const handleEnviar = () => {
     if (!autorizoDatos) return;
     const lineas = [
-      `Hola Concretos Narváez, solicito cotización de concreto premezclado.`,
+      `Hola ${CONFIG.companyDisplayName}, solicito cotización de concreto premezclado.`,
       `Tiro directo o bombeo: ${labelEntrega(entrega)}`,
       nombre.trim() ? `Nombre: ${nombre.trim()}` : null,
       `Tipo de obra: ${tipoObra}`,
@@ -275,7 +275,7 @@ export function CotizacionModal({ isOpen, onClose }: CotizacionModalProps) {
                 className="mt-1 h-4 w-4 shrink-0 rounded border-[#b8c4d8]/55 text-[#25D366] focus:ring-[#25D366]"
               />
               <span>
-                Autorizo el uso de mis datos para que Concretos Narváez me contacte con la cotización.
+                Autorizo el uso de mis datos para que {CONFIG.companyDisplayName} me contacte con la cotización.
               </span>
             </label>
 

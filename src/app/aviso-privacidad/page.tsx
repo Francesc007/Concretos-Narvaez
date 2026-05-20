@@ -36,7 +36,7 @@ export default function AvisoPrivacidadPage() {
                 priority
               />
             </span>
-            CONCRETOS NARVAEZ
+            {name}
           </Link>
           <Link
             href="/"

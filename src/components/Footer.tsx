@@ -50,7 +50,7 @@ export function Footer() {
                 <div className="flex h-[4rem] w-[4rem] shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-[var(--tepexi-logo-navy)] bg-white p-[3px] shadow-sm ring-1 ring-black/[0.06] md:h-[4.7rem] md:w-[4.7rem] md:p-1">
                   <img
                     src="/C%20Narvaez.jpg"
-                    alt="Concretos Narváez"
+                    alt={CONFIG.companyDisplayName}
                     className="h-full w-full object-contain object-center scale-[1.14]"
                   />
                 </div>
@@ -151,7 +151,7 @@ export function Footer() {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex h-12 w-12 items-center justify-center rounded-full border border-white/30 bg-white/15 text-white transition-all hover:bg-tepexi-accent"
-                aria-label="Instagram @narvaezconcretos"
+                aria-label={`Instagram de ${CONFIG.companyDisplayName}`}
               >
                 <InstagramIcon className="h-6 w-6" />
               </a>
@@ -160,7 +160,7 @@ export function Footer() {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex h-12 w-12 items-center justify-center rounded-full border border-white/30 bg-white/15 text-white transition-all hover:bg-tepexi-accent"
-                aria-label="Facebook Concretos Narváez oficial"
+                aria-label={`Facebook ${CONFIG.companyDisplayName} oficial`}
               >
                 <FacebookIcon className="h-6 w-6" />
               </a>
@@ -186,7 +186,7 @@ export function Footer() {
               Política de calidad
             </Link>
           </p>
-          <p>© {new Date().getFullYear()} CONCRETOS NARVAEZ · TODOS LOS DERECHOS RESERVADOS.</p>
+          <p>© {new Date().getFullYear()} {CONFIG.companyLegalName} · TODOS LOS DERECHOS RESERVADOS.</p>
           <p className="break-words text-xs">
             Powered by{" "}
             <a

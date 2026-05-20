@@ -10,6 +10,7 @@
  *   {GOOGLE_SERVICE_ACCOUNT_EMAIL} con permiso "Realizar cambios en los eventos".
  * Sin ese paso, insert puede responder 403/404 y no verás eventos en el calendario del negocio.
  */
+import { CONFIG } from "@/config";
 import { google } from "googleapis";
 import type { GaxiosError } from "gaxios";
 import type { TipoVisitaAgendada } from "@/lib/agendaVisita";
@@ -89,7 +90,7 @@ export async function createVisitaAgendadaCalendarEvent(opts: {
     opts.correo.trim() ? `Correo: ${opts.correo.trim()}` : null,
     `Teléfono / WhatsApp: ${opts.telefono.trim()}`,
     "",
-    "Registrado desde la landing de Concretos Narváez.",
+    `Registrado desde la landing de ${CONFIG.companyDisplayName}.`,
   ]
     .filter(Boolean)
     .join("\n");

@@ -135,7 +135,7 @@ export function Navbar({ onCotizadorClick, onAgendaVisitaClick }: NavbarProps) {
             <div className="relative flex h-[4rem] w-[4rem] shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-[var(--tepexi-logo-navy)] bg-white p-[3px] shadow-sm ring-1 ring-black/[0.06] sm:h-[4rem] sm:w-[4rem] md:h-[4.7rem] md:w-[4.7rem] md:p-1">
               <Image
                 src="/C%20Narvaez.jpg"
-                alt="Concretos Narváez"
+                alt={CONFIG.companyDisplayName}
                 width={188}
                 height={188}
                 priority
@@ -147,7 +147,7 @@ export function Navbar({ onCotizadorClick, onAgendaVisitaClick }: NavbarProps) {
               />
             </div>
             <span className="font-display hidden max-w-[40vw] truncate text-base font-semibold tracking-wide text-[var(--tepexi-logo-navy)] sm:inline sm:text-xl md:max-w-none md:text-2xl drop-shadow-sm">
-              CONCRETOS NARVAEZ
+              {CONFIG.companyLegalName}
             </span>
           </a>
 

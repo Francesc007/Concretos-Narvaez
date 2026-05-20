@@ -3,11 +3,13 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { CalendarCheck, X } from "lucide-react";
-import { DateFieldCalendar, todayYmdLocal } from "@/components/ui/DateFieldCalendar";
+import { DateFieldCalendar } from "@/components/ui/DateFieldCalendar";
 import { apiUrl, fetchApiJson } from "@/lib/api";
 import {
+  earliestVisitDateYmd,
   firstAvailableVisitYmd,
   getHorariosVisita,
+  isVisitDateAllowed,
   TIPOS_VISITA_AGENDADA,
   type TipoVisitaAgendada,
 } from "@/lib/agendaVisita";
@@ -83,11 +85,15 @@ export function AgendaVisitaModal({ isOpen, onClose }: AgendaVisitaModalProps) {
       setError("Elige una fecha.");
       return;
     }
-    const slots = getHorariosVisita(fecha);
-    if (slots.length === 0) {
-      setError("Los domingos no hay visitas. Elige otro día.");
+    if (!isVisitDateAllowed(fecha)) {
+      setError(
+        fecha < earliestVisitDateYmd()
+          ? "Las visitas se agendan a partir de mañana, no el mismo día."
+          : "Los domingos no hay visitas. Elige otro día.",
+      );
       return;
     }
+    const slots = getHorariosVisita(fecha);
     if (!hora || !slots.includes(hora)) {
       setError("Selecciona un horario disponible.");
       return;
@@ -166,7 +172,8 @@ export function AgendaVisitaModal({ isOpen, onClose }: AgendaVisitaModalProps) {
 
             <p className="mb-6 text-sm text-[var(--tepexi-text-body)]">
               Horario de atención: <span className="font-medium text-[var(--tepexi-logo-navy)]">Lun–Vie 9:00 – 16:00 h</span> /{" "}
-              <span className="font-medium text-[var(--tepexi-logo-navy)]">Sab 9:00 – 12:00 h</span>
+              <span className="font-medium text-[var(--tepexi-logo-navy)]">Sab 9:00 – 12:00 h</span>. Las citas se reservan{" "}
+              <span className="font-medium text-[var(--tepexi-logo-navy)]">a partir del día siguiente</span>.
             </p>
 
             <div className="space-y-4">
@@ -253,7 +260,7 @@ export function AgendaVisitaModal({ isOpen, onClose }: AgendaVisitaModalProps) {
                 <DateFieldCalendar
                   value={fecha}
                   onChange={setFecha}
-                  minDate={todayYmdLocal()}
+                  minDate={firstAvailableVisitYmd()}
                   disabledDays={(date) => date.getDay() === 0}
                   placeholder="Elegir fecha"
                 />

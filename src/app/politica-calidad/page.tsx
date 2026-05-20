@@ -1,15 +1,18 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import { CONFIG } from "@/config";
 
 export const metadata: Metadata = {
   title: "Política de calidad | Concretos Narváez",
   description:
-    "Enfoque de CONCRETOS NARVAEZ en gestión de calidad del CH premezclado: cumplimiento normativo, seguimiento al cliente y mejora continua operativa.",
+    "Enfoque de CONCRETOS NARVÁEZ en gestión de calidad del CH premezclado: cumplimiento normativo, seguimiento al cliente y mejora continua operativa.",
   robots: "index, follow",
 };
 
 export default function PoliticaCalidadPage() {
+  const name = CONFIG.companyLegalName;
+
   return (
     <div className="min-h-full flex flex-col bg-[var(--tepexi-page)] text-[var(--tepexi-text-body)] antialiased">
       <header className="sticky top-0 z-20 border-b border-[var(--tepexi-border-light)] bg-white shadow-sm">
@@ -31,7 +34,7 @@ export default function PoliticaCalidadPage() {
                 priority
               />
             </span>
-            CONCRETOS NARVAEZ
+            {name}
           </Link>
           <Link
             href="/"
@@ -50,7 +53,7 @@ export default function PoliticaCalidadPage() {
 
           <div className="space-y-6 leading-relaxed text-[15px] text-[var(--tepexi-text-body)] sm:text-base">
             <p>
-              <strong className="text-[var(--tepexi-logo-navy)]">CONCRETOS NARVAEZ</strong> es una empresa mexicana
+              <strong className="text-[var(--tepexi-logo-navy)]">{name}</strong> es una empresa mexicana
               especializada en la fabricación, transporte y entrega de Concreto Hidráulico Premezclado para la industria
               de la construcción; elaboramos productos con la más alta calidad exigida en las normas de calidad vigentes.
             </p>

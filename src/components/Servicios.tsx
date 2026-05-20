@@ -12,21 +12,21 @@ const servicios = [
     titulo: "Concreto Hidráulico Premezclado Certificado",
     descripcion:
       "Dosificación controlada en planta y registro de resistencias según normas NMX-C aplicables; orientamos la curva de elaboración para tu especificación de obra.",
-    imagen: "/Planta 3.jpg",
+    imagen: "/TX2.jpg",
     icon: Truck,
   },
   {
     titulo: "Bombeo y Vaciado Programado",
     descripcion:
       "Equipos para altura y frentes angostos; enlazamos bomba con rutas internas para reducir esperas en sitio y mantener la calidad de la mezcla.",
-    imagen: "/bombeo.jpg",
+    imagen: "/Jilo1.jpg",
     icon: Cylinder,
   },
   {
     titulo: "Despacho con flota propia",
     descripcion:
       "Ventanas horarias coordinadas contigo y tu cuadrilla; salimos desde planta Jilotepec con trayectos pensados para obra en Edo. Méx. y municipios cercanos.",
-    imagen: "/TX6.jpg",
+    imagen: "/Jilo.jpg",
     icon: Gauge,
   },
   {

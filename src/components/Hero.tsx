@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { heroImageSrc } from "@/config";
+import { CONFIG, heroImageSrc } from "@/config";
 
 export function Hero() {
   return (
@@ -12,7 +12,7 @@ export function Hero() {
     >
       <Image
         src={heroImageSrc()}
-        alt="Concretos Narváez — planta de concreto premezclado y cobertura en Jilotepec, Estado de México"
+        alt={`${CONFIG.companyDisplayName} — planta de concreto premezclado y cobertura en Jilotepec, Estado de México`}
         fill
         priority
         sizes="100vw"

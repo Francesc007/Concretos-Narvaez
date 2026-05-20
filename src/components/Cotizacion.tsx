@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { Calculator, Calendar } from "lucide-react";
+import { CONFIG } from "@/config";
 
 interface CotizacionProps {
   onCotizadorClick: () => void;
@@ -38,7 +39,7 @@ export function Cotizacion({ onCotizadorClick, onAgendaVisitaClick }: Cotizacion
                 <Calculator size={24} className="shrink-0" strokeWidth={1.75} aria-hidden />
               </span>
               <h3 className="font-display text-xl font-bold tracking-wide text-[var(--tepexi-logo-navy)] sm:text-2xl">
-                Cotizador Narváez
+                Cotizador {CONFIG.companyDisplayName.split(" ").slice(1).join(" ")}
               </h3>
               <p className="mt-2 flex-1 text-sm leading-relaxed text-[var(--tepexi-text-body)] sm:text-base">
                 Introduce tipo de vaciado, distancia estimada y resistencia deseada; recibes una propuesta orientativa y

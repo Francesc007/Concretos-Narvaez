@@ -28,7 +28,9 @@ export const CONFIG = {
   /** Operación declarada para avisos simplificados (ajustar a domicilio fiscal si aplica) */
   companyAddressShort: "Jilotepec, Estado de México, México",
   /** Razón social o denominación utilizada en el sitio público */
-  companyLegalName: "CONCRETOS NARVAEZ",
+  companyLegalName: "CONCRETOS NARVÁEZ",
+  /** Marca en mayúsculas/minúsculas para textos y metadatos */
+  companyDisplayName: "Concretos Narváez",
   /**
    * `true`: flujo completo con agenda, capacidad y escritura en «Agenda» + «Bloqueos_Logistica».
    * `false` (stand by): solo cotización informativa + contacto; los leads van a la hoja «Cotizaciones».

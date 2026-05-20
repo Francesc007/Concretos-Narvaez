@@ -330,7 +330,7 @@ export function CotizadorReservaModal({ isOpen, onClose, volumenInicialM3 = null
       .map((aditivo) => (aditivo === "fibra" ? "Fibra de polipropileno" : "Impermeabilizante integral"))
       .join(", ");
     const lineas = [
-      `*Reserva Concretos Narváez*`,
+      `*Reserva ${CONFIG.companyDisplayName}*`,
       `Nombre: ${nombre.trim()}`,
       `Teléfono: ${telefono.trim()}`,
       empresa.trim() ? `Empresa: ${empresa.trim()}` : null,
@@ -369,7 +369,7 @@ export function CotizadorReservaModal({ isOpen, onClose, volumenInicialM3 = null
       .map((aditivo) => (aditivo === "fibra" ? "Fibra de polipropileno" : "Impermeabilizante integral"))
       .join(", ");
     const lineas = [
-      `*Cotización Concretos Narváez*`,
+      `*Cotización ${CONFIG.companyDisplayName}*`,
       destinoObra.trim() ? `Ubicación obra: ${destinoObra.trim()}` : null,
       rutaMaps ? `Ruta: ${rutaMaps}` : null,
       `Volumen: ${vol} m³`,

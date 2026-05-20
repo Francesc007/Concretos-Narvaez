@@ -1,6 +1,7 @@
 import {
   TIPOS_VISITA_AGENDADA,
   getHorariosVisita,
+  isVisitDateAllowed,
   type TipoVisitaAgendada,
 } from "@/lib/agendaVisita";
 import { emptyWithCors, jsonWithCors } from "@/lib/api-cors";
@@ -61,10 +62,14 @@ export async function POST(request: Request) {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(fecha)) {
     return jsonWithCors({ error: "Fecha inválida" }, 400, METHODS);
   }
-  const slots = getHorariosVisita(fecha);
-  if (slots.length === 0) {
-    return jsonWithCors({ error: "No hay visitas ese día (domingo cerrado)" }, 400, METHODS);
+  if (!isVisitDateAllowed(fecha)) {
+    return jsonWithCors(
+      { error: "La visita debe agendarse a partir de mañana (no el mismo día ni domingo)" },
+      400,
+      METHODS,
+    );
   }
+  const slots = getHorariosVisita(fecha);
   if (!slots.includes(horario)) {
     return jsonWithCors({ error: "Horario no disponible" }, 400, METHODS);
   }

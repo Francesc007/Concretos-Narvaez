@@ -4,6 +4,7 @@
  */
 
 import { addDays, format } from "date-fns";
+import { CONFIG } from "@/config";
 
 export const DURACION_VISITA_MIN = 60;
 
@@ -33,15 +34,27 @@ export function getHorariosVisita(fechaYmd: string): string[] {
   return out;
 }
 
-/** Primera fecha (desde hoy) con al menos un horario de visita */
+/** Mañana en yyyy-MM-dd (hora local). No se permiten visitas el mismo día. */
+export function earliestVisitDateYmd(): string {
+  return format(addDays(new Date(), 1), "yyyy-MM-dd");
+}
+
+/** Primera fecha elegible (desde mañana) con al menos un horario de visita */
 export function firstAvailableVisitYmd(): string {
-  const start = new Date();
-  for (let i = 0; i < 21; i++) {
-    const d = addDays(start, i);
+  for (let i = 1; i < 22; i++) {
+    const d = addDays(new Date(), i);
     const ymd = format(d, "yyyy-MM-dd");
     if (getHorariosVisita(ymd).length > 0) return ymd;
   }
-  return format(start, "yyyy-MM-dd");
+  return earliestVisitDateYmd();
+}
+
+/** Valida fecha de visita: no hoy, no domingo y con horarios disponibles */
+export function isVisitDateAllowed(fechaYmd: string): boolean {
+  const ymd = fechaYmd.trim().slice(0, 10);
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(ymd)) return false;
+  if (ymd < earliestVisitDateYmd()) return false;
+  return getHorariosVisita(ymd).length > 0;
 }
 
 function formatGCalLocal(d: Date): string {
@@ -90,14 +103,14 @@ export function buildGoogleCalendarVisitaUrl(opts: BuildGoogleCalendarVisitaPara
     ? `• Correo: ${opts.correo.trim()}`
     : null;
   const details = [
-    "Visita a planta — Concretos Narváez",
+    `Visita a planta — ${CONFIG.companyDisplayName}`,
     "",
     "Contacto",
     ...(correoLine ? [correoLine] : []),
     `• WhatsApp / Teléfono: ${opts.telefono.trim()}`,
     "",
     `Duración: ${dur} minutos`,
-    "Solicitud generada desde el sitio web de Concretos Narváez.",
+    `Solicitud generada desde el sitio web de ${CONFIG.companyDisplayName}.`,
   ].join("\n");
 
   const location = opts.ubicacion ?? "Jilotepec, Estado de México, México";

@@ -1,91 +1,59 @@
 "use client";
 
-import { memo, useEffect, useState } from "react";
+import { memo } from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { blurDataUrlForPublicImage } from "@/lib/image-blur-placeholders";
 
-/** Tres vistas por proyecto; rutas bajo /public (p. ej. 1→1,1.2,1.3 / 2→2,2.1,2.3 / 3→3,3.1,3.2 …). */
+/** Una imagen fija por proyecto bajo /public. */
 const PROYECTO_IMAGENES = [
-  ["/1.jpg", "/1.2.jpg", "/1.3.jpg"],
-  ["/2.jpg", "/2.1.jpg", "/2.3.jpg"],
-  ["/3.jpg", "/3.1.jpg", "/3.2.jpg"],
-  ["/4.jpg", "/4.1.jpg", "/4.2.jpg"],
-  ["/5.jpg", "/5.1.jpg", "/5.2.jpg"],
-  ["/6.jpg", "/6.1.jpg", "/6.2.jpg"],
-  ["/7.jpg", "/7.1.jpg", "/7.2.jpg"],
-  ["/8.jpg", "/8.1.jpg", "/8.2.jpg"],
-  ["/9.JPG", "/9.1.JPG", "/9.2.JPG"],
-  ["/10.jpg", "/10.1.jpg", "/10.2.jpg"],
-  ["/11.jpg", "/11.1.jpg", "/11.2.jpg"],
-  ["/12.jpg", "/12.1.jpg", "/12.2.jpg"],
-  ["/13.jpg", "/13.1.jpg", "/13.2.jpg"],
-  ["/14.jpg", "/14.1.jpg", "/14.2.jpg"],
-  ["/15.jpg", "/15.1.jpg", "/15.2.jpg"],
+  "/Jilo1.jpg",
+  "/Jilo5.jpg",
+  "/Jilo7.jpg",
+  "/Jilo8.jpg",
+  "/Jilo9.jpg",
+  "/6.jpg",
+  "/7.jpg",
+  "/8.jpg",
+  "/9.JPG",
 ] as const;
-
-const SLIDE_INTERVAL_MS = 4500;
 
 const items = [
   {
     titulo: "Central Park 57, Tepeji del Río, Hgo.",
-    imagenes: PROYECTO_IMAGENES[0],
+    imagen: PROYECTO_IMAGENES[0],
   },
   {
     titulo: "Muro de Contención en Autopista Méx-Qro.",
-    imagenes: PROYECTO_IMAGENES[1],
+    imagen: PROYECTO_IMAGENES[1],
   },
   {
     titulo: "Cimentación en Farmaceútica, Parque Industrial Tepeji del Río, Hgo.",
-    imagenes: PROYECTO_IMAGENES[2],
+    imagen: PROYECTO_IMAGENES[2],
   },
   {
     titulo: "Colado Masivo Pericimbras, Parque de las Américas, Huehuetoca, Edo. Méx.",
-    imagenes: PROYECTO_IMAGENES[3],
+    imagen: PROYECTO_IMAGENES[3],
   },
   {
     titulo: "Parque QUMA, Huehuetoca, Edo. Méx.",
-    imagenes: PROYECTO_IMAGENES[4],
+    imagen: PROYECTO_IMAGENES[4],
   },
   {
     titulo: "Terminal Tepeji del Río, Parque Industrial Tepeji del Río, Hgo.",
-    imagenes: PROYECTO_IMAGENES[5],
+    imagen: PROYECTO_IMAGENES[5],
   },
   {
     titulo: "Naves Industriales Marvic Ingeniería, Tepeji del Río, Hgo.",
-    imagenes: PROYECTO_IMAGENES[6],
+    imagen: PROYECTO_IMAGENES[6],
   },
   {
     titulo: "Zapatas y nivelación, Tecozautla, Hgo.",
-    imagenes: PROYECTO_IMAGENES[7],
+    imagen: PROYECTO_IMAGENES[7],
   },
   {
     titulo: "Tubos y Barras Huecas, Parque Industrial Tepeji del Río, Tepeji del Río, Hgo.",
-    imagenes: PROYECTO_IMAGENES[8],
-  },
-  {
-    titulo: "Vialidad Melchor Ocampo, Puente de Taxhido, Tepeji del Río, Hgo.",
-    imagenes: PROYECTO_IMAGENES[9],
-  },
-  {
-    titulo: "Vialidad Melchor Ocampo, Tepeji del Río, Hgo.",
-    imagenes: PROYECTO_IMAGENES[10],
-  },
-  {
-    titulo: "Parque industrial, Tepeji del Río, Hgo.",
-    imagenes: PROYECTO_IMAGENES[11],
-  },
-  {
-    titulo: "Suministro Tiendas 3B, Tepeji del Río, Hgo.",
-    imagenes: PROYECTO_IMAGENES[12],
-  },
-  {
-    titulo: "Bodegas Industriales, Tepeji del Río, Hgo..",
-    imagenes: PROYECTO_IMAGENES[13],
-  },
-  {
-    titulo: "Vialidades en Santa María Magdalena, Tepeji del Río,Hgo.",
-    imagenes: PROYECTO_IMAGENES[14],
+    imagen: PROYECTO_IMAGENES[8],
   },
 ] as const;
 
@@ -107,33 +75,22 @@ const cardVariants = {
 
 type Proyecto = (typeof items)[number];
 
-const ProyectoCardContent = memo(function ProyectoCardContent({
-  item,
-  activeSlide,
-}: {
-  item: Proyecto;
-  activeSlide: number;
-}) {
+const ProyectoCardContent = memo(function ProyectoCardContent({ item }: { item: Proyecto }) {
   return (
     <>
       <div className="relative h-64 overflow-hidden sm:h-72">
         <div className="relative h-full w-full origin-center transition-transform duration-500 ease-out max-md:group-hover:scale-[1.03] group-hover:scale-105">
-          {item.imagenes.map((src, slideIdx) => (
-            <Image
-              key={src}
-              src={src}
-              alt={item.titulo}
-              fill
-              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-              quality={75}
-              placeholder="blur"
-              blurDataURL={blurDataUrlForPublicImage(src)}
-              loading="lazy"
-              className={`object-cover object-center transition-opacity ease-in-out duration-[900ms] ${
-                slideIdx === activeSlide ? "opacity-100 z-[1]" : "opacity-0 z-0"
-              }`}
-            />
-          ))}
+          <Image
+            src={item.imagen}
+            alt={item.titulo}
+            fill
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            quality={75}
+            placeholder="blur"
+            blurDataURL={blurDataUrlForPublicImage(item.imagen)}
+            loading="lazy"
+            className="object-cover object-center"
+          />
         </div>
       </div>
       <div className="px-4 py-3 sm:py-3.5">
@@ -146,15 +103,6 @@ const ProyectoCardContent = memo(function ProyectoCardContent({
 });
 
 export function Galeria() {
-  const [activeSlide, setActiveSlide] = useState(0);
-
-  useEffect(() => {
-    const id = window.setInterval(() => {
-      setActiveSlide((s) => (s + 1) % 3);
-    }, SLIDE_INTERVAL_MS);
-    return () => window.clearInterval(id);
-  }, []);
-
   return (
     <section
       id="proyectos"
@@ -198,7 +146,7 @@ export function Galeria() {
               whileTap={{ scale: 0.985 }}
               className="group rounded-2xl overflow-hidden border-2 border-tepexi-accent/90 bg-white shadow-lg transition-[border-color,box-shadow,ring] duration-300 hover:border-tepexi-accent/90 hover:shadow-md hover:ring-2 hover:ring-tepexi-accent/15 transform-gpu"
             >
-              <ProyectoCardContent item={item} activeSlide={activeSlide} />
+              <ProyectoCardContent item={item} />
             </motion.article>
           ))}
         </motion.div>
