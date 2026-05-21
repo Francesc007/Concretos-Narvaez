@@ -1,23 +1,56 @@
 "use client";
 
-import Image from "next/image";
+import { useEffect, useRef } from "react";
 import { motion } from "framer-motion";
-import { CONFIG, heroImageSrc } from "@/config";
+import { CONFIG, heroVideoSrc } from "@/config";
 
 export function Hero() {
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    const motionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+    const syncPlayback = () => {
+      if (motionQuery.matches) {
+        video.pause();
+        return;
+      }
+      void video.play().catch(() => {});
+    };
+
+    syncPlayback();
+    video.addEventListener("loadeddata", syncPlayback);
+    motionQuery.addEventListener("change", syncPlayback);
+    return () => {
+      video.removeEventListener("loadeddata", syncPlayback);
+      motionQuery.removeEventListener("change", syncPlayback);
+    };
+  }, []);
+
   return (
     <section
       id="inicio"
       className="relative flex min-h-screen min-h-[100dvh] w-full max-w-full items-center justify-center overflow-x-hidden bg-black"
+      aria-label={`${CONFIG.companyDisplayName} — inicio`}
     >
-      <Image
-        src={heroImageSrc()}
-        alt={`${CONFIG.companyDisplayName} — planta de concreto premezclado y cobertura en Jilotepec, Estado de México`}
-        fill
-        priority
-        sizes="100vw"
-        className="tepexi-hero-video pointer-events-none absolute inset-0 z-0 object-cover object-center"
-      />
+      <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden" aria-hidden>
+        <video
+          ref={videoRef}
+          className="tepexi-hero-video"
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="auto"
+          disablePictureInPicture
+          disableRemotePlayback
+        >
+          <source src={heroVideoSrc()} type="video/mp4" />
+        </video>
+      </div>
       <div className="pointer-events-none absolute inset-0 z-[1] bg-gradient-to-b from-[#3d3d3d]/58 via-[#3d3d3d]/34 to-black/45" />
 
       <div className="relative z-10 mx-auto w-full min-w-0 max-w-5xl px-3 pt-28 pb-16 text-center sm:px-4 sm:pt-32">

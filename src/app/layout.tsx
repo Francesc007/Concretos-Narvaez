@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { DM_Sans, Oswald } from "next/font/google";
-import { heroImageSrc } from "@/config";
+import { heroVideoSrc } from "@/config";
 import "./globals.css";
 
 const dmSans = DM_Sans({
@@ -47,7 +47,7 @@ export default function RootLayout({
   return (
     <html lang="es-MX" className={`${dmSans.variable} ${oswald.variable} h-full antialiased`}>
       <head>
-        <link rel="preload" href={heroImageSrc()} as="image" />
+        <link rel="preload" href={heroVideoSrc()} as="video" type="video/mp4" />
       </head>
       <body
         suppressHydrationWarning

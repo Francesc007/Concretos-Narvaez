@@ -1,6 +1,6 @@
-/** Ruta del hero en /public (sin query: Next Image exige `localPatterns` para `?`). */
-export function heroImageSrc(): string {
-  return "/Hero1.jpg";
+/** Vídeo de fondo del hero en /public */
+export function heroVideoSrc(): string {
+  return "/Concretos%20Narv%C3%A1ez.mp4";
 }
 
 export const CONFIG = {
