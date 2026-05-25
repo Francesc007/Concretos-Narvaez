@@ -3,6 +3,11 @@ export function heroVideoSrc(): string {
   return "/Concretos%20Narv%C3%A1ez.mp4";
 }
 
+/** Logotipo principal en /public */
+export function logoSrc(): string {
+  return "/logo.png";
+}
+
 export const CONFIG = {
   /**
    * WhatsApp (solo dígitos, sin + ni espacios).

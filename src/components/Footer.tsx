@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { Clock, Mail, MapPin, Phone } from "lucide-react";
-import { CONFIG } from "@/config";
+import { CONFIG, logoSrc } from "@/config";
 
 function WhatsAppIconSmall({ className }: { className?: string }) {
   return (
@@ -47,11 +47,19 @@ export function Footer() {
           >
             <div className="inline-flex flex-col items-center md:items-start">
               <a href="#inicio" className="inline-flex flex-col items-center md:items-start">
-                <div className="flex h-[4rem] w-[4rem] shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-[var(--tepexi-logo-navy)] bg-white p-[3px] shadow-sm ring-1 ring-black/[0.06] md:h-[4.7rem] md:w-[4.7rem] md:p-1">
+                <div
+                  className="relative flex h-[4rem] w-[4rem] shrink-0 items-center justify-center overflow-hidden rounded-full border-[3px] border-tepexi-accent p-2 shadow-sm md:h-[4.7rem] md:w-[4.7rem] md:p-0.5"
+                  style={{
+                    backgroundColor: "var(--tepexi-nav-bg)",
+                    backgroundImage: "url(/concrete-texture.svg)",
+                    backgroundSize: "88px 88px",
+                    backgroundRepeat: "repeat",
+                  }}
+                >
                   <img
-                    src="/C%20Narvaez.jpg"
+                    src={logoSrc()}
                     alt={CONFIG.companyDisplayName}
-                    className="h-full w-full object-contain object-center scale-[1.14]"
+                    className="relative z-[1] h-full w-full object-contain object-center scale-[0.92]"
                   />
                 </div>
                 <p className="mt-3 max-w-xs text-sm leading-snug text-slate-100">

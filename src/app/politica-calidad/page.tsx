@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import { CONFIG } from "@/config";
+import { CONFIG, logoSrc } from "@/config";
 
 export const metadata: Metadata = {
   title: "Política de calidad | Concretos Narváez",
@@ -22,14 +22,15 @@ export default function PoliticaCalidadPage() {
             className="flex items-center gap-2 font-display text-sm font-semibold tracking-wide text-[var(--tepexi-logo-navy)] transition-colors hover:text-tepexi-accent sm:text-base"
           >
             <span
-              className="relative inline-block h-9 w-9 sm:h-10 sm:w-10 shrink-0 overflow-hidden rounded-full border-2 border-[var(--tepexi-logo-navy)] bg-white shadow-sm"
+              className="relative inline-block h-9 w-9 sm:h-10 sm:w-10 shrink-0 overflow-hidden rounded-full border-2 border-[var(--tepexi-border-light)] bg-tepexi-logo-badge-bg p-0.5 shadow-sm"
+              style={{ backgroundColor: "var(--tepexi-logo-badge-bg)" }}
               aria-hidden
             >
               <Image
-                src="/C%20Narvaez.jpg"
+                src={logoSrc()}
                 alt=""
                 fill
-                className="object-contain"
+                className="object-contain scale-110"
                 sizes="40px"
                 priority
               />

@@ -32,6 +32,8 @@
   /** Barra superior: gris marca (alineado al gris del logotipo) */
   --tepexi-nav-bg: #6e6e6e;
   --tepexi-footer-bg: #525252;
+  /** Círculo del logotipo en footer y favicon */
+  --tepexi-logo-badge-bg: #d6d6d6;
   /** Modales / superficies oscuras (cotizador) */
   --tepexi-surface-dark: #141922;
 }
@@ -43,6 +45,7 @@
   --color-tepexi-accent: var(--tepexi-accent);
   --color-tepexi-accent-hover: var(--tepexi-accent-hover);
   --color-tepexi-accent-soft: var(--tepexi-accent-soft-bg);
+  --color-tepexi-logo-badge-bg: var(--tepexi-logo-badge-bg);
 }
 
 html {

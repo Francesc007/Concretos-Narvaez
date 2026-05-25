@@ -5,7 +5,7 @@ import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { Calendar, FileText, Menu, X } from "lucide-react";
 import { LOGO_BLUR_DATA_URL } from "@/lib/image-blur-placeholders";
-import { CONFIG } from "@/config";
+import { CONFIG, logoSrc } from "@/config";
 
 type NavLink = {
   href: string;
@@ -132,18 +132,26 @@ export function Navbar({ onCotizadorClick, onAgendaVisitaClick }: NavbarProps) {
             className="inline-flex items-center gap-2 sm:gap-3 shrink-0 min-w-0"
             onClick={() => setMobileMenuOpen(false)}
           >
-            <div className="relative flex h-[4rem] w-[4rem] shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-[var(--tepexi-logo-navy)] bg-white p-[3px] shadow-sm ring-1 ring-black/[0.06] sm:h-[4rem] sm:w-[4rem] md:h-[4.7rem] md:w-[4.7rem] md:p-1">
+            <div
+              className="relative flex h-[4.5rem] w-[4.5rem] shrink-0 items-center justify-center overflow-hidden rounded-full border-[3px] border-tepexi-accent p-2 shadow-sm sm:h-[4.5rem] sm:w-[4.5rem] md:h-[5.25rem] md:w-[5.25rem] md:p-0.5"
+              style={{
+                backgroundColor: "var(--tepexi-nav-bg)",
+                backgroundImage: "url(/concrete-texture.svg)",
+                backgroundSize: "88px 88px",
+                backgroundRepeat: "repeat",
+              }}
+            >
               <Image
-                src="/C%20Narvaez.jpg"
+                src={logoSrc()}
                 alt={CONFIG.companyDisplayName}
                 width={188}
                 height={188}
                 priority
-                quality={75}
+                quality={90}
                 placeholder="blur"
                 blurDataURL={LOGO_BLUR_DATA_URL}
-                sizes="(max-width: 768px) 4rem, 4.7rem"
-                className="h-full w-full object-contain object-center [transform:translateZ(0)] scale-[1.14]"
+                sizes="(max-width: 768px) 4.5rem, 5.25rem"
+                className="h-full w-full object-contain object-center [transform:translateZ(0)] scale-[0.92]"
               />
             </div>
             <span className="font-display hidden max-w-[40vw] truncate text-base font-semibold tracking-wide text-[var(--tepexi-logo-navy)] sm:inline sm:text-xl md:max-w-none md:text-2xl drop-shadow-sm">
