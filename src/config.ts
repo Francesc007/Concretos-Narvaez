@@ -29,7 +29,7 @@ export const CONFIG = {
   whatsappDefaultMessage:
     "Buen día, escribo desde la página de Concretos Narváez. Requiero información y una cotización para mi obra. ¿Me pueden orientar?",
   /** Correo institucional (contacto ARCO / aviso de privacidad) */
-  contactEmail: "concretos.narvaez@gmail.com",
+  contactEmail: "narvaezconcretos.jilotepec@gmail.com",
   /** Operación declarada para avisos simplificados (ajustar a domicilio fiscal si aplica) */
   companyAddressShort: "Jilotepec, Estado de México, México",
   /** Razón social o denominación utilizada en el sitio público */
