@@ -177,7 +177,7 @@ export function Navbar({ onCotizadorClick, onAgendaVisitaClick }: NavbarProps) {
                 onCotizadorClick();
                 setMobileMenuOpen(false);
               }}
-              className="font-display flex items-center gap-1.5 sm:gap-2 rounded-xl border-2 border-transparent bg-gradient-to-b from-tepexi-accent-hover to-tepexi-accent px-3 py-2.5 text-white shadow-md shadow-orange-950/20 ring-1 ring-white/30 transition-all hover:scale-[1.02] hover:shadow-lg active:scale-[0.98] uppercase text-[11px] font-bold tracking-wide sm:px-5 sm:text-sm"
+              className="font-display flex items-center gap-1.5 sm:gap-2 rounded-xl border-2 border-transparent bg-gradient-to-b from-tepexi-accent-hover to-tepexi-accent px-3 py-2.5 text-white shadow-md shadow-red-950/25 ring-1 ring-white/30 transition-all hover:scale-[1.02] hover:shadow-lg active:scale-[0.98] uppercase text-[11px] font-bold tracking-wide sm:px-5 sm:text-sm"
             >
               <FileText size={17} className="shrink-0 sm:h-[18px] sm:w-[18px]" aria-hidden />
               <span>Cotizar</span>

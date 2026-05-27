@@ -9,11 +9,13 @@
   /** Bloques / tarjetas */
   --tepexi-surface: #f7f7f7;
   --tepexi-elevated: #ededed;
-  /** Naranja marca */
-  --tepexi-accent: #e97528;
-  --tepexi-accent-hover: #cf6620;
+  /** Naranja marca (muestreado del logotipo: #f63306) */
+  --tepexi-accent: #f63306;
+  --tepexi-accent-hover: #d42b05;
   /** Fondo suave para estados seleccionados / badges */
-  --tepexi-accent-soft-bg: #fff3ea;
+  --tepexi-accent-soft-bg: #ffede8;
+  /** Acento claro sobre fondos oscuros (hover en footer) */
+  --tepexi-accent-on-dark: #ff8f6c;
   /** Gris oscuro marca (titulares y UI principal; mismo rol que el azul anterior) */
   --tepexi-logo-navy: #3d3d3d;
   /** Texto principal */
@@ -31,7 +33,7 @@
   --tepexi-concrete-frame: #9e9e9e;
   /** Barra superior: gris marca (alineado al gris del logotipo) */
   --tepexi-nav-bg: #6e6e6e;
-  --tepexi-footer-bg: #525252;
+  --tepexi-footer-bg: #000000;
   /** Círculo del logotipo en footer y favicon */
   --tepexi-logo-badge-bg: #d6d6d6;
   /** Modales / superficies oscuras (cotizador) */
@@ -45,6 +47,7 @@
   --color-tepexi-accent: var(--tepexi-accent);
   --color-tepexi-accent-hover: var(--tepexi-accent-hover);
   --color-tepexi-accent-soft: var(--tepexi-accent-soft-bg);
+  --color-tepexi-accent-on-dark: var(--tepexi-accent-on-dark);
   --color-tepexi-logo-badge-bg: var(--tepexi-logo-badge-bg);
 }
 

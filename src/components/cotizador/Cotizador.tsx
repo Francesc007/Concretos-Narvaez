@@ -272,7 +272,7 @@ export function Cotizador({
       </h4>
       {loading && <p className="text-sm text-slate-600">Cargando precios desde la tabla…</p>}
       {error && (
-        <p className="rounded-lg border border-orange-200/90 bg-tepexi-accent-soft px-3 py-2 text-sm text-[var(--tepexi-logo-navy)]">{error}</p>
+        <p className="rounded-lg border border-tepexi-accent/25 bg-tepexi-accent-soft px-3 py-2 text-sm text-[var(--tepexi-logo-navy)]">{error}</p>
       )}
 
       <div>
@@ -337,7 +337,7 @@ export function Cotizador({
           </div>
         )}
         {errorDistancia && (
-          <p className="mt-2 rounded-lg border border-orange-200/90 bg-tepexi-accent-soft px-3 py-2 text-sm text-[var(--tepexi-logo-navy)]">
+          <p className="mt-2 rounded-lg border border-tepexi-accent/25 bg-tepexi-accent-soft px-3 py-2 text-sm text-[var(--tepexi-logo-navy)]">
             {errorDistancia}
           </p>
         )}

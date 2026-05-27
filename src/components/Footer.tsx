@@ -48,13 +48,7 @@ export function Footer() {
             <div className="inline-flex flex-col items-center md:items-start">
               <a href="#inicio" className="inline-flex flex-col items-center md:items-start">
                 <div
-                  className="relative flex h-[4rem] w-[4rem] shrink-0 items-center justify-center overflow-hidden rounded-full border-[3px] border-tepexi-accent p-2 shadow-sm md:h-[4.7rem] md:w-[4.7rem] md:p-0.5"
-                  style={{
-                    backgroundColor: "var(--tepexi-nav-bg)",
-                    backgroundImage: "url(/concrete-texture.svg)",
-                    backgroundSize: "88px 88px",
-                    backgroundRepeat: "repeat",
-                  }}
+                  className="relative flex h-[4rem] w-[4rem] shrink-0 items-center justify-center overflow-hidden rounded-full border-[3px] border-tepexi-accent bg-white p-2 shadow-sm md:h-[4.7rem] md:w-[4.7rem] md:p-0.5"
                 >
                   <img
                     src={logoSrc()}
@@ -84,7 +78,7 @@ export function Footer() {
               href={CONFIG.googleMapsUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-start justify-center gap-2 text-white transition-colors hover:text-[#ffb87a] mb-2"
+              className="flex items-start justify-center gap-2 text-white transition-colors hover:text-tepexi-accent-on-dark mb-2"
               aria-label="Abrir ubicación en Google Maps"
             >
               <MapPin size={18} className="shrink-0 mt-0.5" aria-hidden />
@@ -114,7 +108,7 @@ export function Footer() {
             <address className="not-italic mx-auto mb-6 flex w-full max-w-md flex-col items-center space-y-5">
               <a
                 href={`mailto:${CONFIG.contactEmail}`}
-                className="flex max-w-full items-center justify-center gap-2 text-sm text-white transition-colors hover:text-[#ffb87a] break-words text-center"
+                className="flex max-w-full items-center justify-center gap-2 text-sm text-white transition-colors hover:text-tepexi-accent-on-dark break-words text-center"
               >
                 <Mail size={15} className="shrink-0 opacity-90" aria-hidden />
                 <span>{CONFIG.contactEmail}</span>
@@ -125,7 +119,7 @@ export function Footer() {
                     href={whatsappHref(CONFIG.whatsappNumber)}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center justify-center gap-2 text-white transition-colors hover:text-[#ffb87a]"
+                    className="inline-flex items-center justify-center gap-2 text-white transition-colors hover:text-tepexi-accent-on-dark"
                   >
                     <WhatsAppIconSmall className="h-4 w-4 shrink-0 text-[#25D366]" />
                     <span>55 2140 4539</span>
@@ -136,7 +130,7 @@ export function Footer() {
                     href={whatsappHref(CONFIG.whatsappSecondaryNumber)}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center justify-center gap-2 text-white transition-colors hover:text-[#ffb87a]"
+                    className="inline-flex items-center justify-center gap-2 text-white transition-colors hover:text-tepexi-accent-on-dark"
                   >
                     <WhatsAppIconSmall className="h-4 w-4 shrink-0 text-[#25D366]" />
                     <span>56 1987 7440</span>
@@ -145,7 +139,7 @@ export function Footer() {
                 <li>
                   <a
                     href={`tel:${CONFIG.landlinePhoneE164}`}
-                    className="inline-flex items-center justify-center gap-2 text-white transition-colors hover:text-[#ffb87a]"
+                    className="inline-flex items-center justify-center gap-2 text-white transition-colors hover:text-tepexi-accent-on-dark"
                   >
                     <Phone size={15} className="shrink-0 opacity-90" aria-hidden />
                     <span>55 7488 9733</span>
@@ -180,7 +174,7 @@ export function Footer() {
           <p className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 break-words text-xs md:text-[13px]">
             <Link
               href="/aviso-privacidad"
-              className="text-[#fafaf9] transition-colors underline-offset-4 hover:text-[#ffb87a] hover:underline"
+              className="text-[#fafaf9] transition-colors underline-offset-4 hover:text-tepexi-accent-on-dark hover:underline"
             >
               Aviso de privacidad
             </Link>
@@ -189,7 +183,7 @@ export function Footer() {
             </span>
             <Link
               href="/politica-calidad"
-              className="text-[#fafaf9] transition-colors underline-offset-4 hover:text-[#ffb87a] hover:underline"
+              className="text-[#fafaf9] transition-colors underline-offset-4 hover:text-tepexi-accent-on-dark hover:underline"
             >
               Política de calidad
             </Link>
@@ -201,7 +195,7 @@ export function Footer() {
               href="https://sigmaaiagency.com"
               target="_blank"
               rel="noopener noreferrer"
-              className="font-semibold text-white transition-colors hover:text-[#ffb87a]"
+              className="font-semibold text-white transition-colors hover:text-tepexi-accent-on-dark"
             >
               Sigma AI Agency
             </a>{" "}

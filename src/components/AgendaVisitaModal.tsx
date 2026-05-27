@@ -292,7 +292,7 @@ export function AgendaVisitaModal({ isOpen, onClose }: AgendaVisitaModalProps) {
             </div>
 
             {error && (
-              <p className="mt-4 rounded-lg border border-orange-200/90 bg-tepexi-accent-soft px-3 py-2 text-sm text-[var(--tepexi-logo-navy)]">
+              <p className="mt-4 rounded-lg border border-tepexi-accent/25 bg-tepexi-accent-soft px-3 py-2 text-sm text-[var(--tepexi-logo-navy)]">
                 {error}
               </p>
             )}

@@ -464,7 +464,7 @@ export function CalculadoraVolumenConcreto({ onCotizarVolumenM3 }: CalculadoraVo
                     className={[
                       "group flex min-h-0 w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-left transition-all duration-200",
                       active
-                        ? "border-2 border-tepexi-accent bg-tepexi-accent-soft shadow-sm shadow-orange-200/35"
+                        ? "border-2 border-tepexi-accent bg-tepexi-accent-soft shadow-sm shadow-tepexi-accent/25"
                         : "border border-slate-200 bg-slate-50 hover:border-slate-300 hover:bg-white",
                     ].join(" ")}
                   >
@@ -864,7 +864,7 @@ export function CalculadoraVolumenConcreto({ onCotizarVolumenM3 }: CalculadoraVo
                     type="button"
                     disabled={totalM3 == null || totalM3 <= 0}
                     onClick={() => onCotizarVolumenM3(totalM3!)}
-                    className="w-full font-display flex items-center justify-center gap-2 rounded-xl bg-gradient-to-b from-tepexi-accent-hover to-tepexi-accent px-5 py-4 text-base font-bold uppercase tracking-wide text-white shadow-lg shadow-orange-950/25 ring-2 ring-orange-100 transition-all hover:scale-[1.01] hover:shadow-xl disabled:opacity-40 disabled:hover:scale-100 disabled:cursor-not-allowed"
+                    className="w-full font-display flex items-center justify-center gap-2 rounded-xl bg-gradient-to-b from-tepexi-accent-hover to-tepexi-accent px-5 py-4 text-base font-bold uppercase tracking-wide text-white shadow-lg shadow-red-950/25 ring-2 ring-tepexi-accent/20 transition-all hover:scale-[1.01] hover:shadow-xl disabled:opacity-40 disabled:hover:scale-100 disabled:cursor-not-allowed"
                   >
                     Cotizar este volumen
                   </button>

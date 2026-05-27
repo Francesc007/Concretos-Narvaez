@@ -364,7 +364,7 @@ export function AgendaSelector({
       </div>
 
       {errorReserva && (
-        <p className="rounded-lg border border-orange-200/90 bg-tepexi-accent-soft px-3 py-2 text-sm text-[var(--tepexi-logo-navy)]">{errorReserva}</p>
+        <p className="rounded-lg border border-tepexi-accent/25 bg-tepexi-accent-soft px-3 py-2 text-sm text-[var(--tepexi-logo-navy)]">{errorReserva}</p>
       )}
 
       <button

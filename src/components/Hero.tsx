@@ -58,7 +58,7 @@ export function Hero() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="font-display mb-4 inline-block max-w-full rounded-md border-2 border-tepexi-accent-hover bg-gradient-to-r from-tepexi-accent to-tepexi-accent-hover px-2 py-1.5 text-sm font-semibold uppercase tracking-[0.2em] text-white shadow-[0_4px_24px_rgba(233,117,40,0.45)] [text-wrap:balance] ring-1 ring-inset ring-white/25 drop-shadow-[0_2px_10px_rgba(0,0,0,0.55)] sm:px-3 sm:py-1.5 sm:text-base"
+          className="font-display mb-4 inline-block max-w-full rounded-md border-2 border-tepexi-accent-hover bg-gradient-to-r from-tepexi-accent to-tepexi-accent-hover px-2 py-1.5 text-sm font-semibold uppercase tracking-[0.2em] text-white shadow-[0_4px_24px_rgba(246,51,6,0.45)] [text-wrap:balance] ring-1 ring-inset ring-white/25 drop-shadow-[0_2px_10px_rgba(0,0,0,0.55)] sm:px-3 sm:py-1.5 sm:text-base"
         >
           Premezclado en Jilotepec y zona norte del Edo. Méx.
         </motion.h1>

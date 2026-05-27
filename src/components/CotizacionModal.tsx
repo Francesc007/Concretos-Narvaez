@@ -113,7 +113,7 @@ export function CotizacionModal({ isOpen, onClose }: CotizacionModalProps) {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.96, y: 12 }}
             transition={{ type: "spring", damping: 26, stiffness: 320 }}
-            className="cotizacion-modal-scroll relative w-full max-w-md max-h-[min(90vh,36rem)] overflow-y-auto rounded-2xl border-2 border-tepexi-accent/75 bg-[#141922] p-5 shadow-[0_0_0_1px_rgba(233,117,40,0.45),0_0_36px_-4px_rgba(233,117,40,0.32),0_20px_50px_-12px_rgba(0,0,0,0.55)] ring-2 ring-tepexi-accent/25 sm:p-6"
+            className="cotizacion-modal-scroll relative w-full max-w-md max-h-[min(90vh,36rem)] overflow-y-auto rounded-2xl border-2 border-tepexi-accent/75 bg-[#141922] p-5 shadow-[0_0_0_1px_rgba(246,51,6,0.45),0_0_36px_-4px_rgba(246,51,6,0.32),0_20px_50px_-12px_rgba(0,0,0,0.55)] ring-2 ring-tepexi-accent/25 sm:p-6"
             role="dialog"
             aria-modal="true"
             aria-labelledby="cotizacion-modal-title"
