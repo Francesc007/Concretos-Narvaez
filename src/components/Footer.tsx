@@ -148,7 +148,7 @@ export function Footer() {
                     className="inline-flex items-center justify-center gap-2 text-white transition-colors hover:text-[#ffb87a]"
                   >
                     <Phone size={15} className="shrink-0 opacity-90" aria-hidden />
-                    <span>55 7488 9773</span>
+                    <span>55 7488 9733</span>
                   </a>
                 </li>
               </ul>

@@ -132,31 +132,18 @@ export function Navbar({ onCotizadorClick, onAgendaVisitaClick }: NavbarProps) {
             className="inline-flex items-center gap-2 sm:gap-3 shrink-0 min-w-0"
             onClick={() => setMobileMenuOpen(false)}
           >
-            <div
-              className="relative flex h-[4.5rem] w-[4.5rem] shrink-0 items-center justify-center overflow-hidden rounded-full border-[3px] border-tepexi-accent p-2 shadow-sm sm:h-[4.5rem] sm:w-[4.5rem] md:h-[5.25rem] md:w-[5.25rem] md:p-0.5"
-              style={{
-                backgroundColor: "var(--tepexi-nav-bg)",
-                backgroundImage: "url(/concrete-texture.svg)",
-                backgroundSize: "88px 88px",
-                backgroundRepeat: "repeat",
-              }}
-            >
-              <Image
-                src={logoSrc()}
-                alt={CONFIG.companyDisplayName}
-                width={188}
-                height={188}
-                priority
-                quality={90}
-                placeholder="blur"
-                blurDataURL={LOGO_BLUR_DATA_URL}
-                sizes="(max-width: 768px) 4.5rem, 5.25rem"
-                className="h-full w-full object-contain object-center [transform:translateZ(0)] scale-[0.92]"
-              />
-            </div>
-            <span className="font-display hidden max-w-[40vw] truncate text-base font-semibold tracking-wide text-[var(--tepexi-logo-navy)] sm:inline sm:text-xl md:max-w-none md:text-2xl drop-shadow-sm">
-              {CONFIG.companyLegalName}
-            </span>
+            <Image
+              src={logoSrc()}
+              alt={CONFIG.companyDisplayName}
+              width={240}
+              height={240}
+              priority
+              quality={90}
+              placeholder="blur"
+              blurDataURL={LOGO_BLUR_DATA_URL}
+              sizes="(max-width: 768px) 6rem, 7rem"
+              className="h-[6rem] w-[6rem] shrink-0 object-contain object-center md:h-[7rem] md:w-[7rem]"
+            />
           </a>
 
           <div className="hidden lg:flex flex-1 items-center justify-center gap-8">
